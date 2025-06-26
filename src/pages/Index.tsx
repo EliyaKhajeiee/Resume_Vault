@@ -33,7 +33,7 @@ const Index = () => {
       <header className="border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50">
         <div className="container max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="font-bold text-2xl text-black">Resume Vault</div>
+            <div className="font-bold text-2xl text-black">Resume Proof</div>
           </div>
         </div>
       </header>
@@ -148,12 +148,12 @@ const Index = () => {
       {/* Footer */}
       <footer className="py-12 bg-black text-white">
         <div className="container max-w-6xl mx-auto px-4 text-center">
-          <div className="font-bold text-xl mb-4">Resume Vault</div>
+          <div className="font-bold text-xl mb-4">Resume Proof</div>
           <p className="text-gray-400 mb-4">
             The definitive resource for proven resume examples from top companies.
           </p>
           <p className="text-gray-500 text-sm">
-            &copy; 2024 Resume Vault. All rights reserved.
+            &copy; 2024 Resume Proof. All rights reserved.
           </p>
         </div>
       </footer>
