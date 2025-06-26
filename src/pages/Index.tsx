@@ -1,9 +1,9 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Check, Mail, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
+import { EmailService } from "@/services/emailService";
 
 const Index = () => {
   const [email, setEmail] = useState("");
@@ -15,15 +15,27 @@ const Index = () => {
     if (email) {
       setIsLoading(true);
       
-      // Simulate API call - replace with your actual backend later
-      setTimeout(() => {
-        setIsSubmitted(true);
-        setIsLoading(false);
-        toast.success("Email saved! Stay tuned for exclusive resume insights.");
+      try {
+        const result = await EmailService.saveEmail(email, 'landing_page');
         
-        // Here you would save to your database
-        console.log("Email to save:", email);
-      }, 1000);
+        if (result.success) {
+          setIsSubmitted(true);
+          toast.success("Email saved! Stay tuned for exclusive resume insights.");
+          console.log("Email successfully saved to database:", email);
+        } else {
+          if (result.error === 'Email already registered') {
+            toast.error("This email is already registered!");
+          } else {
+            toast.error("Failed to save email. Please try again.");
+          }
+          console.error("Failed to save email:", result.error);
+        }
+      } catch (error) {
+        console.error("Unexpected error:", error);
+        toast.error("An unexpected error occurred. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
