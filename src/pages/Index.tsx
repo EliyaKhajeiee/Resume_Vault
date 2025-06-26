@@ -41,11 +41,6 @@ const Index = () => {
       {/* Hero Section */}
       <section className="py-32 bg-gradient-to-b from-gray-50 to-white">
         <div className="container max-w-4xl mx-auto px-4 text-center">
-          <div className="inline-flex items-center px-4 py-2 rounded-full bg-green-100 text-green-800 text-sm font-medium mb-8">
-            <Check className="w-4 h-4 mr-2" />
-            500+ students landed their dream internships
-          </div>
-          
           <h1 className="text-5xl md:text-7xl font-bold text-black mb-8 leading-tight">
             Resumes that actually <br />
             <span className="text-blue-600">got people hired</span>
