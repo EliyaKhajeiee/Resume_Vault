@@ -1,9 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Check, Mail, ArrowRight } from "lucide-react";
+import { Check, Mail, ArrowRight, Star, Users, FileText, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 import { EmailService } from "@/services/emailService";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import CompanyLogos from "@/components/CompanyLogos";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   const [email, setEmail] = useState("");
@@ -39,32 +43,139 @@ const Index = () => {
     }
   };
 
+  const features = [
+    {
+      icon: <FileText className="w-8 h-8 text-blue-600" />,
+      title: "500+ Real Resume Examples",
+      description: "Access hundreds of resumes that landed offers at top companies"
+    },
+    {
+      icon: <Users className="w-8 h-8 text-green-600" />,
+      title: "Proven Success Stories",
+      description: "Every resume in our database led to an actual job offer"
+    },
+    {
+      icon: <TrendingUp className="w-8 h-8 text-purple-600" />,
+      title: "Smart Search & Filters",
+      description: "Find resumes by company, role, industry, and experience level"
+    }
+  ];
+
+  const testimonials = [
+    {
+      name: "Sarah Chen",
+      role: "Software Engineer at Google",
+      content: "Found the perfect resume template that helped me land my dream job at Google. The examples were incredibly detailed and relevant.",
+      rating: 5
+    },
+    {
+      name: "Michael Rodriguez",
+      role: "Product Manager at Meta",
+      content: "Resume Proof showed me exactly what top companies are looking for. Got 3 offers within 2 weeks of updating my resume.",
+      rating: 5
+    },
+    {
+      name: "Emily Johnson",
+      role: "Data Scientist at Netflix",
+      content: "The industry-specific examples were game-changing. Finally understood how to present my experience effectively.",
+      rating: 5
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50">
-        <div className="container max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="font-bold text-2xl text-black">Resume Proof</div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
-      <section className="py-32 bg-gradient-to-b from-gray-50 to-white">
+      <section className="py-20 md:py-32 bg-gradient-to-b from-blue-50 to-white">
+        <div className="container max-w-6xl mx-auto px-4 text-center">
+          <div className="animate-fade-in">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-black mb-8 leading-tight">
+              Everything you need to <br />
+              <span className="text-blue-600">ace your career</span>
+            </h1>
+            
+            <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-4xl mx-auto leading-relaxed">
+              Level up your career and land your next role with proven resume examples, smart search, and community insights.
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+              <Link to="/resumes">
+                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-xl">
+                  Browse Resumes
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </Link>
+              <Button variant="outline" size="lg" className="px-8 py-4 text-lg font-semibold rounded-xl">
+                Get started for free
+              </Button>
+            </div>
+
+            {/* Role Categories */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 max-w-5xl mx-auto mb-16">
+              {[
+                "Product Management",
+                "Engineering",
+                "Software Engineering", 
+                "Data Engineering",
+                "Data Science",
+                "Machine Learning",
+                "TPM"
+              ].map((role, index) => (
+                <div key={role} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div className="text-center">
+                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                      <FileText className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <h3 className="font-medium text-sm text-gray-900">{role}</h3>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Company Logos */}
+      <CompanyLogos />
+
+      {/* Features Section */}
+      <section className="py-20 bg-white">
+        <div className="container max-w-6xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-black mb-6">Why Resume Proof?</h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              We're building the ultimate resource for proven resume examples from top companies
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <div key={index} className="text-center p-8 rounded-xl border border-gray-200 hover:shadow-lg transition-shadow">
+                <div className="flex justify-center mb-4">
+                  {feature.icon}
+                </div>
+                <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
+                <p className="text-gray-600">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Email Capture Section */}
+      <section className="py-20 bg-blue-600">
         <div className="container max-w-4xl mx-auto px-4 text-center">
-          <h1 className="text-5xl md:text-7xl font-bold text-black mb-8 leading-tight">
-            Resumes that actually <br />
-            <span className="text-blue-600">got people hired</span>
-          </h1>
-          
-          <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
-            Stop guessing what works. Get access to real resumes from successful candidates at Google, Goldman Sachs, Meta, and 200+ top companies.
+          <h2 className="text-4xl font-bold text-white mb-6">
+            Get early access to our resume database
+          </h2>
+          <p className="text-xl text-blue-100 mb-12 max-w-2xl mx-auto">
+            Be the first to access 500+ proven resume examples when we launch. No spam, just career gold.
           </p>
 
-          {/* Email Capture */}
           {!isSubmitted ? (
-            <form onSubmit={handleEmailSubmit} className="max-w-lg mx-auto mb-16">
+            <form onSubmit={handleEmailSubmit} className="max-w-lg mx-auto">
               <div className="flex gap-4">
                 <div className="flex-1 relative">
                   <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -73,102 +184,88 @@ const Index = () => {
                     placeholder="Enter your email address"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="h-14 pl-12 text-lg border-2 border-gray-200 focus:border-blue-500 rounded-xl"
+                    className="h-14 pl-12 text-lg border-2 border-blue-500 focus:border-white rounded-xl bg-white"
                     required
                     disabled={isLoading}
                   />
                 </div>
                 <Button 
                   type="submit" 
-                  className="h-14 px-8 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-lg font-semibold"
+                  className="h-14 px-8 bg-white text-blue-600 hover:bg-gray-100 rounded-xl text-lg font-semibold"
                   disabled={isLoading}
                 >
                   {isLoading ? "Saving..." : "Get Early Access"}
-                  {!isLoading && <ArrowRight className="w-5 h-5 ml-2" />}
                 </Button>
               </div>
-              <p className="text-sm text-gray-500 mt-4">
-                Be the first to know when we launch. No spam, just career gold.
-              </p>
             </form>
           ) : (
-            <div className="max-w-lg mx-auto mb-16 text-center">
-              <div className="bg-green-50 border border-green-200 rounded-xl p-8">
-                <Check className="w-12 h-12 text-green-600 mx-auto mb-4" />
-                <h3 className="text-2xl font-bold text-green-800 mb-2">You're in!</h3>
-                <p className="text-green-700 text-lg">
+            <div className="max-w-lg mx-auto">
+              <div className="bg-white/10 border border-white/20 rounded-xl p-8">
+                <Check className="w-12 h-12 text-white mx-auto mb-4" />
+                <h3 className="text-2xl font-bold text-white mb-2">You're in!</h3>
+                <p className="text-blue-100 text-lg">
                   Thanks for joining! Stay tuned to crack your next interview with resumes that actually worked.
                 </p>
               </div>
             </div>
           )}
-
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-4xl mx-auto">
-            <div className="text-center">
-              <div className="text-4xl font-bold text-black mb-3">500+</div>
-              <div className="text-gray-600 text-lg">Successful Resumes</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-black mb-3">200+</div>
-              <div className="text-gray-600 text-lg">Top Companies</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-black mb-3">95%</div>
-              <div className="text-gray-600 text-lg">Interview Success Rate</div>
-            </div>
-          </div>
         </div>
       </section>
 
-      {/* What We're Building Section */}
+      {/* Testimonials */}
       <section className="py-20 bg-gray-50">
-        <div className="container max-w-6xl mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold text-black mb-6">What's Coming</h2>
-          <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto">
-            We're building the ultimate resource for proven resume examples from top companies
-          </p>
+        <div className="container max-w-6xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-black mb-6">Success Stories</h2>
+            <p className="text-xl text-gray-600">
+              See how Resume Proof helped professionals land their dream jobs
+            </p>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-xl border border-gray-200">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Check className="w-6 h-6 text-blue-600" />
+            {testimonials.map((testimonial, index) => (
+              <div key={index} className="bg-white p-8 rounded-xl border border-gray-200">
+                <div className="flex mb-4">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                  ))}
+                </div>
+                <p className="text-gray-600 mb-6">"{testimonial.content}"</p>
+                <div>
+                  <div className="font-semibold text-gray-900">{testimonial.name}</div>
+                  <div className="text-sm text-gray-500">{testimonial.role}</div>
+                </div>
               </div>
-              <h3 className="text-xl font-bold mb-3">Real Resume Examples</h3>
-              <p className="text-gray-600">Access hundreds of resumes that landed offers at FAANG, finance, and consulting firms</p>
-            </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-            <div className="bg-white p-8 rounded-xl border border-gray-200">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Check className="w-6 h-6 text-green-600" />
-              </div>
-              <h3 className="text-xl font-bold mb-3">Smart Search & Filters</h3>
-              <p className="text-gray-600">Find resumes by company, role, industry, and experience level in seconds</p>
+      {/* Stats Section */}
+      <section className="py-20 bg-white">
+        <div className="container max-w-6xl mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+            <div>
+              <div className="text-4xl font-bold text-blue-600 mb-3">500+</div>
+              <div className="text-gray-600 text-lg">Successful Resumes</div>
             </div>
-
-            <div className="bg-white p-8 rounded-xl border border-gray-200">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Check className="w-6 h-6 text-purple-600" />
-              </div>
-              <h3 className="text-xl font-bold mb-3">AI-Powered Insights</h3>
-              <p className="text-gray-600">Understand what made each resume successful with detailed breakdowns</p>
+            <div>
+              <div className="text-4xl font-bold text-blue-600 mb-3">200+</div>
+              <div className="text-gray-600 text-lg">Top Companies</div>
+            </div>
+            <div>
+              <div className="text-4xl font-bold text-blue-600 mb-3">95%</div>
+              <div className="text-gray-600 text-lg">Interview Success Rate</div>
+            </div>
+            <div>
+              <div className="text-4xl font-bold text-blue-600 mb-3">50K+</div>
+              <div className="text-gray-600 text-lg">Happy Users</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-12 bg-black text-white">
-        <div className="container max-w-6xl mx-auto px-4 text-center">
-          <div className="font-bold text-xl mb-4">Resume Proof</div>
-          <p className="text-gray-400 mb-4">
-            The definitive resource for proven resume examples from top companies.
-          </p>
-          <p className="text-gray-500 text-sm">
-            &copy; 2024 Resume Proof. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

@@ -17,3 +17,19 @@ export interface EmailSignup {
   source: string
   status: string
 }
+
+export interface Resume {
+  id: string
+  title: string
+  company: string
+  role: string
+  industry: string
+  experience_level: string
+  file_url?: string
+  description?: string
+  tags: string[]
+  created_at: string
+  updated_at: string
+  is_featured: boolean
+  view_count: number
+}
