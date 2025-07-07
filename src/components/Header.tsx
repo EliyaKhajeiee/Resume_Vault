@@ -17,11 +17,16 @@ const Header = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
+  const handleNavClick = () => {
+    setIsMenuOpen(false);
+    window.scrollTo(0, 0);
+  };
+
   return (
     <header className="border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50">
       <div className="container max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="flex items-center space-x-2">
+        <Link to="/" className="flex items-center space-x-2" onClick={handleNavClick}>
           <div className="font-bold text-2xl text-black">Resume Proof</div>
         </Link>
 
@@ -34,6 +39,7 @@ const Header = () => {
               className={`text-sm font-medium transition-colors hover:text-blue-600 ${
                 isActive(item.href) ? "text-blue-600" : "text-gray-700"
               }`}
+              onClick={handleNavClick}
             >
               {item.name}
             </Link>
@@ -90,7 +96,7 @@ const Header = () => {
                   className={`block py-2 text-sm font-medium transition-colors hover:text-blue-600 ${
                     isActive(item.href) ? "text-blue-600" : "text-gray-700"
                   }`}
-                  onClick={() => setIsMenuOpen(false)}
+                  onClick={handleNavClick}
                 >
                   {item.name}
                 </Link>

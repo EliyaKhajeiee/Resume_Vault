@@ -47,7 +47,6 @@ const Pricing = () => {
         "Everything in Pro",
         "Team collaboration tools",
         "Custom branding",
-        "API access",
         "Dedicated account manager",
         "Custom integrations",
         "Advanced analytics"
@@ -175,7 +174,6 @@ const Pricing = () => {
                     { feature: "AI Insights", free: "❌", pro: "✅", enterprise: "✅" },
                     { feature: "Priority Support", free: "❌", pro: "✅", enterprise: "✅" },
                     { feature: "Team Collaboration", free: "❌", pro: "❌", enterprise: "✅" },
-                    { feature: "API Access", free: "❌", pro: "❌", enterprise: "✅" },
                   ].map((row, index) => (
                     <tr key={index}>
                       <td className="py-4 px-6 font-medium">{row.feature}</td>

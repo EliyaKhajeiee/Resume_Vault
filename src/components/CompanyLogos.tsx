@@ -36,8 +36,8 @@ const CompanyLogos = () => {
       alt: "Tesla logo"
     },
     { 
-      name: "McKinsey", 
-      logo: "https://upload.wikimedia.org/wikipedia/commons/9/9e/McKinsey_%26_Company_logo.svg",
+      name: "McKinsey & Company", 
+      logo: "https://logos-world.net/wp-content/uploads/2021/02/McKinsey-Company-Logo.png",
       alt: "McKinsey logo"
     },
     { 
@@ -46,8 +46,8 @@ const CompanyLogos = () => {
       alt: "Goldman Sachs logo"
     },
     { 
-      name: "JPMorgan", 
-      logo: "https://upload.wikimedia.org/wikipedia/commons/4/44/JPMorgan_Chase_logo.svg",
+      name: "JPMorgan Chase", 
+      logo: "https://logos-world.net/wp-content/uploads/2021/02/JPMorgan-Chase-Logo.png",
       alt: "JPMorgan logo"
     },
     { 
@@ -76,7 +76,7 @@ const CompanyLogos = () => {
         <div className="relative overflow-hidden">
           <div className="flex animate-scroll space-x-12 items-center">
             {[...companies, ...companies].map((company, index) => (
-              <div key={`${company.name}-${index}`} className="flex-shrink-0 flex items-center justify-center h-16 w-32">
+              <div key={`${company.name}-${index}`} className="flex-shrink-0 flex items-center justify-center h-16 w-40">
                 <img 
                   src={company.logo} 
                   alt={company.alt}

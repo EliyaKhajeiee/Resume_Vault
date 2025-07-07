@@ -8,7 +8,7 @@ const Footer = () => {
         { name: "Browse Resumes", href: "/resumes" },
         { name: "Featured", href: "/resumes?featured=true" },
         { name: "Pricing", href: "/pricing" },
-        { name: "API", href: "/pricing" },
+        { name: "Templates", href: "/templates" },
       ],
     },
     {
@@ -17,16 +17,16 @@ const Footer = () => {
         { name: "About", href: "/about" },
         { name: "Blog", href: "/blog" },
         { name: "Careers", href: "/about" },
-        { name: "Contact", href: "/about" },
+        { name: "Contact", href: "/contact" },
       ],
     },
     {
       title: "Resources",
       links: [
-        { name: "Help Center", href: "/blog" },
+        { name: "Guides", href: "/guides" },
+        { name: "Templates", href: "/templates" },
         { name: "Community", href: "/about" },
-        { name: "Guides", href: "/blog" },
-        { name: "Templates", href: "/resumes" },
+        { name: "Support", href: "/contact" },
       ],
     },
     {
@@ -89,7 +89,7 @@ const Footer = () => {
 
         <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-400 text-sm">
-            &copy; 2024 Resume Proof. All rights reserved.
+            &copy; 2025 Resume Proof. All rights reserved.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <Link to="/privacy" className="text-gray-400 hover:text-white text-sm">

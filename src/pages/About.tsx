@@ -4,13 +4,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
+import { useEffect } from "react";
 
 const About = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const team = [
     {
       name: "Nathan Lee",
       role: "CEO & Co-Founder",
-      bio: "Software Engineer at Google with 5+ years helping professionals land dream jobs at top tech companies.",
+      bio: "Associate Product Manager at Google with 3+ years helping professionals land dream jobs at top tech companies.",
       image: "/images/download.jpg"
     },
     {
@@ -75,11 +80,11 @@ const About = () => {
             
             <div className="space-y-6 text-gray-600">
               <p>
-                It started with a harsh reality check. The job market had become increasingly competitive, and despite having strong qualifications, many talented professionals were struggling to land interviews at top companies. The problem wasn't their skills—it was how they presented them.
+                It started with a harsh reality check. The job market in 2025 had become increasingly competitive, and despite having strong qualifications, many talented professionals were struggling to land interviews at top companies. The problem wasn't their skills—it was how they presented them.
               </p>
               
               <p>
-                Our founders, Nathan Lee and Eliya Khajeie, experienced this firsthand while helping friends and colleagues navigate their career transitions. Nathan, working as a Software Engineer at Google, and Eliya, running a successful software engineering firm serving multi-million dollar enterprises, noticed a troubling pattern: the most successful applications followed specific formats and highlighted certain types of achievements that weren't widely known.
+                Our founders, Nathan Lee and Eliya Khajeie, experienced this firsthand while helping friends and colleagues navigate their career transitions. Nathan, working as an Associate Product Manager at Google, and Eliya, running a successful software engineering firm serving multi-million dollar enterprises, noticed a troubling pattern: the most successful applications followed specific formats and highlighted certain types of achievements that weren't widely known.
               </p>
               
               <p>

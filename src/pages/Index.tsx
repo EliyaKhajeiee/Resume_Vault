@@ -145,9 +145,11 @@ const Index = () => {
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
-              <Button variant="outline" size="lg" className="px-8 py-4 text-lg font-semibold rounded-xl">
-                Get started for free
-              </Button>
+              <Link to="/pricing">
+                <Button variant="outline" size="lg" className="px-8 py-4 text-lg font-semibold rounded-xl">
+                  Get started for free
+                </Button>
+              </Link>
             </div>
 
             {/* Role Categories */}

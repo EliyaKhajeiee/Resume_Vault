@@ -5,20 +5,25 @@ import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
+import { useEffect } from "react";
 
 const Blog = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const featuredPost = {
     title: "Why We Started Resume Proof: Leveling the Playing Field in a Tough Job Market",
     excerpt: "The story of how two founders decided to help students and professionals achieve their dreams through curated, proven resume examples.",
     author: "Nathan Lee & Eliya Khajeie",
-    date: "Dec 15, 2024",
+    date: "Jan 15, 2025",
     readTime: "8 min read",
     category: "Company Story",
     image: "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=800&h=400&fit=crop",
     content: `
-      The job market in 2024 has been brutal. Despite having strong technical skills and impressive academic backgrounds, we watched countless talented individuals struggle to land interviews at top companies. The problem wasn't their qualifications—it was how they presented them.
+      The job market in 2025 has been brutal. Despite having strong technical skills and impressive academic backgrounds, we watched countless talented individuals struggle to land interviews at top companies. The problem wasn't their qualifications—it was how they presented them.
 
-      As a Software Engineer at Google, Nathan saw firsthand how certain resume formats and storytelling techniques consistently led to successful hires. Meanwhile, Eliya, running a software engineering firm serving multi-million dollar enterprises, noticed that the most successful candidates all seemed to follow similar patterns in their applications.
+      As an Associate Product Manager at Google, Nathan saw firsthand how certain resume formats and storytelling techniques consistently led to successful hires. Meanwhile, Eliya, running a software engineering firm serving multi-million dollar enterprises, noticed that the most successful candidates all seemed to follow similar patterns in their applications.
 
       But here's the thing: this knowledge was locked away in private networks. The best resume examples were shared only among insiders, creating an unfair advantage for those with the right connections.
 
@@ -35,7 +40,7 @@ const Blog = () => {
       title: "The Ultimate Guide to Product Manager Resumes",
       excerpt: "Everything you need to know about crafting a PM resume that stands out.",
       author: "Nathan Lee",
-      date: "Dec 12, 2024",
+      date: "Jan 12, 2025",
       readTime: "6 min read",
       category: "Product Management",
       image: "https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&fit=crop"
@@ -44,7 +49,7 @@ const Blog = () => {
       title: "Software Engineering Resume Mistakes to Avoid",
       excerpt: "Common pitfalls that prevent engineers from getting interviews.",
       author: "Eliya Khajeie",
-      date: "Dec 10, 2024",
+      date: "Jan 10, 2025",
       readTime: "5 min read",
       category: "Engineering",
       image: "https://images.pexels.com/photos/3861958/pexels-photo-3861958.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&fit=crop"
@@ -53,7 +58,7 @@ const Blog = () => {
       title: "Data Science Resume Templates That Work",
       excerpt: "Proven templates and examples from successful data scientists.",
       author: "Nathan Lee",
-      date: "Dec 8, 2024",
+      date: "Jan 8, 2025",
       readTime: "7 min read",
       category: "Data Science",
       image: "https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&fit=crop"
@@ -62,7 +67,7 @@ const Blog = () => {
       title: "How to Quantify Your Impact on Your Resume",
       excerpt: "Turn your accomplishments into compelling, measurable results.",
       author: "Eliya Khajeie",
-      date: "Dec 5, 2024",
+      date: "Jan 5, 2025",
       readTime: "4 min read",
       category: "Career Tips",
       image: "https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&fit=crop"
@@ -71,16 +76,16 @@ const Blog = () => {
       title: "McKinsey Resume Format: What Consultants Need to Know",
       excerpt: "Inside look at what top consulting firms look for in resumes.",
       author: "Nathan Lee",
-      date: "Dec 3, 2024",
+      date: "Jan 3, 2025",
       readTime: "6 min read",
       category: "Consulting",
       image: "https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&fit=crop"
     },
     {
-      title: "Resume Keywords That Actually Matter in 2024",
+      title: "Resume Keywords That Actually Matter in 2025",
       excerpt: "The latest insights on ATS optimization and keyword strategy.",
       author: "Eliya Khajeie",
-      date: "Nov 30, 2024",
+      date: "Dec 30, 2024",
       readTime: "5 min read",
       category: "ATS Optimization",
       image: "https://images.pexels.com/photos/3184454/pexels-photo-3184454.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&fit=crop"
