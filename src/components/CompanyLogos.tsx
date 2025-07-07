@@ -1,17 +1,65 @@
 const CompanyLogos = () => {
   const companies = [
-    { name: "Google", logo: "https://images.pexels.com/photos/2041627/pexels-photo-2041627.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop" },
-    { name: "Meta", logo: "https://images.pexels.com/photos/267350/pexels-photo-267350.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop" },
-    { name: "Apple", logo: "https://images.pexels.com/photos/788946/pexels-photo-788946.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop" },
-    { name: "Microsoft", logo: "https://images.pexels.com/photos/4348401/pexels-photo-4348401.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop" },
-    { name: "Amazon", logo: "https://images.pexels.com/photos/1029757/pexels-photo-1029757.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop" },
-    { name: "Netflix", logo: "https://images.pexels.com/photos/4009402/pexels-photo-4009402.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop" },
-    { name: "Tesla", logo: "https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop" },
-    { name: "McKinsey", logo: "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop" },
-    { name: "Goldman Sachs", logo: "https://images.pexels.com/photos/3483098/pexels-photo-3483098.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop" },
-    { name: "JPMorgan", logo: "https://images.pexels.com/photos/3760067/pexels-photo-3760067.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop" },
-    { name: "Stripe", logo: "https://images.pexels.com/photos/4386321/pexels-photo-4386321.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop" },
-    { name: "Airbnb", logo: "https://images.pexels.com/photos/1001965/pexels-photo-1001965.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop" },
+    { 
+      name: "Google", 
+      logo: "https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg",
+      alt: "Google logo"
+    },
+    { 
+      name: "Meta", 
+      logo: "https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg",
+      alt: "Meta logo"
+    },
+    { 
+      name: "Apple", 
+      logo: "https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg",
+      alt: "Apple logo"
+    },
+    { 
+      name: "Microsoft", 
+      logo: "https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg",
+      alt: "Microsoft logo"
+    },
+    { 
+      name: "Amazon", 
+      logo: "https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg",
+      alt: "Amazon logo"
+    },
+    { 
+      name: "Netflix", 
+      logo: "https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg",
+      alt: "Netflix logo"
+    },
+    { 
+      name: "Tesla", 
+      logo: "https://upload.wikimedia.org/wikipedia/commons/b/bb/Tesla_T_symbol.svg",
+      alt: "Tesla logo"
+    },
+    { 
+      name: "McKinsey", 
+      logo: "https://upload.wikimedia.org/wikipedia/commons/9/9e/McKinsey_%26_Company_logo.svg",
+      alt: "McKinsey logo"
+    },
+    { 
+      name: "Goldman Sachs", 
+      logo: "https://upload.wikimedia.org/wikipedia/commons/6/61/Goldman_Sachs.svg",
+      alt: "Goldman Sachs logo"
+    },
+    { 
+      name: "JPMorgan", 
+      logo: "https://upload.wikimedia.org/wikipedia/commons/4/44/JPMorgan_Chase_logo.svg",
+      alt: "JPMorgan logo"
+    },
+    { 
+      name: "Stripe", 
+      logo: "https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg",
+      alt: "Stripe logo"
+    },
+    { 
+      name: "Airbnb", 
+      logo: "https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_Logo_B%C3%A9lo.svg",
+      alt: "Airbnb logo"
+    },
   ];
 
   return (
@@ -24,16 +72,36 @@ const CompanyLogos = () => {
           Our resume examples have helped professionals get hired at the world's most competitive companies
         </p>
         
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 items-center opacity-60">
-          {companies.map((company) => (
-            <div key={company.name} className="flex items-center justify-center">
-              <div className="text-2xl font-bold text-gray-400 hover:text-gray-600 transition-colors">
-                {company.name}
+        {/* Animated scrolling banner */}
+        <div className="relative overflow-hidden">
+          <div className="flex animate-scroll space-x-12 items-center">
+            {[...companies, ...companies].map((company, index) => (
+              <div key={`${company.name}-${index}`} className="flex-shrink-0 flex items-center justify-center h-16 w-32">
+                <img 
+                  src={company.logo} 
+                  alt={company.alt}
+                  className="max-h-12 max-w-full object-contain opacity-60 hover:opacity-100 transition-opacity filter grayscale hover:grayscale-0"
+                />
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
+      
+      <style jsx>{`
+        @keyframes scroll {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+        
+        .animate-scroll {
+          animation: scroll 30s linear infinite;
+        }
+      `}</style>
     </section>
   );
 };

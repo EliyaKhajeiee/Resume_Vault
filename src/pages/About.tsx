@@ -8,28 +8,16 @@ import { Link } from "react-router-dom";
 const About = () => {
   const team = [
     {
-      name: "Sarah Chen",
-      role: "CEO & Founder",
-      bio: "Former Google PM with 8+ years helping professionals land dream jobs.",
-      image: "https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop"
+      name: "Nathan Lee",
+      role: "CEO & Co-Founder",
+      bio: "Software Engineer at Google with 5+ years helping professionals land dream jobs at top tech companies.",
+      image: "/images/download.jpg"
     },
     {
-      name: "Michael Rodriguez",
-      role: "Head of Product",
-      bio: "Ex-Meta engineer passionate about building tools that accelerate careers.",
-      image: "https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop"
-    },
-    {
-      name: "Emily Johnson",
-      role: "Head of Content",
-      bio: "Career coach and resume expert who's helped 1000+ professionals.",
-      image: "https://images.pexels.com/photos/3861958/pexels-photo-3861958.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop"
-    },
-    {
-      name: "David Kim",
-      role: "Head of Engineering",
-      bio: "Former Netflix engineer building the future of career development.",
-      image: "https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop"
+      name: "Eliya Khajeie",
+      role: "CTO & Co-Founder",
+      bio: "Owner of a premier software engineering firm serving multi-million dollar enterprises. Expert in scaling technical teams and building world-class products.",
+      image: "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop"
     }
   ];
 
@@ -87,23 +75,23 @@ const About = () => {
             
             <div className="space-y-6 text-gray-600">
               <p>
-                It started with a frustrating realization. Despite having strong qualifications, many talented professionals were struggling to land interviews at top companies. The problem wasn't their skills—it was how they presented them.
+                It started with a harsh reality check. The job market had become increasingly competitive, and despite having strong qualifications, many talented professionals were struggling to land interviews at top companies. The problem wasn't their skills—it was how they presented them.
               </p>
               
               <p>
-                Our founder, Sarah Chen, experienced this firsthand. After years of helping friends and colleagues improve their resumes, she noticed a pattern: the most successful applications followed specific formats and highlighted certain types of achievements.
+                Our founders, Nathan Lee and Eliya Khajeie, experienced this firsthand while helping friends and colleagues navigate their career transitions. Nathan, working as a Software Engineer at Google, and Eliya, running a successful software engineering firm serving multi-million dollar enterprises, noticed a troubling pattern: the most successful applications followed specific formats and highlighted certain types of achievements that weren't widely known.
               </p>
               
               <p>
-                But this knowledge was scattered and hard to access. The best resume examples were hidden in private networks, shared only among insiders at top companies. This created an unfair advantage for those with the right connections.
+                But this knowledge was scattered and hard to access. The best resume examples were hidden in private networks, shared only among insiders at top companies. This created an unfair advantage for those with the right connections, while equally talented individuals struggled to break through.
               </p>
               
               <p>
-                That's when we decided to change the game. We started collecting real resume examples from successful candidates at Google, Meta, Apple, McKinsey, Goldman Sachs, and hundreds of other top companies. Every resume in our database led to an actual job offer.
+                That's when we decided to level the playing field. We started collecting real resume examples from successful candidates at Google, Meta, Apple, McKinsey, Goldman Sachs, and hundreds of other top companies. Every resume in our database led to an actual job offer—no theoretical templates or generic advice.
               </p>
               
               <p>
-                Today, Resume Proof is the world's largest collection of proven resume examples, helping thousands of professionals land their dream jobs every month.
+                Today, Resume Proof is the world's largest collection of proven resume examples, helping thousands of professionals land their dream jobs every month. We believe that with the right guidance and examples, anyone can achieve their career goals.
               </p>
             </div>
           </div>
@@ -165,30 +153,30 @@ const About = () => {
       <section className="py-20 bg-gray-50">
         <div className="container max-w-6xl mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-black mb-6">Meet Our Team</h2>
+            <h2 className="text-4xl font-bold text-black mb-6">Meet Our Founders</h2>
             <p className="text-xl text-gray-600">
               The people behind Resume Proof
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
             {team.map((member, index) => (
               <Card key={index} className="text-center border-none shadow-lg">
                 <CardHeader>
-                  <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden">
+                  <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden">
                     <img 
                       src={member.image} 
                       alt={member.name}
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <CardTitle className="text-xl">{member.name}</CardTitle>
-                  <CardDescription className="text-blue-600 font-medium">
+                  <CardTitle className="text-2xl">{member.name}</CardTitle>
+                  <CardDescription className="text-blue-600 font-medium text-lg">
                     {member.role}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-gray-600">{member.bio}</p>
+                  <p className="text-gray-600">{member.bio}</p>
                 </CardContent>
               </Card>
             ))}

@@ -8,20 +8,33 @@ import { Link } from "react-router-dom";
 
 const Blog = () => {
   const featuredPost = {
-    title: "How to Write a Resume That Gets You Hired at FAANG Companies",
-    excerpt: "Learn the insider secrets that helped 500+ candidates land offers at Google, Meta, Apple, Amazon, and Netflix.",
-    author: "Sarah Chen",
+    title: "Why We Started Resume Proof: Leveling the Playing Field in a Tough Job Market",
+    excerpt: "The story of how two founders decided to help students and professionals achieve their dreams through curated, proven resume examples.",
+    author: "Nathan Lee & Eliya Khajeie",
     date: "Dec 15, 2024",
     readTime: "8 min read",
-    category: "Career Tips",
-    image: "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=800&h=400&fit=crop"
+    category: "Company Story",
+    image: "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=800&h=400&fit=crop",
+    content: `
+      The job market in 2024 has been brutal. Despite having strong technical skills and impressive academic backgrounds, we watched countless talented individuals struggle to land interviews at top companies. The problem wasn't their qualifications—it was how they presented them.
+
+      As a Software Engineer at Google, Nathan saw firsthand how certain resume formats and storytelling techniques consistently led to successful hires. Meanwhile, Eliya, running a software engineering firm serving multi-million dollar enterprises, noticed that the most successful candidates all seemed to follow similar patterns in their applications.
+
+      But here's the thing: this knowledge was locked away in private networks. The best resume examples were shared only among insiders, creating an unfair advantage for those with the right connections.
+
+      That's when we realized we had to act. We started collecting real resume examples from successful candidates—not theoretical templates, but actual resumes that led to job offers at Google, Meta, Apple, McKinsey, Goldman Sachs, and hundreds of other top companies.
+
+      Every resume in our database is verified and has led to an actual job offer. We believe that with the right guidance and examples, anyone can achieve their career goals, regardless of their background or connections.
+
+      Resume Proof isn't just a product—it's our mission to democratize access to career success and help the next generation of professionals achieve their dreams.
+    `
   };
 
   const blogPosts = [
     {
       title: "The Ultimate Guide to Product Manager Resumes",
       excerpt: "Everything you need to know about crafting a PM resume that stands out.",
-      author: "Michael Rodriguez",
+      author: "Nathan Lee",
       date: "Dec 12, 2024",
       readTime: "6 min read",
       category: "Product Management",
@@ -30,7 +43,7 @@ const Blog = () => {
     {
       title: "Software Engineering Resume Mistakes to Avoid",
       excerpt: "Common pitfalls that prevent engineers from getting interviews.",
-      author: "Emily Johnson",
+      author: "Eliya Khajeie",
       date: "Dec 10, 2024",
       readTime: "5 min read",
       category: "Engineering",
@@ -39,7 +52,7 @@ const Blog = () => {
     {
       title: "Data Science Resume Templates That Work",
       excerpt: "Proven templates and examples from successful data scientists.",
-      author: "David Kim",
+      author: "Nathan Lee",
       date: "Dec 8, 2024",
       readTime: "7 min read",
       category: "Data Science",
@@ -48,7 +61,7 @@ const Blog = () => {
     {
       title: "How to Quantify Your Impact on Your Resume",
       excerpt: "Turn your accomplishments into compelling, measurable results.",
-      author: "Lisa Wang",
+      author: "Eliya Khajeie",
       date: "Dec 5, 2024",
       readTime: "4 min read",
       category: "Career Tips",
@@ -57,7 +70,7 @@ const Blog = () => {
     {
       title: "McKinsey Resume Format: What Consultants Need to Know",
       excerpt: "Inside look at what top consulting firms look for in resumes.",
-      author: "James Thompson",
+      author: "Nathan Lee",
       date: "Dec 3, 2024",
       readTime: "6 min read",
       category: "Consulting",
@@ -66,7 +79,7 @@ const Blog = () => {
     {
       title: "Resume Keywords That Actually Matter in 2024",
       excerpt: "The latest insights on ATS optimization and keyword strategy.",
-      author: "Rachel Green",
+      author: "Eliya Khajeie",
       date: "Nov 30, 2024",
       readTime: "5 min read",
       category: "ATS Optimization",
@@ -81,7 +94,8 @@ const Blog = () => {
     "Product Management",
     "Data Science",
     "Consulting",
-    "ATS Optimization"
+    "ATS Optimization",
+    "Company Story"
   ];
 
   return (
@@ -104,7 +118,7 @@ const Blog = () => {
         {/* Featured Post */}
         <div className="mb-16">
           <h2 className="text-2xl font-bold text-black mb-8">Featured Article</h2>
-          <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+          <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
             <div className="md:flex">
               <div className="md:w-1/2">
                 <img 
@@ -159,9 +173,11 @@ const Blog = () => {
                 <p className="text-sm text-gray-600 mb-4">
                   Get the latest career tips and resume insights delivered to your inbox.
                 </p>
-                <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700">
-                  Subscribe
-                </Button>
+                <Link to="/">
+                  <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700">
+                    Subscribe
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>

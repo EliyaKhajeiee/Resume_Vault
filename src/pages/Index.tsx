@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Check, Mail, ArrowRight, Star, Users, FileText, TrendingUp } from "lucide-react";
+import { Check, Mail, ArrowRight, Star, Users, FileText, TrendingUp, Briefcase, Code, Database, BarChart3, Brain, Settings } from "lucide-react";
 import { toast } from "sonner";
 import { EmailService } from "@/services/emailService";
 import Header from "@/components/Header";
@@ -61,6 +61,44 @@ const Index = () => {
     }
   ];
 
+  const roleCategories = [
+    {
+      name: "Product Management",
+      icon: <Briefcase className="w-6 h-6 text-blue-600" />,
+      href: "/resumes?role=Product%20Manager"
+    },
+    {
+      name: "Engineering",
+      icon: <Settings className="w-6 h-6 text-blue-600" />,
+      href: "/resumes?role=Engineering%20Manager"
+    },
+    {
+      name: "Software Engineering", 
+      icon: <Code className="w-6 h-6 text-blue-600" />,
+      href: "/resumes?role=Software%20Engineer"
+    },
+    {
+      name: "Data Engineering",
+      icon: <Database className="w-6 h-6 text-blue-600" />,
+      href: "/resumes?role=Data%20Engineer"
+    },
+    {
+      name: "Data Science",
+      icon: <BarChart3 className="w-6 h-6 text-blue-600" />,
+      href: "/resumes?role=Data%20Scientist"
+    },
+    {
+      name: "Machine Learning",
+      icon: <Brain className="w-6 h-6 text-blue-600" />,
+      href: "/resumes?role=ML%20Engineer"
+    },
+    {
+      name: "TPM",
+      icon: <FileText className="w-6 h-6 text-blue-600" />,
+      href: "/resumes?role=Technical%20Program%20Manager"
+    }
+  ];
+
   const testimonials = [
     {
       name: "Sarah Chen",
@@ -114,23 +152,17 @@ const Index = () => {
 
             {/* Role Categories */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 max-w-5xl mx-auto mb-16">
-              {[
-                "Product Management",
-                "Engineering",
-                "Software Engineering", 
-                "Data Engineering",
-                "Data Science",
-                "Machine Learning",
-                "TPM"
-              ].map((role, index) => (
-                <div key={role} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <div className="text-center">
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-                      <FileText className="w-6 h-6 text-blue-600" />
+              {roleCategories.map((role, index) => (
+                <Link key={role.name} to={role.href} className="block">
+                  <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all hover:scale-105 cursor-pointer">
+                    <div className="text-center">
+                      <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                        {role.icon}
+                      </div>
+                      <h3 className="font-medium text-sm text-gray-900">{role.name}</h3>
                     </div>
-                    <h3 className="font-medium text-sm text-gray-900">{role}</h3>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
