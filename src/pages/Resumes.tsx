@@ -16,6 +16,10 @@ const Resumes = () => {
   const [filters, setFilters] = useState<SearchFilters>({});
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     searchResumes();
   }, [filters]);
 
@@ -40,6 +44,14 @@ const Resumes = () => {
     await ResumeService.incrementViewCount(resumeId);
     // Here you would typically open the resume in a modal or new page
     toast.info("Resume viewing functionality coming soon!");
+  };
+
+  const handleDownloadResume = (resume: Resume) => {
+    if (resume.file_url) {
+      window.open(resume.file_url, '_blank');
+    } else {
+      toast.info("Download functionality coming soon!");
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -148,6 +160,21 @@ const Resumes = () => {
                         {resume.description}
                       </p>
                     )}
+
+                    {resume.tags && resume.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {resume.tags.slice(0, 3).map((tag) => (
+                          <Badge key={tag} variant="outline" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                        {resume.tags.length > 3 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{resume.tags.length - 3} more
+                          </Badge>
+                        )}
+                      </div>
+                    )}
                     
                     <div className="flex justify-between items-center pt-2">
                       <div className="flex items-center text-xs text-gray-500">
@@ -168,7 +195,11 @@ const Resumes = () => {
                         <Eye className="w-4 h-4 mr-2" />
                         View
                       </Button>
-                      <Button size="sm" variant="outline">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleDownloadResume(resume)}
+                      >
                         <Download className="w-4 h-4" />
                       </Button>
                     </div>

@@ -9,6 +9,18 @@ export interface SearchFilters {
   searchQuery?: string
 }
 
+export interface AddResumeData {
+  title: string
+  company: string
+  role: string
+  industry: string
+  experience_level: string
+  description?: string
+  tags: string[]
+  is_featured: boolean
+  file_url?: string
+}
+
 export class ResumeService {
   /**
    * Search resumes with filters
@@ -48,6 +60,77 @@ export class ResumeService {
     } catch (error) {
       console.error('Unexpected error searching resumes:', error)
       return { data: null, error: 'An unexpected error occurred' }
+    }
+  }
+
+  /**
+   * Add a new resume
+   */
+  static async addResume(resumeData: AddResumeData): Promise<{ success: boolean; error?: string }> {
+    try {
+      const { data, error } = await supabase
+        .from('resumes')
+        .insert([resumeData])
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Error adding resume:', error)
+        return { success: false, error: 'Failed to add resume' }
+      }
+
+      console.log('Resume added successfully:', data)
+      return { success: true }
+    } catch (error) {
+      console.error('Unexpected error adding resume:', error)
+      return { success: false, error: 'An unexpected error occurred' }
+    }
+  }
+
+  /**
+   * Delete a resume
+   */
+  static async deleteResume(resumeId: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const { error } = await supabase
+        .from('resumes')
+        .delete()
+        .eq('id', resumeId)
+
+      if (error) {
+        console.error('Error deleting resume:', error)
+        return { success: false, error: 'Failed to delete resume' }
+      }
+
+      return { success: true }
+    } catch (error) {
+      console.error('Unexpected error deleting resume:', error)
+      return { success: false, error: 'An unexpected error occurred' }
+    }
+  }
+
+  /**
+   * Update a resume
+   */
+  static async updateResume(resumeId: string, resumeData: Partial<AddResumeData>): Promise<{ success: boolean; error?: string }> {
+    try {
+      const { data, error } = await supabase
+        .from('resumes')
+        .update(resumeData)
+        .eq('id', resumeId)
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Error updating resume:', error)
+        return { success: false, error: 'Failed to update resume' }
+      }
+
+      console.log('Resume updated successfully:', data)
+      return { success: true }
+    } catch (error) {
+      console.error('Unexpected error updating resume:', error)
+      return { success: false, error: 'An unexpected error occurred' }
     }
   }
 
@@ -111,6 +194,29 @@ export class ResumeService {
       await supabase.rpc('increment_view_count', { resume_id: resumeId })
     } catch (error) {
       console.error('Error incrementing view count:', error)
+    }
+  }
+
+  /**
+   * Get resume by ID
+   */
+  static async getResumeById(resumeId: string): Promise<{ data: Resume | null; error?: string }> {
+    try {
+      const { data, error } = await supabase
+        .from('resumes')
+        .select('*')
+        .eq('id', resumeId)
+        .single()
+
+      if (error) {
+        console.error('Error fetching resume:', error)
+        return { data: null, error: 'Failed to fetch resume' }
+      }
+
+      return { data }
+    } catch (error) {
+      console.error('Unexpected error fetching resume:', error)
+      return { data: null, error: 'An unexpected error occurred' }
     }
   }
 }
