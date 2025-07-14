@@ -24,8 +24,8 @@ const Admin = () => {
   const [isEditResumeOpen, setIsEditResumeOpen] = useState(false);
   const [editingResume, setEditingResume] = useState<Resume | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [companyFilter, setCompanyFilter] = useState("");
-  const [industryFilter, setIndustryFilter] = useState("");
+  const [companyFilter, setCompanyFilter] = useState("all");
+  const [industryFilter, setIndustryFilter] = useState("all");
   const [featuredFilter, setFeaturedFilter] = useState<string>("all");
 
   // Form state for adding/editing resumes
@@ -126,11 +126,11 @@ const Admin = () => {
       );
     }
 
-    if (companyFilter) {
+    if (companyFilter && companyFilter !== "all") {
       filtered = filtered.filter(resume => resume.company === companyFilter);
     }
 
-    if (industryFilter) {
+    if (industryFilter && industryFilter !== "all") {
       filtered = filtered.filter(resume => resume.industry === industryFilter);
     }
 
@@ -285,8 +285,8 @@ const Admin = () => {
 
   const clearFilters = () => {
     setSearchQuery("");
-    setCompanyFilter("");
-    setIndustryFilter("");
+    setCompanyFilter("all");
+    setIndustryFilter("all");
     setFeaturedFilter("all");
   };
 
@@ -628,7 +628,7 @@ const Admin = () => {
                       <SelectValue placeholder="All Companies" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Companies</SelectItem>
+                      <SelectItem value="all">All Companies</SelectItem>
                       {filterOptions.companies.map(company => (
                         <SelectItem key={company} value={company}>{company}</SelectItem>
                       ))}
@@ -640,7 +640,7 @@ const Admin = () => {
                       <SelectValue placeholder="All Industries" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Industries</SelectItem>
+                      <SelectItem value="all">All Industries</SelectItem>
                       {filterOptions.industries.map(industry => (
                         <SelectItem key={industry} value={industry}>{industry}</SelectItem>
                       ))}
@@ -779,27 +779,3 @@ const Admin = () => {
                       ))}
                     </TableBody>
                   </Table>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Edit Resume Dialog */}
-            <Dialog open={isEditResumeOpen} onOpenChange={setIsEditResumeOpen}>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>Edit Resume</DialogTitle>
-                  <DialogDescription>
-                    Update the resume information
-                  </DialogDescription>
-                </DialogHeader>
-                <ResumeFormFields onSubmit={handleEditResume} submitText="Update Resume" />
-              </DialogContent>
-            </Dialog>
-          </>
-        )}
-      </div>
-    </div>
-  );
-};
-
-export default Admin;
