@@ -67,22 +67,29 @@ const SearchFiltersComponent = ({ onFiltersChange, className = "" }: SearchFilte
     placeholder: string;
   }) => (
     <div className="flex flex-wrap gap-2">
-      <span className="text-sm font-medium text-gray-700 py-2">{placeholder}:</span>
-      {options.map((option) => (
-        <Badge
-          key={option}
-          variant={selected === option ? "default" : "outline"}
-          className={`cursor-pointer transition-colors ${
-            selected === option 
-              ? "bg-blue-600 text-white hover:bg-blue-700" 
-              : "hover:bg-gray-100"
-          }`}
-          onClick={() => onSelect(selected === option ? "" : option)}
-        >
-          {option}
-          {selected === option && <X className="w-3 h-3 ml-1" />}
-        </Badge>
-      ))}
+      <span className="text-sm font-medium text-gray-700 py-2 min-w-fit">{placeholder}:</span>
+      <div className="flex flex-wrap gap-2">
+        {options.slice(0, 10).map((option) => (
+          <Badge
+            key={option}
+            variant={selected === option ? "default" : "outline"}
+            className={`cursor-pointer transition-colors ${
+              selected === option 
+                ? "bg-blue-600 text-white hover:bg-blue-700" 
+                : "hover:bg-gray-100"
+            }`}
+            onClick={() => onSelect(selected === option ? "" : option)}
+          >
+            {option}
+            {selected === option && <X className="w-3 h-3 ml-1" />}
+          </Badge>
+        ))}
+        {options.length > 10 && (
+          <Badge variant="outline" className="cursor-default">
+            +{options.length - 10} more
+          </Badge>
+        )}
+      </div>
     </div>
   );
 
@@ -93,7 +100,7 @@ const SearchFiltersComponent = ({ onFiltersChange, className = "" }: SearchFilte
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
         <Input
           type="text"
-          placeholder="Search resumes by title or description..."
+          placeholder="Search resumes by title, company, role, or description..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-12 h-12 text-lg"
@@ -126,33 +133,41 @@ const SearchFiltersComponent = ({ onFiltersChange, className = "" }: SearchFilte
       {/* Filter Bubbles */}
       {showFilters && (
         <div className="space-y-4">
-          <FilterBubble
-            options={filterOptions.companies}
-            selected={selectedCompany}
-            onSelect={setSelectedCompany}
-            placeholder="Company"
-          />
+          {filterOptions.companies.length > 0 && (
+            <FilterBubble
+              options={filterOptions.companies}
+              selected={selectedCompany}
+              onSelect={setSelectedCompany}
+              placeholder="Company"
+            />
+          )}
           
-          <FilterBubble
-            options={filterOptions.roles}
-            selected={selectedRole}
-            onSelect={setSelectedRole}
-            placeholder="Role"
-          />
+          {filterOptions.roles.length > 0 && (
+            <FilterBubble
+              options={filterOptions.roles}
+              selected={selectedRole}
+              onSelect={setSelectedRole}
+              placeholder="Role"
+            />
+          )}
           
-          <FilterBubble
-            options={filterOptions.industries}
-            selected={selectedIndustry}
-            onSelect={setSelectedIndustry}
-            placeholder="Industry"
-          />
+          {filterOptions.industries.length > 0 && (
+            <FilterBubble
+              options={filterOptions.industries}
+              selected={selectedIndustry}
+              onSelect={setSelectedIndustry}
+              placeholder="Industry"
+            />
+          )}
           
-          <FilterBubble
-            options={filterOptions.experienceLevels}
-            selected={selectedExperience}
-            onSelect={setSelectedExperience}
-            placeholder="Experience Level"
-          />
+          {filterOptions.experienceLevels.length > 0 && (
+            <FilterBubble
+              options={filterOptions.experienceLevels}
+              selected={selectedExperience}
+              onSelect={setSelectedExperience}
+              placeholder="Experience Level"
+            />
+          )}
         </div>
       )}
     </div>

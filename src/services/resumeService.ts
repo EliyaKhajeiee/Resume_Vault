@@ -7,6 +7,7 @@ export interface SearchFilters {
   industry?: string
   experienceLevel?: string
   searchQuery?: string
+  featured?: boolean
 }
 
 export interface AddResumeData {
@@ -34,19 +35,22 @@ export class ResumeService {
 
       // Apply filters
       if (filters.company) {
-        query = query.eq('company', filters.company)
+        query = query.ilike('company', `%${filters.company}%`)
       }
       if (filters.role) {
-        query = query.eq('role', filters.role)
+        query = query.ilike('role', `%${filters.role}%`)
       }
       if (filters.industry) {
-        query = query.eq('industry', filters.industry)
+        query = query.ilike('industry', `%${filters.industry}%`)
       }
       if (filters.experienceLevel) {
         query = query.eq('experience_level', filters.experienceLevel)
       }
       if (filters.searchQuery) {
-        query = query.or(`title.ilike.%${filters.searchQuery}%,description.ilike.%${filters.searchQuery}%`)
+        query = query.or(`title.ilike.%${filters.searchQuery}%,description.ilike.%${filters.searchQuery}%,company.ilike.%${filters.searchQuery}%,role.ilike.%${filters.searchQuery}%`)
+      }
+      if (filters.featured !== undefined) {
+        query = query.eq('is_featured', filters.featured)
       }
 
       const { data, error } = await query
@@ -66,11 +70,16 @@ export class ResumeService {
   /**
    * Add a new resume
    */
-  static async addResume(resumeData: AddResumeData): Promise<{ success: boolean; error?: string }> {
+  static async addResume(resumeData: AddResumeData): Promise<{ success: boolean; data?: Resume; error?: string }> {
     try {
       const { data, error } = await supabase
         .from('resumes')
-        .insert([resumeData])
+        .insert([{
+          ...resumeData,
+          view_count: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }])
         .select()
         .single()
 
@@ -80,7 +89,7 @@ export class ResumeService {
       }
 
       console.log('Resume added successfully:', data)
-      return { success: true }
+      return { success: true, data }
     } catch (error) {
       console.error('Unexpected error adding resume:', error)
       return { success: false, error: 'An unexpected error occurred' }
@@ -112,11 +121,14 @@ export class ResumeService {
   /**
    * Update a resume
    */
-  static async updateResume(resumeId: string, resumeData: Partial<AddResumeData>): Promise<{ success: boolean; error?: string }> {
+  static async updateResume(resumeId: string, resumeData: Partial<AddResumeData>): Promise<{ success: boolean; data?: Resume; error?: string }> {
     try {
       const { data, error } = await supabase
         .from('resumes')
-        .update(resumeData)
+        .update({
+          ...resumeData,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', resumeId)
         .select()
         .single()
@@ -127,7 +139,7 @@ export class ResumeService {
       }
 
       console.log('Resume updated successfully:', data)
-      return { success: true }
+      return { success: true, data }
     } catch (error) {
       console.error('Unexpected error updating resume:', error)
       return { success: false, error: 'An unexpected error occurred' }
@@ -174,10 +186,10 @@ export class ResumeService {
 
       if (!data) return { companies: [], roles: [], industries: [], experienceLevels: [] }
 
-      const companies = [...new Set(data.map(r => r.company))].sort()
-      const roles = [...new Set(data.map(r => r.role))].sort()
-      const industries = [...new Set(data.map(r => r.industry))].sort()
-      const experienceLevels = [...new Set(data.map(r => r.experience_level))].sort()
+      const companies = [...new Set(data.map(r => r.company))].filter(Boolean).sort()
+      const roles = [...new Set(data.map(r => r.role))].filter(Boolean).sort()
+      const industries = [...new Set(data.map(r => r.industry))].filter(Boolean).sort()
+      const experienceLevels = [...new Set(data.map(r => r.experience_level))].filter(Boolean).sort()
 
       return { companies, roles, industries, experienceLevels }
     } catch (error) {
@@ -191,7 +203,20 @@ export class ResumeService {
    */
   static async incrementViewCount(resumeId: string): Promise<void> {
     try {
-      await supabase.rpc('increment_view_count', { resume_id: resumeId })
+      // First get current view count
+      const { data: currentData } = await supabase
+        .from('resumes')
+        .select('view_count')
+        .eq('id', resumeId)
+        .single()
+
+      if (currentData) {
+        // Increment the view count
+        await supabase
+          .from('resumes')
+          .update({ view_count: (currentData.view_count || 0) + 1 })
+          .eq('id', resumeId)
+      }
     } catch (error) {
       console.error('Error incrementing view count:', error)
     }
@@ -217,6 +242,83 @@ export class ResumeService {
     } catch (error) {
       console.error('Unexpected error fetching resume:', error)
       return { data: null, error: 'An unexpected error occurred' }
+    }
+  }
+
+  /**
+   * Toggle featured status of a resume
+   */
+  static async toggleFeatured(resumeId: string, isFeatured: boolean): Promise<{ success: boolean; error?: string }> {
+    try {
+      const { error } = await supabase
+        .from('resumes')
+        .update({ 
+          is_featured: isFeatured,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', resumeId)
+
+      if (error) {
+        console.error('Error toggling featured status:', error)
+        return { success: false, error: 'Failed to update featured status' }
+      }
+
+      return { success: true }
+    } catch (error) {
+      console.error('Unexpected error toggling featured status:', error)
+      return { success: false, error: 'An unexpected error occurred' }
+    }
+  }
+
+  /**
+   * Get resume statistics
+   */
+  static async getResumeStats(): Promise<{
+    total: number
+    featured: number
+    totalViews: number
+    byCompany: { [key: string]: number }
+    byIndustry: { [key: string]: number }
+  }> {
+    try {
+      const { data } = await supabase
+        .from('resumes')
+        .select('company, industry, is_featured, view_count')
+
+      if (!data) return {
+        total: 0,
+        featured: 0,
+        totalViews: 0,
+        byCompany: {},
+        byIndustry: {}
+      }
+
+      const total = data.length
+      const featured = data.filter(r => r.is_featured).length
+      const totalViews = data.reduce((sum, r) => sum + (r.view_count || 0), 0)
+      
+      const byCompany: { [key: string]: number } = {}
+      const byIndustry: { [key: string]: number } = {}
+
+      data.forEach(resume => {
+        if (resume.company) {
+          byCompany[resume.company] = (byCompany[resume.company] || 0) + 1
+        }
+        if (resume.industry) {
+          byIndustry[resume.industry] = (byIndustry[resume.industry] || 0) + 1
+        }
+      })
+
+      return { total, featured, totalViews, byCompany, byIndustry }
+    } catch (error) {
+      console.error('Error fetching resume stats:', error)
+      return {
+        total: 0,
+        featured: 0,
+        totalViews: 0,
+        byCompany: {},
+        byIndustry: {}
+      }
     }
   }
 }

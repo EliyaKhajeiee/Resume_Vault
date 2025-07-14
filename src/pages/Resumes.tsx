@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Download, Star } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Eye, Download, Star, ExternalLink } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SearchFiltersComponent from "@/components/SearchFilters";
@@ -14,6 +15,9 @@ const Resumes = () => {
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<SearchFilters>({});
+  const [selectedResume, setSelectedResume] = useState<Resume | null>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'featured'>('recent');
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -28,7 +32,27 @@ const Resumes = () => {
     try {
       const result = await ResumeService.searchResumes(filters);
       if (result.data) {
-        setResumes(result.data);
+        let sortedData = [...result.data];
+        
+        // Apply sorting
+        switch (sortBy) {
+          case 'popular':
+            sortedData.sort((a, b) => b.view_count - a.view_count);
+            break;
+          case 'featured':
+            sortedData.sort((a, b) => {
+              if (a.is_featured && !b.is_featured) return -1;
+              if (!a.is_featured && b.is_featured) return 1;
+              return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+            });
+            break;
+          case 'recent':
+          default:
+            sortedData.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+            break;
+        }
+        
+        setResumes(sortedData);
       } else {
         toast.error(result.error || "Failed to load resumes");
       }
@@ -40,17 +64,23 @@ const Resumes = () => {
     }
   };
 
-  const handleViewResume = async (resumeId: string) => {
-    await ResumeService.incrementViewCount(resumeId);
-    // Here you would typically open the resume in a modal or new page
-    toast.info("Resume viewing functionality coming soon!");
+  const handleViewResume = async (resume: Resume) => {
+    await ResumeService.incrementViewCount(resume.id);
+    setSelectedResume(resume);
+    setIsViewDialogOpen(true);
+    
+    // Update the view count in the local state
+    setResumes(prev => prev.map(r => 
+      r.id === resume.id ? { ...r, view_count: r.view_count + 1 } : r
+    ));
   };
 
   const handleDownloadResume = (resume: Resume) => {
     if (resume.file_url) {
       window.open(resume.file_url, '_blank');
+      toast.success("Opening resume file...");
     } else {
-      toast.info("Download functionality coming soon!");
+      toast.info("Download functionality coming soon! This resume doesn't have a file URL yet.");
     }
   };
 
@@ -61,6 +91,26 @@ const Resumes = () => {
       day: 'numeric'
     });
   };
+
+  const getSortButtonText = () => {
+    switch (sortBy) {
+      case 'popular': return 'Most Popular';
+      case 'featured': return 'Featured First';
+      case 'recent':
+      default: return 'Most Recent';
+    }
+  };
+
+  const cycleSortBy = () => {
+    const sortOptions: ('recent' | 'popular' | 'featured')[] = ['recent', 'popular', 'featured'];
+    const currentIndex = sortOptions.indexOf(sortBy);
+    const nextIndex = (currentIndex + 1) % sortOptions.length;
+    setSortBy(sortOptions[nextIndex]);
+  };
+
+  useEffect(() => {
+    searchResumes();
+  }, [sortBy]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -82,14 +132,14 @@ const Resumes = () => {
           className="mb-8"
         />
 
-        {/* Results */}
+        {/* Results Header */}
         <div className="mb-6 flex justify-between items-center">
           <div className="text-gray-600">
             {loading ? "Loading..." : `${resumes.length} resume${resumes.length !== 1 ? 's' : ''} found`}
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              Sort by: Most Recent
+            <Button variant="outline" size="sm" onClick={cycleSortBy}>
+              Sort by: {getSortButtonText()}
             </Button>
           </div>
         </div>
@@ -129,11 +179,11 @@ const Resumes = () => {
               <Card key={resume.id} className="hover:shadow-lg transition-shadow cursor-pointer group">
                 <CardHeader>
                   <div className="flex justify-between items-start mb-2">
-                    <CardTitle className="text-lg group-hover:text-blue-600 transition-colors">
+                    <CardTitle className="text-lg group-hover:text-blue-600 transition-colors line-clamp-2">
                       {resume.title}
                     </CardTitle>
                     {resume.is_featured && (
-                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 flex-shrink-0 ml-2">
                         <Star className="w-3 h-3 mr-1" />
                         Featured
                       </Badge>
@@ -190,7 +240,7 @@ const Resumes = () => {
                       <Button 
                         size="sm" 
                         className="flex-1"
-                        onClick={() => handleViewResume(resume.id)}
+                        onClick={() => handleViewResume(resume)}
                       >
                         <Eye className="w-4 h-4 mr-2" />
                         View
@@ -199,6 +249,7 @@ const Resumes = () => {
                         size="sm" 
                         variant="outline"
                         onClick={() => handleDownloadResume(resume)}
+                        disabled={!resume.file_url}
                       >
                         <Download className="w-4 h-4" />
                       </Button>
@@ -213,12 +264,105 @@ const Resumes = () => {
         {/* Load More */}
         {resumes.length > 0 && (
           <div className="text-center mt-12">
-            <Button variant="outline" size="lg">
-              Load more resumes
+            <Button variant="outline" size="lg" disabled>
+              Load more resumes (Coming Soon)
             </Button>
           </div>
         )}
       </div>
+
+      {/* Resume View Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {selectedResume?.title}
+              {selectedResume?.is_featured && (
+                <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                  <Star className="w-3 h-3 mr-1" />
+                  Featured
+                </Badge>
+              )}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedResume?.company} • {selectedResume?.role} • {selectedResume?.industry}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedResume && (
+            <div className="space-y-6">
+              {/* Resume Details */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-700 mb-1">Experience Level</h4>
+                  <Badge variant="outline">{selectedResume.experience_level}</Badge>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-700 mb-1">Views</h4>
+                  <div className="flex items-center text-sm text-gray-600">
+                    <Eye className="w-4 h-4 mr-1" />
+                    {selectedResume.view_count}
+                  </div>
+                </div>
+              </div>
+
+              {/* Description */}
+              {selectedResume.description && (
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-700 mb-2">Description</h4>
+                  <p className="text-gray-600">{selectedResume.description}</p>
+                </div>
+              )}
+
+              {/* Tags */}
+              {selectedResume.tags && selectedResume.tags.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-700 mb-2">Skills & Keywords</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedResume.tags.map((tag) => (
+                      <Badge key={tag} variant="outline" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex gap-3 pt-4 border-t">
+                {selectedResume.file_url ? (
+                  <Button 
+                    onClick={() => handleDownloadResume(selectedResume)}
+                    className="flex-1"
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    View Full Resume
+                  </Button>
+                ) : (
+                  <Button disabled className="flex-1">
+                    <Download className="w-4 h-4 mr-2" />
+                    File Not Available
+                  </Button>
+                )}
+                <Button 
+                  variant="outline"
+                  onClick={() => setIsViewDialogOpen(false)}
+                >
+                  Close
+                </Button>
+              </div>
+
+              {/* Metadata */}
+              <div className="text-xs text-gray-500 pt-2 border-t">
+                Added on {formatDate(selectedResume.created_at)}
+                {selectedResume.updated_at !== selectedResume.created_at && (
+                  <> • Updated on {formatDate(selectedResume.updated_at)}</>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>
