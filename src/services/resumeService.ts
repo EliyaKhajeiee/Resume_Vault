@@ -20,9 +20,82 @@ export interface AddResumeData {
   tags: string[]
   is_featured: boolean
   file_url?: string
+  file_name?: string
+  file_size?: number
+  file_type?: string
 }
 
 export class ResumeService {
+  /**
+   * Upload file to Supabase Storage
+   */
+  static async uploadResumeFile(file: File): Promise<{ success: boolean; url?: string; error?: string }> {
+    try {
+      // Validate file type
+      const allowedTypes = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'text/plain'
+      ];
+
+      if (!allowedTypes.includes(file.type)) {
+        return { 
+          success: false, 
+          error: 'Invalid file type. Please upload PDF, DOC, DOCX, or TXT files only.' 
+        };
+      }
+
+      // Validate file size (10MB limit)
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        return { 
+          success: false, 
+          error: 'File size too large. Please upload files smaller than 10MB.' 
+        };
+      }
+
+      // Generate unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+
+      // Upload to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('resumes')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) {
+        console.error('Error uploading file:', error);
+        return { success: false, error: 'Failed to upload file' };
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('resumes')
+        .getPublicUrl(fileName);
+
+      return { success: true, url: publicUrl };
+    } catch (error) {
+      console.error('Unexpected error uploading file:', error);
+      return { success: false, error: 'An unexpected error occurred during upload' };
+    }
+  }
+
+  /**
+   * Validate URL format
+   */
+  static validateUrl(url: string): boolean {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   /**
    * Search resumes with filters
    */
@@ -68,14 +141,61 @@ export class ResumeService {
   }
 
   /**
-   * Add a new resume
+   * Add a new resume with file upload support
    */
-  static async addResume(resumeData: AddResumeData): Promise<{ success: boolean; data?: Resume; error?: string }> {
+  static async addResume(resumeData: AddResumeData, file?: File): Promise<{ success: boolean; data?: Resume; error?: string }> {
     try {
+      let fileUrl = resumeData.file_url;
+      let fileName = resumeData.file_name;
+      let fileSize = resumeData.file_size;
+      let fileType = resumeData.file_type;
+
+      // Handle file upload if provided
+      if (file) {
+        const uploadResult = await this.uploadResumeFile(file);
+        if (!uploadResult.success) {
+          return { success: false, error: uploadResult.error };
+        }
+        fileUrl = uploadResult.url;
+        fileName = file.name;
+        fileSize = file.size;
+        fileType = file.type;
+      }
+
+      // Validate URL if provided as string
+      if (fileUrl && !file && !this.validateUrl(fileUrl)) {
+        return { success: false, error: 'Invalid URL format. Please provide a valid URL.' };
+      }
+
+      // Validate required fields
+      if (!resumeData.title?.trim()) {
+        return { success: false, error: 'Title is required' };
+      }
+      if (!resumeData.company?.trim()) {
+        return { success: false, error: 'Company is required' };
+      }
+      if (!resumeData.role?.trim()) {
+        return { success: false, error: 'Role is required' };
+      }
+      if (!resumeData.industry?.trim()) {
+        return { success: false, error: 'Industry is required' };
+      }
+
       const { data, error } = await supabase
         .from('resumes')
         .insert([{
-          ...resumeData,
+          title: resumeData.title.trim(),
+          company: resumeData.company.trim(),
+          role: resumeData.role.trim(),
+          industry: resumeData.industry.trim(),
+          experience_level: resumeData.experience_level,
+          description: resumeData.description?.trim() || null,
+          tags: resumeData.tags || [],
+          is_featured: resumeData.is_featured || false,
+          file_url: fileUrl || null,
+          file_name: fileName || null,
+          file_size: fileSize || null,
+          file_type: fileType || null,
           view_count: 0,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
@@ -85,7 +205,7 @@ export class ResumeService {
 
       if (error) {
         console.error('Error adding resume:', error)
-        return { success: false, error: 'Failed to add resume' }
+        return { success: false, error: 'Failed to add resume. Please check all required fields.' }
       }
 
       console.log('Resume added successfully:', data)
@@ -97,10 +217,28 @@ export class ResumeService {
   }
 
   /**
-   * Delete a resume
+   * Delete a resume and its associated file
    */
   static async deleteResume(resumeId: string): Promise<{ success: boolean; error?: string }> {
     try {
+      // First get the resume to check if it has a file
+      const { data: resume } = await supabase
+        .from('resumes')
+        .select('file_url, file_name')
+        .eq('id', resumeId)
+        .single();
+
+      // Delete the file from storage if it exists and was uploaded to our storage
+      if (resume?.file_url && resume.file_url.includes('supabase') && resume.file_name) {
+        const fileName = resume.file_url.split('/').pop();
+        if (fileName) {
+          await supabase.storage
+            .from('resumes')
+            .remove([fileName]);
+        }
+      }
+
+      // Delete the resume record
       const { error } = await supabase
         .from('resumes')
         .delete()
@@ -121,12 +259,31 @@ export class ResumeService {
   /**
    * Update a resume
    */
-  static async updateResume(resumeId: string, resumeData: Partial<AddResumeData>): Promise<{ success: boolean; data?: Resume; error?: string }> {
+  static async updateResume(resumeId: string, resumeData: Partial<AddResumeData>, file?: File): Promise<{ success: boolean; data?: Resume; error?: string }> {
     try {
+      let updateData = { ...resumeData };
+
+      // Handle file upload if provided
+      if (file) {
+        const uploadResult = await this.uploadResumeFile(file);
+        if (!uploadResult.success) {
+          return { success: false, error: uploadResult.error };
+        }
+        updateData.file_url = uploadResult.url;
+        updateData.file_name = file.name;
+        updateData.file_size = file.size;
+        updateData.file_type = file.type;
+      }
+
+      // Validate URL if provided as string
+      if (updateData.file_url && !file && !this.validateUrl(updateData.file_url)) {
+        return { success: false, error: 'Invalid URL format. Please provide a valid URL.' };
+      }
+
       const { data, error } = await supabase
         .from('resumes')
         .update({
-          ...resumeData,
+          ...updateData,
           updated_at: new Date().toISOString()
         })
         .eq('id', resumeId)

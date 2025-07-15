@@ -26,6 +26,9 @@ export interface Resume {
   industry: string
   experience_level: string
   file_url?: string
+  file_name?: string
+  file_size?: number
+  file_type?: string
   description?: string
   tags: string[]
   created_at: string

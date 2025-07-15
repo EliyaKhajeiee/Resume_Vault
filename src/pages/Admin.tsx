@@ -11,7 +11,7 @@ import { EmailService } from "@/services/emailService";
 import { ResumeService, type SearchFilters } from "@/services/resumeService";
 import type { EmailSignup, Resume } from "@/lib/supabase";
 import { toast } from "sonner";
-import { Mail, Users, Calendar, Download, Plus, Edit, Trash2, FileText, Eye, Star, Search, Filter } from "lucide-react";
+import { Mail, Users, Calendar, Download, Plus, Edit, Trash2, FileText, Eye, Star, Search, Filter, Upload, Link as LinkIcon } from "lucide-react";
 
 const Admin = () => {
   const [emails, setEmails] = useState<EmailSignup[]>([]);
@@ -40,6 +40,11 @@ const Admin = () => {
     is_featured: false,
     file_url: ''
   });
+
+  // File upload state
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadMethod, setUploadMethod] = useState<'url' | 'file'>('url');
+  const [isUploading, setIsUploading] = useState(false);
 
   // Filter options
   const [filterOptions, setFilterOptions] = useState({
@@ -155,17 +160,48 @@ const Admin = () => {
       is_featured: false,
       file_url: ''
     });
+    setSelectedFile(null);
+    setUploadMethod('url');
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'text/plain'
+      ];
+
+      if (!allowedTypes.includes(file.type)) {
+        toast.error('Invalid file type. Please upload PDF, DOC, DOCX, or TXT files only.');
+        return;
+      }
+
+      // Validate file size (10MB limit)
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        toast.error('File size too large. Please upload files smaller than 10MB.');
+        return;
+      }
+
+      setSelectedFile(file);
+    }
   };
 
   const handleAddResume = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsUploading(true);
+
     try {
       const tagsArray = resumeForm.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
       
       const result = await ResumeService.addResume({
         ...resumeForm,
         tags: tagsArray
-      });
+      }, uploadMethod === 'file' ? selectedFile || undefined : undefined);
 
       if (result.success) {
         toast.success("Resume added successfully!");
@@ -179,6 +215,8 @@ const Admin = () => {
     } catch (error) {
       console.error("Error adding resume:", error);
       toast.error("Failed to add resume");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -186,13 +224,15 @@ const Admin = () => {
     e.preventDefault();
     if (!editingResume) return;
 
+    setIsUploading(true);
+
     try {
       const tagsArray = resumeForm.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
       
       const result = await ResumeService.updateResume(editingResume.id, {
         ...resumeForm,
         tags: tagsArray
-      });
+      }, uploadMethod === 'file' ? selectedFile || undefined : undefined);
 
       if (result.success) {
         toast.success("Resume updated successfully!");
@@ -207,6 +247,8 @@ const Admin = () => {
     } catch (error) {
       console.error("Error updating resume:", error);
       toast.error("Failed to update resume");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -256,6 +298,8 @@ const Admin = () => {
       is_featured: resume.is_featured,
       file_url: resume.file_url || ''
     });
+    setUploadMethod('url');
+    setSelectedFile(null);
     setIsEditResumeOpen(true);
   };
 
@@ -298,6 +342,13 @@ const Admin = () => {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const formatFileSize = (bytes?: number) => {
+    if (!bytes) return 'N/A';
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
   };
 
   const ResumeFormFields = ({ onSubmit, submitText }: { onSubmit: (e: React.FormEvent) => void; submitText: string }) => (
@@ -344,29 +395,19 @@ const Admin = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-2">Experience Level</label>
-          <Select value={resumeForm.experience_level} onValueChange={(value) => setResumeForm({...resumeForm, experience_level: value})}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Entry-level">Entry-level</SelectItem>
-              <SelectItem value="Mid-level">Mid-level</SelectItem>
-              <SelectItem value="Senior">Senior</SelectItem>
-              <SelectItem value="Staff+">Staff+</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-2">File URL (optional)</label>
-          <Input
-            value={resumeForm.file_url}
-            onChange={(e) => setResumeForm({...resumeForm, file_url: e.target.value})}
-            placeholder="https://..."
-          />
-        </div>
+      <div>
+        <label className="block text-sm font-medium mb-2">Experience Level</label>
+        <Select value={resumeForm.experience_level} onValueChange={(value) => setResumeForm({...resumeForm, experience_level: value})}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Entry-level">Entry-level</SelectItem>
+            <SelectItem value="Mid-level">Mid-level</SelectItem>
+            <SelectItem value="Senior">Senior</SelectItem>
+            <SelectItem value="Staff+">Staff+</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div>
@@ -386,6 +427,58 @@ const Admin = () => {
           onChange={(e) => setResumeForm({...resumeForm, tags: e.target.value})}
           placeholder="python, machine-learning, leadership"
         />
+      </div>
+
+      {/* File Upload Section */}
+      <div className="space-y-4 border-t pt-4">
+        <label className="block text-sm font-medium mb-2">Resume File</label>
+        
+        <div className="flex gap-2 mb-4">
+          <Button
+            type="button"
+            variant={uploadMethod === 'url' ? 'default' : 'outline'}
+            onClick={() => setUploadMethod('url')}
+            size="sm"
+          >
+            <LinkIcon className="w-4 h-4 mr-2" />
+            URL
+          </Button>
+          <Button
+            type="button"
+            variant={uploadMethod === 'file' ? 'default' : 'outline'}
+            onClick={() => setUploadMethod('file')}
+            size="sm"
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            Upload File
+          </Button>
+        </div>
+
+        {uploadMethod === 'url' ? (
+          <Input
+            value={resumeForm.file_url}
+            onChange={(e) => setResumeForm({...resumeForm, file_url: e.target.value})}
+            placeholder="https://example.com/resume.pdf"
+            type="url"
+          />
+        ) : (
+          <div>
+            <input
+              type="file"
+              accept=".pdf,.doc,.docx,.txt"
+              onChange={handleFileSelect}
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+            {selectedFile && (
+              <div className="mt-2 text-sm text-gray-600">
+                Selected: {selectedFile.name} ({formatFileSize(selectedFile.size)})
+              </div>
+            )}
+            <div className="mt-2 text-xs text-gray-500">
+              Supported formats: PDF, DOC, DOCX, TXT (max 10MB)
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="flex items-center space-x-2">
@@ -410,10 +503,13 @@ const Admin = () => {
             setEditingResume(null);
             resetForm();
           }}
+          disabled={isUploading}
         >
           Cancel
         </Button>
-        <Button type="submit">{submitText}</Button>
+        <Button type="submit" disabled={isUploading}>
+          {isUploading ? "Processing..." : submitText}
+        </Button>
       </div>
     </form>
   );
@@ -690,7 +786,7 @@ const Admin = () => {
                         <DialogHeader>
                           <DialogTitle>Add New Resume</DialogTitle>
                           <DialogDescription>
-                            Add a new resume example to your database
+                            Add a new resume example to your database. You can either provide a URL or upload a file.
                           </DialogDescription>
                         </DialogHeader>
                         <ResumeFormFields onSubmit={handleAddResume} submitText="Add Resume" />
@@ -717,6 +813,7 @@ const Admin = () => {
                         <TableHead>Company</TableHead>
                         <TableHead>Role</TableHead>
                         <TableHead>Industry</TableHead>
+                        <TableHead>File</TableHead>
                         <TableHead>Views</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Actions</TableHead>
@@ -733,6 +830,25 @@ const Admin = () => {
                           <TableCell>{resume.company}</TableCell>
                           <TableCell>{resume.role}</TableCell>
                           <TableCell>{resume.industry}</TableCell>
+                          <TableCell>
+                            {resume.file_url ? (
+                              <div className="text-xs">
+                                <div className="text-green-600">✓ Available</div>
+                                {resume.file_name && (
+                                  <div className="text-gray-500 truncate max-w-20" title={resume.file_name}>
+                                    {resume.file_name}
+                                  </div>
+                                )}
+                                {resume.file_size && (
+                                  <div className="text-gray-500">
+                                    {formatFileSize(resume.file_size)}
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="text-xs text-gray-400">No file</div>
+                            )}
+                          </TableCell>
                           <TableCell>{resume.view_count}</TableCell>
                           <TableCell>
                             <div className="flex gap-1">
@@ -779,3 +895,27 @@ const Admin = () => {
                       ))}
                     </TableBody>
                   </Table>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Edit Resume Dialog */}
+            <Dialog open={isEditResumeOpen} onOpenChange={setIsEditResumeOpen}>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Edit Resume</DialogTitle>
+                  <DialogDescription>
+                    Update the resume information. You can change the file by uploading a new one or providing a new URL.
+                  </DialogDescription>
+                </DialogHeader>
+                <ResumeFormFields onSubmit={handleEditResume} submitText="Update Resume" />
+              </DialogContent>
+            </Dialog>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Admin;
