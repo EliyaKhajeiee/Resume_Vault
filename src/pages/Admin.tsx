@@ -164,6 +164,13 @@ const Admin = () => {
     setUploadMethod('url');
   };
 
+  const handleInputChange = (field: string, value: string | boolean) => {
+    setResumeForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -188,6 +195,7 @@ const Admin = () => {
       }
 
       setSelectedFile(file);
+      toast.success(`File selected: ${file.name}`);
     }
   };
 
@@ -196,6 +204,11 @@ const Admin = () => {
     setIsUploading(true);
 
     try {
+      console.log('Starting resume add process...');
+      console.log('Form data:', resumeForm);
+      console.log('Selected file:', selectedFile);
+      console.log('Upload method:', uploadMethod);
+
       const tagsArray = resumeForm.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
       
       const result = await ResumeService.addResume({
@@ -210,6 +223,7 @@ const Admin = () => {
         loadResumes();
         loadFilterOptions();
       } else {
+        console.error('Add resume failed:', result.error);
         toast.error(result.error || "Failed to add resume");
       }
     } catch (error) {
@@ -358,7 +372,7 @@ const Admin = () => {
           <label className="block text-sm font-medium mb-2">Title *</label>
           <Input
             value={resumeForm.title}
-            onChange={(e) => setResumeForm({...resumeForm, title: e.target.value})}
+            onChange={(e) => handleInputChange('title', e.target.value)}
             placeholder="e.g., Senior Software Engineer Resume - Google"
             required
           />
@@ -367,7 +381,7 @@ const Admin = () => {
           <label className="block text-sm font-medium mb-2">Company *</label>
           <Input
             value={resumeForm.company}
-            onChange={(e) => setResumeForm({...resumeForm, company: e.target.value})}
+            onChange={(e) => handleInputChange('company', e.target.value)}
             placeholder="e.g., Google"
             required
           />
@@ -379,7 +393,7 @@ const Admin = () => {
           <label className="block text-sm font-medium mb-2">Role *</label>
           <Input
             value={resumeForm.role}
-            onChange={(e) => setResumeForm({...resumeForm, role: e.target.value})}
+            onChange={(e) => handleInputChange('role', e.target.value)}
             placeholder="e.g., Software Engineer"
             required
           />
@@ -388,7 +402,7 @@ const Admin = () => {
           <label className="block text-sm font-medium mb-2">Industry *</label>
           <Input
             value={resumeForm.industry}
-            onChange={(e) => setResumeForm({...resumeForm, industry: e.target.value})}
+            onChange={(e) => handleInputChange('industry', e.target.value)}
             placeholder="e.g., Technology"
             required
           />
@@ -397,7 +411,7 @@ const Admin = () => {
 
       <div>
         <label className="block text-sm font-medium mb-2">Experience Level</label>
-        <Select value={resumeForm.experience_level} onValueChange={(value) => setResumeForm({...resumeForm, experience_level: value})}>
+        <Select value={resumeForm.experience_level} onValueChange={(value) => handleInputChange('experience_level', value)}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
@@ -414,7 +428,7 @@ const Admin = () => {
         <label className="block text-sm font-medium mb-2">Description</label>
         <Textarea
           value={resumeForm.description}
-          onChange={(e) => setResumeForm({...resumeForm, description: e.target.value})}
+          onChange={(e) => handleInputChange('description', e.target.value)}
           placeholder="Brief description of what makes this resume successful..."
           rows={3}
         />
@@ -424,7 +438,7 @@ const Admin = () => {
         <label className="block text-sm font-medium mb-2">Tags (comma-separated)</label>
         <Input
           value={resumeForm.tags}
-          onChange={(e) => setResumeForm({...resumeForm, tags: e.target.value})}
+          onChange={(e) => handleInputChange('tags', e.target.value)}
           placeholder="python, machine-learning, leadership"
         />
       </div>
@@ -457,7 +471,7 @@ const Admin = () => {
         {uploadMethod === 'url' ? (
           <Input
             value={resumeForm.file_url}
-            onChange={(e) => setResumeForm({...resumeForm, file_url: e.target.value})}
+            onChange={(e) => handleInputChange('file_url', e.target.value)}
             placeholder="https://example.com/resume.pdf"
             type="url"
           />
@@ -486,7 +500,7 @@ const Admin = () => {
           type="checkbox"
           id="featured"
           checked={resumeForm.is_featured}
-          onChange={(e) => setResumeForm({...resumeForm, is_featured: e.target.checked})}
+          onChange={(e) => handleInputChange('is_featured', e.target.checked)}
         />
         <label htmlFor="featured" className="text-sm font-medium">
           Featured resume
@@ -832,19 +846,7 @@ const Admin = () => {
                           <TableCell>{resume.industry}</TableCell>
                           <TableCell>
                             {resume.file_url ? (
-                              <div className="text-xs">
-                                <div className="text-green-600">✓ Available</div>
-                                {resume.file_name && (
-                                  <div className="text-gray-500 truncate max-w-20" title={resume.file_name}>
-                                    {resume.file_name}
-                                  </div>
-                                )}
-                                {resume.file_size && (
-                                  <div className="text-gray-500">
-                                    {formatFileSize(resume.file_size)}
-                                  </div>
-                                )}
-                              </div>
+                              <div className="text-xs text-green-600">✓ Available</div>
                             ) : (
                               <div className="text-xs text-gray-400">No file</div>
                             )}

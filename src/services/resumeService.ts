@@ -20,9 +20,6 @@ export interface AddResumeData {
   tags: string[]
   is_featured: boolean
   file_url?: string
-  file_name?: string
-  file_size?: number
-  file_type?: string
 }
 
 export class ResumeService {
@@ -31,6 +28,8 @@ export class ResumeService {
    */
   static async uploadResumeFile(file: File): Promise<{ success: boolean; url?: string; error?: string }> {
     try {
+      console.log('Starting file upload:', file.name, file.type, file.size);
+      
       // Validate file type
       const allowedTypes = [
         'application/pdf',
@@ -59,6 +58,28 @@ export class ResumeService {
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
 
+      console.log('Uploading file with name:', fileName);
+
+      // First, ensure the bucket exists and is properly configured
+      const { data: buckets } = await supabase.storage.listBuckets();
+      console.log('Available buckets:', buckets);
+
+      // Try to create the bucket if it doesn't exist
+      const bucketExists = buckets?.some(bucket => bucket.name === 'resumes');
+      if (!bucketExists) {
+        console.log('Creating resumes bucket...');
+        const { error: bucketError } = await supabase.storage.createBucket('resumes', {
+          public: true,
+          allowedMimeTypes: allowedTypes,
+          fileSizeLimit: maxSize
+        });
+        
+        if (bucketError) {
+          console.error('Error creating bucket:', bucketError);
+          return { success: false, error: 'Failed to create storage bucket' };
+        }
+      }
+
       // Upload to Supabase Storage
       const { data, error } = await supabase.storage
         .from('resumes')
@@ -69,18 +90,22 @@ export class ResumeService {
 
       if (error) {
         console.error('Error uploading file:', error);
-        return { success: false, error: 'Failed to upload file' };
+        return { success: false, error: `Upload failed: ${error.message}` };
       }
+
+      console.log('File uploaded successfully:', data);
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('resumes')
         .getPublicUrl(fileName);
 
+      console.log('Public URL:', publicUrl);
+
       return { success: true, url: publicUrl };
     } catch (error) {
       console.error('Unexpected error uploading file:', error);
-      return { success: false, error: 'An unexpected error occurred during upload' };
+      return { success: false, error: `An unexpected error occurred during upload: ${error}` };
     }
   }
 
@@ -146,20 +171,15 @@ export class ResumeService {
   static async addResume(resumeData: AddResumeData, file?: File): Promise<{ success: boolean; data?: Resume; error?: string }> {
     try {
       let fileUrl = resumeData.file_url;
-      let fileName = resumeData.file_name;
-      let fileSize = resumeData.file_size;
-      let fileType = resumeData.file_type;
 
       // Handle file upload if provided
       if (file) {
+        console.log('Processing file upload for resume...');
         const uploadResult = await this.uploadResumeFile(file);
         if (!uploadResult.success) {
           return { success: false, error: uploadResult.error };
         }
         fileUrl = uploadResult.url;
-        fileName = file.name;
-        fileSize = file.size;
-        fileType = file.type;
       }
 
       // Validate URL if provided as string
@@ -193,12 +213,7 @@ export class ResumeService {
           tags: resumeData.tags || [],
           is_featured: resumeData.is_featured || false,
           file_url: fileUrl || null,
-          file_name: fileName || null,
-          file_size: fileSize || null,
-          file_type: fileType || null,
-          view_count: 0,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          view_count: 0
         }])
         .select()
         .single()
@@ -224,12 +239,12 @@ export class ResumeService {
       // First get the resume to check if it has a file
       const { data: resume } = await supabase
         .from('resumes')
-        .select('file_url, file_name')
+        .select('file_url')
         .eq('id', resumeId)
         .single();
 
       // Delete the file from storage if it exists and was uploaded to our storage
-      if (resume?.file_url && resume.file_url.includes('supabase') && resume.file_name) {
+      if (resume?.file_url && resume.file_url.includes('supabase')) {
         const fileName = resume.file_url.split('/').pop();
         if (fileName) {
           await supabase.storage
@@ -270,9 +285,6 @@ export class ResumeService {
           return { success: false, error: uploadResult.error };
         }
         updateData.file_url = uploadResult.url;
-        updateData.file_name = file.name;
-        updateData.file_size = file.size;
-        updateData.file_type = file.type;
       }
 
       // Validate URL if provided as string
