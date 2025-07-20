@@ -15,6 +15,8 @@ import Contact from "./pages/Contact";
 import Templates from "./pages/Templates";
 import Guides from "./pages/Guides";
 import NotFound from "./pages/NotFound";
+import AuthCallback from "./pages/auth/AuthCallback";
+import ResetPassword from "./pages/auth/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +38,8 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/templates" element={<Templates />} />
           <Route path="/guides" element={<Guides />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/auth/reset-password" element={<ResetPassword />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

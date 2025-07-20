@@ -7,7 +7,13 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  }
+})
 
 // Database types
 export interface EmailSignup {
@@ -35,4 +41,12 @@ export interface Resume {
   updated_at: string
   is_featured: boolean
   view_count: number
+}
+
+export interface User {
+  id: string
+  email: string
+  email_confirmed_at?: string
+  created_at: string
+  updated_at: string
 }

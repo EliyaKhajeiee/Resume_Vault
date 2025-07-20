@@ -60,26 +60,6 @@ export class ResumeService {
 
       console.log('Uploading file with name:', fileName);
 
-      // First, ensure the bucket exists and is properly configured
-      const { data: buckets } = await supabase.storage.listBuckets();
-      console.log('Available buckets:', buckets);
-
-      // Try to create the bucket if it doesn't exist
-      const bucketExists = buckets?.some(bucket => bucket.name === 'resumes');
-      if (!bucketExists) {
-        console.log('Creating resumes bucket...');
-        const { error: bucketError } = await supabase.storage.createBucket('resumes', {
-          public: true,
-          allowedMimeTypes: allowedTypes,
-          fileSizeLimit: maxSize
-        });
-        
-        if (bucketError) {
-          console.error('Error creating bucket:', bucketError);
-          return { success: false, error: 'Failed to create storage bucket' };
-        }
-      }
-
       // Upload to Supabase Storage
       const { data, error } = await supabase.storage
         .from('resumes')
@@ -90,6 +70,10 @@ export class ResumeService {
 
       if (error) {
         console.error('Error uploading file:', error);
+        // If bucket doesn't exist, provide a helpful error message
+        if (error.message.includes('Bucket not found')) {
+          return { success: false, error: 'Storage bucket not configured. Please contact support.' };
+        }
         return { success: false, error: `Upload failed: ${error.message}` };
       }
 
