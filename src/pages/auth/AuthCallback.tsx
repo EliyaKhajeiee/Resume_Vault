@@ -10,20 +10,28 @@ const AuthCallback = () => {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        const { data, error } = await supabase.auth.getSession();
+        // Handle the auth callback from email confirmation
+        const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.search);
         
         if (error) {
           console.error('Auth callback error:', error);
-          toast.error('Authentication failed. Please try again.');
+          // Try to get existing session as fallback
+          const { data: sessionData } = await supabase.auth.getSession();
+          if (sessionData.session) {
+            toast.success('Email confirmed successfully! You are now signed in.');
+            navigate('/');
+            return;
+          }
+          toast.error('Email confirmation failed. The link may have expired.');
           navigate('/');
           return;
         }
 
-        if (data.session) {
+        if (data?.session) {
           toast.success('Email confirmed successfully! You are now signed in.');
           navigate('/');
         } else {
-          toast.info('Please complete the authentication process.');
+          toast.error('Email confirmation failed. Please try again.');
           navigate('/');
         }
       } catch (error) {

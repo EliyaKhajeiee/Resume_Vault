@@ -61,7 +61,7 @@ export class ResumeService {
       console.log('Uploading file with name:', fileName);
 
       // Upload to Supabase Storage
-      const { data, error } = await supabase.storage
+      const { error } = await supabase.storage
         .from('resumes')
         .upload(fileName, file, {
           cacheControl: '3600',
@@ -70,14 +70,14 @@ export class ResumeService {
 
       if (error) {
         console.error('Error uploading file:', error);
-        // If bucket doesn't exist, provide a helpful error message
-        if (error.message.includes('Bucket not found')) {
-          return { success: false, error: 'Storage bucket not configured. Please contact support.' };
+        // Handle specific error cases
+        if (error.message.includes('Bucket not found') || error.message.includes('bucket')) {
+          return { success: false, error: 'Storage not properly configured. Please run the database migrations first.' };
         }
         return { success: false, error: `Upload failed: ${error.message}` };
       }
 
-      console.log('File uploaded successfully:', data);
+      console.log('File uploaded successfully');
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage

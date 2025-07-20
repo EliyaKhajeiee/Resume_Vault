@@ -171,6 +171,12 @@ const Admin = () => {
     }));
   };
 
+  // Fix for controlled input issue
+  const handleFormChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const value = e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value;
+    handleInputChange(field, value);
+  };
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -372,7 +378,7 @@ const Admin = () => {
           <label className="block text-sm font-medium mb-2">Title *</label>
           <Input
             value={resumeForm.title}
-            onChange={(e) => handleInputChange('title', e.target.value)}
+            onChange={handleFormChange('title')}
             placeholder="e.g., Senior Software Engineer Resume - Google"
             required
           />
@@ -381,7 +387,7 @@ const Admin = () => {
           <label className="block text-sm font-medium mb-2">Company *</label>
           <Input
             value={resumeForm.company}
-            onChange={(e) => handleInputChange('company', e.target.value)}
+            onChange={handleFormChange('company')}
             placeholder="e.g., Google"
             required
           />
@@ -393,7 +399,7 @@ const Admin = () => {
           <label className="block text-sm font-medium mb-2">Role *</label>
           <Input
             value={resumeForm.role}
-            onChange={(e) => handleInputChange('role', e.target.value)}
+            onChange={handleFormChange('role')}
             placeholder="e.g., Software Engineer"
             required
           />
@@ -402,7 +408,7 @@ const Admin = () => {
           <label className="block text-sm font-medium mb-2">Industry *</label>
           <Input
             value={resumeForm.industry}
-            onChange={(e) => handleInputChange('industry', e.target.value)}
+            onChange={handleFormChange('industry')}
             placeholder="e.g., Technology"
             required
           />
@@ -428,7 +434,7 @@ const Admin = () => {
         <label className="block text-sm font-medium mb-2">Description</label>
         <Textarea
           value={resumeForm.description}
-          onChange={(e) => handleInputChange('description', e.target.value)}
+          onChange={handleFormChange('description')}
           placeholder="Brief description of what makes this resume successful..."
           rows={3}
         />
@@ -438,7 +444,7 @@ const Admin = () => {
         <label className="block text-sm font-medium mb-2">Tags (comma-separated)</label>
         <Input
           value={resumeForm.tags}
-          onChange={(e) => handleInputChange('tags', e.target.value)}
+          onChange={handleFormChange('tags')}
           placeholder="python, machine-learning, leadership"
         />
       </div>
@@ -471,7 +477,7 @@ const Admin = () => {
         {uploadMethod === 'url' ? (
           <Input
             value={resumeForm.file_url}
-            onChange={(e) => handleInputChange('file_url', e.target.value)}
+            onChange={handleFormChange('file_url')}
             placeholder="https://example.com/resume.pdf"
             type="url"
           />

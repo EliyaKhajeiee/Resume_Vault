@@ -17,7 +17,10 @@ export class AuthService {
         email: email.toLowerCase().trim(),
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: {
+            app_name: 'Resume Proof'
+          }
         }
       })
 
@@ -107,7 +110,8 @@ export class AuthService {
   static async resetPassword(email: string): Promise<{ success: boolean; error?: string }> {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+        captchaToken: undefined
       })
 
       if (error) {
@@ -152,7 +156,8 @@ export class AuthService {
         type: 'signup',
         email: email.toLowerCase().trim(),
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          captchaToken: undefined
         }
       })
 
