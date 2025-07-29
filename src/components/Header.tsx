@@ -13,10 +13,6 @@ const Header = () => {
   const [authDialogTab, setAuthDialogTab] = useState<"signin" | "signup">("signin");
   const location = useLocation();
   const { user, signOut, loading } = useAuth();
-  
-  // Admin email - replace with your actual email
-  const ADMIN_EMAIL = "your-admin-email@example.com"; // UPDATE THIS WITH YOUR EMAIL
-  const isAdmin = user?.email === ADMIN_EMAIL;
 
   const navigation = [
     { name: "Browse Resumes", href: "/resumes" },
@@ -83,14 +79,10 @@ const Header = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                {isAdmin && (
-                  <>
-                    <DropdownMenuItem asChild>
-                      <Link to="/admin">Admin Dashboard</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                  </>
-                )}
+                <DropdownMenuItem asChild>
+                  <Link to="/admin">Admin Dashboard</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="w-4 h-4 mr-2" />
                   Sign Out
