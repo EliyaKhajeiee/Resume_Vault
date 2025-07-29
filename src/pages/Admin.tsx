@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -13,7 +13,194 @@ import type { EmailSignup, Resume } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Mail, Users, Calendar, Download, Plus, Edit, Trash2, FileText, Eye, Star, Search, Filter, Upload, Link as LinkIcon } from "lucide-react";
 
+// Form component outside main component to prevent re-renders
+const ResumeFormFields = ({ 
+  resumeForm, 
+  onSubmit, 
+  submitText, 
+  uploadMethod,
+  setUploadMethod,
+  selectedFile,
+  handleFileSelect,
+  formatFileSize,
+  isUploading,
+  setIsAddResumeOpen,
+  setIsEditResumeOpen,
+  setEditingResume,
+  resetForm,
+  onInputChange
+}: any) => {
+  return (
+    <form onSubmit={onSubmit} className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-2">Title *</label>
+          <Input
+            value={resumeForm.title}
+            onChange={(e) => onInputChange('title', e.target.value)}
+            placeholder="e.g., Senior Software Engineer Resume - Google"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-2">Company *</label>
+          <Input
+            value={resumeForm.company}
+            onChange={(e) => onInputChange('company', e.target.value)}
+            placeholder="e.g., Google"
+            required
+          />
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-2">Role *</label>
+          <Input
+            value={resumeForm.role}
+            onChange={(e) => onInputChange('role', e.target.value)}
+            placeholder="e.g., Software Engineer"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-2">Industry *</label>
+          <Input
+            value={resumeForm.industry}
+            onChange={(e) => onInputChange('industry', e.target.value)}
+            placeholder="e.g., Technology"
+            required
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-2">Experience Level</label>
+        <Select value={resumeForm.experience_level} onValueChange={(value) => onInputChange('experience_level', value)}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Entry-level">Entry-level</SelectItem>
+            <SelectItem value="Mid-level">Mid-level</SelectItem>
+            <SelectItem value="Senior">Senior</SelectItem>
+            <SelectItem value="Staff+">Staff+</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-2">Description</label>
+        <Textarea
+          value={resumeForm.description}
+          onChange={(e) => onInputChange('description', e.target.value)}
+          placeholder="Brief description of what makes this resume successful..."
+          rows={3}
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-2">Tags (comma-separated)</label>
+        <Input
+          value={resumeForm.tags}
+          onChange={(e) => onInputChange('tags', e.target.value)}
+          placeholder="python, machine-learning, leadership"
+        />
+      </div>
+
+      {/* File Upload Section */}
+      <div className="space-y-4 border-t pt-4">
+        <label className="block text-sm font-medium mb-2">Resume File</label>
+        
+        <div className="flex gap-2 mb-4">
+          <Button
+            type="button"
+            variant={uploadMethod === 'url' ? 'default' : 'outline'}
+            onClick={() => setUploadMethod('url')}
+            size="sm"
+          >
+            <LinkIcon className="w-4 h-4 mr-2" />
+            URL
+          </Button>
+          <Button
+            type="button"
+            variant={uploadMethod === 'file' ? 'default' : 'outline'}
+            onClick={() => setUploadMethod('file')}
+            size="sm"
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            Upload File
+          </Button>
+        </div>
+
+        {uploadMethod === 'url' ? (
+          <Input
+            value={resumeForm.file_url}
+            onChange={(e) => onInputChange('file_url', e.target.value)}
+            placeholder="https://example.com/resume.pdf"
+            type="url"
+          />
+        ) : (
+          <div>
+            <input
+              type="file"
+              accept=".pdf,.doc,.docx,.txt"
+              onChange={handleFileSelect}
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+            {selectedFile && (
+              <div className="mt-2 text-sm text-gray-600">
+                Selected: {selectedFile.name} ({formatFileSize(selectedFile.size)})
+              </div>
+            )}
+            <div className="mt-2 text-xs text-gray-500">
+              Supported formats: PDF, DOC, DOCX, TXT (max 10MB)
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <input
+          type="checkbox"
+          id="featured"
+          checked={resumeForm.is_featured}
+          onChange={(e) => onInputChange('is_featured', e.target.checked)}
+        />
+        <label htmlFor="featured" className="text-sm font-medium">
+          Featured resume
+        </label>
+      </div>
+
+      <div className="flex justify-end gap-2">
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={() => {
+            setIsAddResumeOpen(false);
+            setIsEditResumeOpen(false);
+            setEditingResume(null);
+            resetForm();
+          }}
+          disabled={isUploading}
+        >
+          Cancel
+        </Button>
+        <Button type="submit" disabled={isUploading}>
+          {isUploading ? "Processing..." : submitText}
+        </Button>
+      </div>
+    </form>
+  );
+};
+
 const Admin = () => {
+  // Passcode protection
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passcode, setPasscode] = useState("");
+  const [showPasscodeError, setShowPasscodeError] = useState(false);
+
+  // Existing state
   const [emails, setEmails] = useState<EmailSignup[]>([]);
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [filteredResumes, setFilteredResumes] = useState<Resume[]>([]);
@@ -27,6 +214,12 @@ const Admin = () => {
   const [companyFilter, setCompanyFilter] = useState("all");
   const [industryFilter, setIndustryFilter] = useState("all");
   const [featuredFilter, setFeaturedFilter] = useState<string>("all");
+  
+  // CSV upload state
+  const [isCsvUploadOpen, setIsCsvUploadOpen] = useState(false);
+  const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [csvUploadProgress, setCsvUploadProgress] = useState(0);
+  const [isProcessingCsv, setIsProcessingCsv] = useState(false);
 
   // Form state for adding/editing resumes
   const [resumeForm, setResumeForm] = useState({
@@ -171,10 +364,134 @@ const Admin = () => {
     }));
   };
 
-  // Fix for controlled input issue
-  const handleFormChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const value = e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value;
-    handleInputChange(field, value);
+  // Passcode validation
+  const handlePasscodeSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passcode === "1375") {
+      setIsAuthenticated(true);
+      setShowPasscodeError(false);
+    } else {
+      setShowPasscodeError(true);
+      setPasscode("");
+    }
+  };
+
+  // Single input change handler
+  const handleFormInputChange = useCallback((field: string, value: string | boolean) => {
+    setResumeForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  }, []);
+
+  // CSV upload functions
+  const handleCsvFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type === 'text/csv') {
+      setCsvFile(file);
+    } else {
+      toast.error('Please select a valid CSV file');
+    }
+  };
+
+  const parseCsvFile = (csvText: string): any[] => {
+    const lines = csvText.split('\n').filter(line => line.trim());
+    if (lines.length < 2) return [];
+
+    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+    const data = [];
+
+    for (let i = 1; i < lines.length; i++) {
+      const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+      if (values.length >= headers.length) {
+        const row: any = {};
+        headers.forEach((header, index) => {
+          row[header] = values[index] || '';
+        });
+        data.push(row);
+      }
+    }
+
+    return data;
+  };
+
+  const processCsvUpload = async () => {
+    if (!csvFile) return;
+
+    setIsProcessingCsv(true);
+    setCsvUploadProgress(0);
+
+    try {
+      const csvText = await csvFile.text();
+      const csvData = parseCsvFile(csvText);
+      
+      if (csvData.length === 0) {
+        toast.error('No valid data found in CSV file');
+        return;
+      }
+
+      console.log('CSV Data:', csvData);
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (let i = 0; i < csvData.length; i++) {
+        const row = csvData[i];
+        
+        try {
+          // Map CSV columns to resume fields
+          const resumeData = {
+            title: row.title || row.Title || '',
+            company: row.company || row.Company || '',
+            role: row.role || row.Role || '',
+            industry: row.industry || row.Industry || '',
+            experience_level: row.experience_level || row.Experience_Level || row['Experience Level'] || 'Mid-level',
+            description: row.description || row.Description || '',
+            tags: row.tags ? row.tags.split(';').map((t: string) => t.trim()).filter((t: string) => t) : [],
+            is_featured: row.is_featured === 'true' || row.Is_Featured === 'true' || row['Is Featured'] === 'true' || false,
+            file_url: row.file_url || row.File_URL || row['File URL'] || ''
+          };
+
+          // Validate required fields
+          if (!resumeData.title || !resumeData.company || !resumeData.role || !resumeData.industry) {
+            console.warn(`Skipping row ${i + 1}: Missing required fields`);
+            errorCount++;
+            continue;
+          }
+
+          const result = await ResumeService.addResume(resumeData);
+          
+          if (result.success) {
+            successCount++;
+          } else {
+            console.error(`Error adding resume ${i + 1}:`, result.error);
+            errorCount++;
+          }
+        } catch (error) {
+          console.error(`Error processing row ${i + 1}:`, error);
+          errorCount++;
+        }
+
+        // Update progress
+        setCsvUploadProgress(Math.round(((i + 1) / csvData.length) * 100));
+      }
+
+      toast.success(`CSV Upload Complete! ${successCount} added, ${errorCount} errors`);
+      
+      // Refresh the resumes list
+      loadResumes();
+      loadFilterOptions();
+      
+      // Close dialog and reset
+      setIsCsvUploadOpen(false);
+      setCsvFile(null);
+      setCsvUploadProgress(0);
+
+    } catch (error) {
+      console.error('CSV processing error:', error);
+      toast.error('Failed to process CSV file');
+    } finally {
+      setIsProcessingCsv(false);
+    }
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -371,168 +688,43 @@ const Admin = () => {
     return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
   };
 
-  const ResumeFormFields = ({ onSubmit, submitText }: { onSubmit: (e: React.FormEvent) => void; submitText: string }) => (
-    <form onSubmit={onSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-2">Title *</label>
-          <Input
-            value={resumeForm.title}
-            onChange={handleFormChange('title')}
-            placeholder="e.g., Senior Software Engineer Resume - Google"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-2">Company *</label>
-          <Input
-            value={resumeForm.company}
-            onChange={handleFormChange('company')}
-            placeholder="e.g., Google"
-            required
-          />
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-2">Role *</label>
-          <Input
-            value={resumeForm.role}
-            onChange={handleFormChange('role')}
-            placeholder="e.g., Software Engineer"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-2">Industry *</label>
-          <Input
-            value={resumeForm.industry}
-            onChange={handleFormChange('industry')}
-            placeholder="e.g., Technology"
-            required
-          />
+
+  // Show passcode screen if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="max-w-md w-full">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-center">Admin Access</CardTitle>
+              <CardDescription className="text-center">
+                Enter the passcode to access the admin dashboard
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handlePasscodeSubmit} className="space-y-4">
+                <div>
+                  <Input
+                    type="password"
+                    value={passcode}
+                    onChange={(e) => setPasscode(e.target.value)}
+                    placeholder="Enter passcode"
+                    className={showPasscodeError ? "border-red-500" : ""}
+                  />
+                  {showPasscodeError && (
+                    <p className="text-red-500 text-sm mt-1">Invalid passcode</p>
+                  )}
+                </div>
+                <Button type="submit" className="w-full">
+                  Access Admin
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
         </div>
       </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-2">Experience Level</label>
-        <Select value={resumeForm.experience_level} onValueChange={(value) => handleInputChange('experience_level', value)}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Entry-level">Entry-level</SelectItem>
-            <SelectItem value="Mid-level">Mid-level</SelectItem>
-            <SelectItem value="Senior">Senior</SelectItem>
-            <SelectItem value="Staff+">Staff+</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-2">Description</label>
-        <Textarea
-          value={resumeForm.description}
-          onChange={handleFormChange('description')}
-          placeholder="Brief description of what makes this resume successful..."
-          rows={3}
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-2">Tags (comma-separated)</label>
-        <Input
-          value={resumeForm.tags}
-          onChange={handleFormChange('tags')}
-          placeholder="python, machine-learning, leadership"
-        />
-      </div>
-
-      {/* File Upload Section */}
-      <div className="space-y-4 border-t pt-4">
-        <label className="block text-sm font-medium mb-2">Resume File</label>
-        
-        <div className="flex gap-2 mb-4">
-          <Button
-            type="button"
-            variant={uploadMethod === 'url' ? 'default' : 'outline'}
-            onClick={() => setUploadMethod('url')}
-            size="sm"
-          >
-            <LinkIcon className="w-4 h-4 mr-2" />
-            URL
-          </Button>
-          <Button
-            type="button"
-            variant={uploadMethod === 'file' ? 'default' : 'outline'}
-            onClick={() => setUploadMethod('file')}
-            size="sm"
-          >
-            <Upload className="w-4 h-4 mr-2" />
-            Upload File
-          </Button>
-        </div>
-
-        {uploadMethod === 'url' ? (
-          <Input
-            value={resumeForm.file_url}
-            onChange={handleFormChange('file_url')}
-            placeholder="https://example.com/resume.pdf"
-            type="url"
-          />
-        ) : (
-          <div>
-            <input
-              type="file"
-              accept=".pdf,.doc,.docx,.txt"
-              onChange={handleFileSelect}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-            />
-            {selectedFile && (
-              <div className="mt-2 text-sm text-gray-600">
-                Selected: {selectedFile.name} ({formatFileSize(selectedFile.size)})
-              </div>
-            )}
-            <div className="mt-2 text-xs text-gray-500">
-              Supported formats: PDF, DOC, DOCX, TXT (max 10MB)
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="flex items-center space-x-2">
-        <input
-          type="checkbox"
-          id="featured"
-          checked={resumeForm.is_featured}
-          onChange={(e) => handleInputChange('is_featured', e.target.checked)}
-        />
-        <label htmlFor="featured" className="text-sm font-medium">
-          Featured resume
-        </label>
-      </div>
-
-      <div className="flex justify-end gap-2">
-        <Button 
-          type="button" 
-          variant="outline" 
-          onClick={() => {
-            setIsAddResumeOpen(false);
-            setIsEditResumeOpen(false);
-            setEditingResume(null);
-            resetForm();
-          }}
-          disabled={isUploading}
-        >
-          Cancel
-        </Button>
-        <Button type="submit" disabled={isUploading}>
-          {isUploading ? "Processing..." : submitText}
-        </Button>
-      </div>
-    </form>
-  );
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -795,6 +987,74 @@ const Admin = () => {
                     <Button onClick={loadResumes} variant="outline" disabled={loading}>
                       {loading ? "Loading..." : "Refresh"}
                     </Button>
+                    <Dialog open={isCsvUploadOpen} onOpenChange={setIsCsvUploadOpen}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline">
+                          <Upload className="w-4 h-4 mr-2" />
+                          CSV Upload
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-lg">
+                        <DialogHeader>
+                          <DialogTitle>Mass Upload Resumes</DialogTitle>
+                          <DialogDescription>
+                            Upload a CSV file with resume data. Required columns: title, company, role, industry.
+                            Optional: description, tags (semicolon-separated), experience_level, is_featured, file_url
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-2">CSV File</label>
+                            <input
+                              type="file"
+                              accept=".csv"
+                              onChange={handleCsvFileSelect}
+                              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                            />
+                            {csvFile && (
+                              <div className="mt-2 text-sm text-green-600">
+                                Selected: {csvFile.name}
+                              </div>
+                            )}
+                          </div>
+                          
+                          {isProcessingCsv && (
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-sm">
+                                <span>Processing...</span>
+                                <span>{csvUploadProgress}%</span>
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div 
+                                  className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                                  style={{ width: `${csvUploadProgress}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="flex justify-end gap-2">
+                            <Button 
+                              variant="outline" 
+                              onClick={() => {
+                                setIsCsvUploadOpen(false);
+                                setCsvFile(null);
+                                setCsvUploadProgress(0);
+                              }}
+                              disabled={isProcessingCsv}
+                            >
+                              Cancel
+                            </Button>
+                            <Button 
+                              onClick={processCsvUpload}
+                              disabled={!csvFile || isProcessingCsv}
+                            >
+                              {isProcessingCsv ? "Processing..." : "Upload CSV"}
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                     <Dialog open={isAddResumeOpen} onOpenChange={setIsAddResumeOpen}>
                       <DialogTrigger asChild>
                         <Button onClick={resetForm}>
@@ -809,7 +1069,22 @@ const Admin = () => {
                             Add a new resume example to your database. You can either provide a URL or upload a file.
                           </DialogDescription>
                         </DialogHeader>
-                        <ResumeFormFields onSubmit={handleAddResume} submitText="Add Resume" />
+                        <ResumeFormFields 
+                          resumeForm={resumeForm}
+                          onSubmit={handleAddResume} 
+                          submitText="Add Resume"
+                          uploadMethod={uploadMethod}
+                          setUploadMethod={setUploadMethod}
+                          selectedFile={selectedFile}
+                          handleFileSelect={handleFileSelect}
+                          formatFileSize={formatFileSize}
+                          isUploading={isUploading}
+                          setIsAddResumeOpen={setIsAddResumeOpen}
+                          setIsEditResumeOpen={setIsEditResumeOpen}
+                          setEditingResume={setEditingResume}
+                          resetForm={resetForm}
+                          onInputChange={handleFormInputChange}
+                        />
                       </DialogContent>
                     </Dialog>
                   </div>
@@ -916,7 +1191,22 @@ const Admin = () => {
                     Update the resume information. You can change the file by uploading a new one or providing a new URL.
                   </DialogDescription>
                 </DialogHeader>
-                <ResumeFormFields onSubmit={handleEditResume} submitText="Update Resume" />
+                <ResumeFormFields 
+                  resumeForm={resumeForm}
+                  onSubmit={handleEditResume} 
+                  submitText="Update Resume"
+                  uploadMethod={uploadMethod}
+                  setUploadMethod={setUploadMethod}
+                  selectedFile={selectedFile}
+                  handleFileSelect={handleFileSelect}
+                  formatFileSize={formatFileSize}
+                  isUploading={isUploading}
+                  setIsAddResumeOpen={setIsAddResumeOpen}
+                  setIsEditResumeOpen={setIsEditResumeOpen}
+                  setEditingResume={setEditingResume}
+                  resetForm={resetForm}
+                  onInputChange={handleFormInputChange}
+                />
               </DialogContent>
             </Dialog>
           </>

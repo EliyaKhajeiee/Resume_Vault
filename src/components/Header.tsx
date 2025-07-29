@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Search, Menu, X, User, LogOut } from "lucide-react";
+import { Menu, X, User, LogOut } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { AuthDialog } from "@/components/auth/AuthDialog";
@@ -14,6 +13,10 @@ const Header = () => {
   const [authDialogTab, setAuthDialogTab] = useState<"signin" | "signup">("signin");
   const location = useLocation();
   const { user, signOut, loading } = useAuth();
+  
+  // Admin email - replace with your actual email
+  const ADMIN_EMAIL = "your-admin-email@example.com"; // UPDATE THIS WITH YOUR EMAIL
+  const isAdmin = user?.email === ADMIN_EMAIL;
 
   const navigation = [
     { name: "Browse Resumes", href: "/resumes" },
@@ -67,17 +70,8 @@ const Header = () => {
           ))}
         </nav>
 
-        {/* Search Bar (Desktop) */}
+        {/* Auth Section (Desktop) */}
         <div className="hidden lg:flex items-center space-x-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              type="text"
-              placeholder="Search resumes..."
-              className="pl-10 w-64 h-9"
-            />
-          </div>
-          
           {loading ? (
             <div className="w-8 h-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
           ) : user ? (
@@ -89,10 +83,14 @@ const Header = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                  <Link to="/admin">Admin Dashboard</Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
+                {isAdmin && (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin">Admin Dashboard</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="w-4 h-4 mr-2" />
                   Sign Out
@@ -124,16 +122,6 @@ const Header = () => {
       {isMenuOpen && (
         <div className="md:hidden border-t bg-white">
           <div className="px-4 py-4 space-y-4">
-            {/* Mobile Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                type="text"
-                placeholder="Search resumes..."
-                className="pl-10 w-full"
-              />
-            </div>
-            
             {/* Mobile Navigation */}
             <nav className="space-y-2">
               {navigation.map((item) => (
