@@ -29,7 +29,22 @@ const ResumeFormFields = ({
   setEditingResume,
   resetForm,
   onInputChange
-}: any) => {
+}: {
+  resumeForm: any;
+  onSubmit: (e: React.FormEvent) => void;
+  submitText: string;
+  uploadMethod: string;
+  setUploadMethod: (method: string) => void;
+  selectedFile: File | null;
+  handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  formatFileSize: (bytes?: number) => string;
+  isUploading: boolean;
+  setIsAddResumeOpen: (open: boolean) => void;
+  setIsEditResumeOpen: (open: boolean) => void;
+  setEditingResume: (resume: any) => void;
+  resetForm: () => void;
+  onInputChange: (field: string, value: string | boolean) => void;
+}) => {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">

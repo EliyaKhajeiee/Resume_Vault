@@ -32,7 +32,7 @@ const Resumes = () => {
     try {
       const result = await ResumeService.searchResumes(filters);
       if (result.data) {
-        let sortedData = [...result.data];
+        const sortedData = [...result.data];
         
         // Apply sorting
         switch (sortBy) {

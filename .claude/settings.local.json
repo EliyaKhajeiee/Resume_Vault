@@ -9,7 +9,11 @@
       "Bash(rm:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(netlify:*)",
+      "Bash(npm run build:*)",
+      "Bash(git pull:*)",
+      "Bash(npm run lint)"
     ],
     "deny": []
   }
