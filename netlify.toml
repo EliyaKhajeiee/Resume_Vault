@@ -1,10 +1,14 @@
 [build]
   publish = "dist"
-  command = "npm install && npm run build"
+  command = '''
+    npm install --include=dev &&
+    npm run build:netlify
+  '''
 
 [build.environment]
-  NODE_VERSION = "18"
+  NODE_VERSION = "18.19.0"
   CI = "false"
+  SKIP_PREFLIGHT_CHECK = "true"
 
 [[redirects]]
   from = "/*"
