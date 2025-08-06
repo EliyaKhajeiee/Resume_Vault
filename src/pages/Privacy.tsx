@@ -109,8 +109,7 @@ const Privacy = () => {
               If you have any questions about this Privacy Policy, please contact us at:
             </p>
             <p className="text-gray-600">
-              Email: privacy@resumeproof.com<br />
-              Address: [Your Business Address]
+              Email: support@resumeproof.com
             </p>
           </section>
         </div>

@@ -146,7 +146,7 @@ const Index = () => {
                 </Button>
               </Link>
               <Link to="/pricing">
-                <Button variant="outline" size="lg" className="px-8 py-4 text-lg font-semibold rounded-xl">
+                <Button variant="outline" size="lg" className="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-4 text-lg font-semibold rounded-xl">
                   Get started for free
                 </Button>
               </Link>

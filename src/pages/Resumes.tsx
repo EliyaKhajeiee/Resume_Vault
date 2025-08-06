@@ -3,13 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Eye, Download, Star, ExternalLink } from "lucide-react";
+import { Eye, Download, Star, ExternalLink, Lock, CreditCard } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SearchFiltersComponent from "@/components/SearchFilters";
 import { ResumeService, type SearchFilters } from "@/services/resumeService";
 import type { Resume } from "@/lib/supabase";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
+import { useNavigate } from "react-router-dom";
 
 const Resumes = () => {
   const [resumes, setResumes] = useState<Resume[]>([]);
@@ -18,6 +21,11 @@ const Resumes = () => {
   const [selectedResume, setSelectedResume] = useState<Resume | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'featured'>('recent');
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  
+  const { user, isAuthenticated } = useAuth();
+  const { hasActiveSubscription, canAccessResume, canDownloadResume, recordResumeAccess } = useSubscription();
+  const navigate = useNavigate();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -65,6 +73,32 @@ const Resumes = () => {
   };
 
   const handleViewResume = async (resume: Resume) => {
+    if (!isAuthenticated) {
+      toast.error("Please sign in to view resumes");
+      navigate('/pricing'); // Redirect to pricing/signup
+      return;
+    }
+
+    // Check if user can access this resume
+    const access = await canAccessResume(resume.id, resume.is_featured);
+    
+    if (!access.canAccess) {
+      if (access.reason === 'featured_only') {
+        toast.error("Featured resumes require a Pro subscription");
+        setShowUpgradeDialog(true);
+        return;
+      } else if (access.reason === 'limit_reached') {
+        toast.error("You've reached your limit of 1 free resume. Upgrade to Pro for unlimited access!");
+        setShowUpgradeDialog(true);
+        return;
+      }
+    }
+
+    // Record access for free users
+    if (!hasActiveSubscription) {
+      await recordResumeAccess(resume.id);
+    }
+
     await ResumeService.incrementViewCount(resume.id);
     setSelectedResume(resume);
     setIsViewDialogOpen(true);
@@ -75,12 +109,26 @@ const Resumes = () => {
     ));
   };
 
-  const handleDownloadResume = (resume: Resume) => {
+  const handleDownloadResume = async (resume: Resume) => {
+    if (!isAuthenticated) {
+      toast.error("Please sign in to download resumes");
+      navigate('/pricing');
+      return;
+    }
+
+    const canDownload = await canDownloadResume();
+    
+    if (!canDownload) {
+      toast.error("Downloads require a Pro subscription");
+      setShowUpgradeDialog(true);
+      return;
+    }
+
     if (resume.file_url) {
       window.open(resume.file_url, '_blank');
       toast.success("Opening resume file...");
     } else {
-      toast.info("Download functionality coming soon! This resume doesn't have a file URL yet.");
+      toast.info("This resume doesn't have a downloadable file yet.");
     }
   };
 
@@ -251,7 +299,11 @@ const Resumes = () => {
                         onClick={() => handleDownloadResume(resume)}
                         disabled={!resume.file_url}
                       >
-                        <Download className="w-4 h-4" />
+                        {!isAuthenticated || !hasActiveSubscription ? (
+                          <Lock className="w-4 h-4" />
+                        ) : (
+                          <Download className="w-4 h-4" />
+                        )}
                       </Button>
                     </div>
                   </div>
@@ -361,6 +413,52 @@ const Resumes = () => {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Upgrade Dialog */}
+      <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CreditCard className="w-5 h-5 text-blue-600" />
+              Upgrade to Pro
+            </DialogTitle>
+            <DialogDescription>
+              Get unlimited access to all resume examples and downloads
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h4 className="font-semibold text-blue-900 mb-2">Pro Plan Benefits:</h4>
+              <ul className="text-sm text-blue-800 space-y-1">
+                <li>• Unlimited resume views</li>
+                <li>• Download all resumes</li>
+                <li>• Access to featured resumes</li>
+                <li>• Advanced search filters</li>
+                <li>• Priority support</li>
+              </ul>
+            </div>
+            
+            <div className="flex gap-3">
+              <Button 
+                onClick={() => {
+                  setShowUpgradeDialog(false);
+                  navigate('/pricing');
+                }}
+                className="flex-1"
+              >
+                Upgrade Now
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={() => setShowUpgradeDialog(false)}
+              >
+                Later
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 

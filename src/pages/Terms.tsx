@@ -96,8 +96,7 @@ const Terms = () => {
               If you have any questions about these Terms of Service, please contact us at:
             </p>
             <p className="text-gray-600">
-              Email: legal@resumeproof.com<br />
-              Address: [Your Business Address]
+              Email: support@resumeproof.com
             </p>
           </section>
         </div>

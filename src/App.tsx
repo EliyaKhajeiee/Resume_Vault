@@ -17,6 +17,9 @@ import Guides from "./pages/Guides";
 import NotFound from "./pages/NotFound";
 import AuthCallback from "./pages/auth/AuthCallback";
 import ResetPassword from "./pages/auth/ResetPassword";
+import Subscription from "./pages/Subscription";
+import SubscriptionSuccess from "./pages/SubscriptionSuccess";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +43,9 @@ const App = () => (
           <Route path="/guides" element={<Guides />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/auth/reset-password" element={<ResetPassword />} />
+          <Route path="/subscription" element={<Subscription />} />
+          <Route path="/subscription/success" element={<SubscriptionSuccess />} />
+          <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

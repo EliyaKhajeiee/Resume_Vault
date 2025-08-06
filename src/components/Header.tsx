@@ -22,7 +22,6 @@ const Header = () => {
   ];
 
   const isActive = (path: string) => location.pathname === path;
-
   const handleNavClick = () => {
     setIsMenuOpen(false);
     window.scrollTo(0, 0);
@@ -80,7 +79,7 @@ const Header = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem asChild>
-                  <Link to="/admin">Admin Dashboard</Link>
+                  <Link to="/settings">Settings</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}>

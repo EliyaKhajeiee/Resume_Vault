@@ -13,7 +13,14 @@
       "Bash(netlify:*)",
       "Bash(npm run build:*)",
       "Bash(git pull:*)",
-      "Bash(npm run lint)"
+      "Bash(npm run lint)",
+      "Bash(npx supabase:*)",
+      "Bash(set SUPABASE_ACCESS_TOKEN=sbp_7339d52a98830671ce4c2cf2cc229ec929ae5adf)",
+      "Bash(./deploy_functions.bat)",
+      "Bash(powershell:*)",
+      "Bash(copy:*)",
+      "Bash(cp:*)",
+      "Bash(git reset:*)"
     ],
     "deny": []
   }

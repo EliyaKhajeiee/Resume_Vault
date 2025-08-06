@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, Phone, MapPin, Clock } from "lucide-react";
+import { Mail, MapPin, Clock } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { toast } from "sonner";
@@ -37,27 +37,21 @@ const Contact = () => {
   const contactInfo = [
     {
       icon: <Mail className="w-6 h-6 text-blue-600" />,
-      title: "Email",
-      content: "hello@resumeproof.com",
-      description: "Send us an email anytime!"
-    },
-    {
-      icon: <Phone className="w-6 h-6 text-blue-600" />,
-      title: "Phone",
-      content: "+1 (555) 123-4567",
-      description: "Mon-Fri from 8am to 5pm PST"
-    },
-    {
-      icon: <MapPin className="w-6 h-6 text-blue-600" />,
-      title: "Office",
-      content: "San Francisco, CA",
-      description: "Come say hello at our HQ"
+      title: "Email Support",
+      content: "support@resumeproof.com",
+      description: "Send us an email anytime for all inquiries!"
     },
     {
       icon: <Clock className="w-6 h-6 text-blue-600" />,
       title: "Response Time",
       content: "< 24 hours",
       description: "We respond to all inquiries quickly"
+    },
+    {
+      icon: <MapPin className="w-6 h-6 text-blue-600" />,
+      title: "Office",
+      content: "San Francisco, CA",
+      description: "Come say hello at our HQ"
     }
   ];
 
@@ -168,7 +162,7 @@ const Contact = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {contactInfo.map((info, index) => (
                 <Card key={index} className="border-none shadow-md">
                   <CardContent className="p-6">
@@ -196,8 +190,8 @@ const Contact = () => {
                   <p className="text-gray-600 text-sm">We typically respond to all inquiries within 24 hours during business days.</p>
                 </div>
                 <div className="border-b border-gray-200 pb-4">
-                  <h4 className="font-semibold text-gray-900 mb-2">Do you offer phone support?</h4>
-                  <p className="text-gray-600 text-sm">Yes! Pro subscribers have access to priority phone support during business hours.</p>
+                  <h4 className="font-semibold text-gray-900 mb-2">What types of inquiries do you handle?</h4>
+                  <p className="text-gray-600 text-sm">We handle all types of inquiries including technical support, billing questions, feature requests, and general feedback through support@resumeproof.com.</p>
                 </div>
                 <div className="border-b border-gray-200 pb-4">
                   <h4 className="font-semibold text-gray-900 mb-2">Can I schedule a demo?</h4>
