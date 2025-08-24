@@ -114,9 +114,20 @@ const Resumes = () => {
       console.log('✅ View count incremented');
       
       console.log('🖼️ Setting selected resume and opening modal...');
+      console.log('📄 Resume data:', resume);
+      
+      // Force set the modal state with a small delay to ensure React renders
       setSelectedResume(resume);
-      setIsViewDialogOpen(true);
-      console.log('✅ Modal should now be open!');
+      
+      // Use setTimeout to ensure state is set before opening modal
+      setTimeout(() => {
+        console.log('⏰ Forcing modal open after timeout...');
+        setIsViewDialogOpen(true);
+        console.log('✅ Modal forced open! Current state:', {
+          selectedResume: resume?.title,
+          isViewDialogOpen: true
+        });
+      }, 100);
     } catch (error) {
       console.error('❌ Error in resume opening process:', error);
       toast.error('Error opening resume. Please try again.');
