@@ -186,22 +186,30 @@ export class StripeService {
     reason?: 'subscription_required' | 'limit_reached' | 'featured_only'
   }> {
     try {
+      console.log('🔍 Checking resume access for user:', userId, 'resume:', resumeId, 'featured:', isFeatured)
+      
       // Check if user has active subscription
       const hasSubscription = await this.hasActiveSubscription(userId)
+      console.log('📋 Has active subscription:', hasSubscription)
       
       if (hasSubscription) {
+        console.log('✅ User has subscription - access granted')
         return { canAccess: true }
       }
 
       // For free users, allow 1 resume access (featured or non-featured)
       const accessCount = await this.getUserResumeAccessCount(userId)
+      console.log('📊 Current access count:', accessCount)
+      
       if (accessCount >= 1) {
+        console.log('❌ Access limit reached (1/1 used)')
         return { canAccess: false, reason: 'limit_reached' }
       }
 
+      console.log('✅ Free access granted (0/1 used)')
       return { canAccess: true }
     } catch (error) {
-      console.error('Error checking resume access:', error)
+      console.error('❌ Error checking resume access:', error)
       return { canAccess: false, reason: 'subscription_required' }
     }
   }
