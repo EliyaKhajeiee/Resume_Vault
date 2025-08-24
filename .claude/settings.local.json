@@ -21,7 +21,8 @@
       "Bash(copy:*)",
       "Bash(cp:*)",
       "Bash(git reset:*)",
-      "Bash(.deploy_functions.ps1)"
+      "Bash(.deploy_functions.ps1)",
+      "Bash(npx netlify:*)"
     ],
     "deny": []
   }

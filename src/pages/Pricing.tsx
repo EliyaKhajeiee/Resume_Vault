@@ -45,14 +45,14 @@ const Pricing = () => {
       name: "Free",
       price: "$0",
       period: "forever",
-      description: "Perfect for getting started with resume examples",
+      description: "Try our service with limited access",
       features: [
-        "Access to 50 resume examples",
-        "Basic search and filters",
+        "View 1 resume example",
+        "Basic search functionality",
         "Community access",
         "Email support"
       ],
-      cta: "Get started for free",
+      cta: "Get started free",
       popular: false
     },
     {
@@ -125,7 +125,7 @@ const Pricing = () => {
             Choose your <span className="text-blue-600">career path</span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-            Start free and unlock premium features to accelerate your job search with proven resume examples.
+            Start free with 1 resume view, then unlock unlimited access with proven resume examples.
           </p>
           <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
             <span>✅ No hidden fees</span>
@@ -227,9 +227,9 @@ const Pricing = () => {
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {[
-                    { feature: "Resume Examples", free: "50", pro: "500+", enterprise: "500+" },
+                    { feature: "Resume Examples", free: "1", pro: "500+", enterprise: "500+" },
                     { feature: "Search & Filters", free: "Basic", pro: "Advanced", enterprise: "Advanced" },
-                    { feature: "Download Formats", free: "PDF", pro: "PDF, Word, Templates", enterprise: "All formats" },
+                    { feature: "Download Formats", free: "❌", pro: "PDF, Word, Templates", enterprise: "All formats" },
                     { feature: "AI Insights", free: "❌", pro: "✅", enterprise: "✅" },
                     { feature: "Priority Support", free: "❌", pro: "✅", enterprise: "✅" },
                     { feature: "Team Collaboration", free: "❌", pro: "❌", enterprise: "✅" },
