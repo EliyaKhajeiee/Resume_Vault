@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
-    "build:netlify": "CI=false vite build",
+    "build:netlify": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
