@@ -24,5 +24,10 @@ dist-ssr
 *.sw?
 .env
 
+# Scripts with actual API keys (keep these local only)
+*_ACTUAL.ps1
+deploy_live_ACTUAL.ps1
+set_webhook_ACTUAL.ps1
+
 # Local Netlify folder
 .netlify

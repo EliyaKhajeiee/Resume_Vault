@@ -2,7 +2,7 @@
 
 ## Create Webhook in Stripe Dashboard
 
-1. **Go to Stripe Webhooks**: https://dashboard.stripe.com/test/webhooks
+1. **Go to Stripe Webhooks**: https://dashboard.stripe.com/webhooks (LIVE MODE - make sure you're not in test mode!)
 
 2. **Click "Add endpoint"**
 

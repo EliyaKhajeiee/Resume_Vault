@@ -18,7 +18,7 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     name: 'Pro',
     price: 29,
     interval: 'month',
-    stripePriceId: 'price_1RschKPMCgCvdUp8NBMoHXSI', // Your actual Stripe price ID
+    stripePriceId: 'price_1Ruy4kAdBHYS516EV50u326a', // Your actual Stripe LIVE price ID
     features: [
       'Access to 500+ resume examples',
       'Advanced search and filters',

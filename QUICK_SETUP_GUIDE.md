@@ -9,8 +9,8 @@
 
 ## Step 2: Create Stripe Product & Price
 
-1. Go to your Stripe dashboard: https://dashboard.stripe.com/test/products
-2. Make sure you're in **Test Mode** (toggle at top left)
+1. Go to your Stripe dashboard: https://dashboard.stripe.com/products
+2. Make sure you're in **LIVE Mode** (toggle at top left) for production
 3. Click **+ Add product**
 4. Fill in:
    - **Name**: Resume Proof Pro
@@ -31,7 +31,7 @@
 
 1. Go to **Settings > Edge Functions** in your Supabase dashboard
 2. Add these secrets:
-   - **STRIPE_SECRET_KEY**: `sk_test_YOUR_STRIPE_SECRET_KEY_HERE`
+   - **STRIPE_SECRET_KEY**: `sk_live_YOUR_LIVE_STRIPE_SECRET_KEY_HERE`
    - **STRIPE_WEBHOOK_SECRET**: (We'll get this in Step 6)
 
 ## Step 5: Deploy Edge Functions
@@ -74,15 +74,16 @@ npx supabase functions deploy stripe-webhook
 1. Restart your dev server: `npm run dev`
 2. Go to `/pricing` page
 3. Click "Subscribe now" on the Pro plan
-4. Use Stripe test card: `4242 4242 4242 4242`
+4. Use REAL credit card details (you're in LIVE mode now!)
 5. Any future expiry date and any 3-digit CVC
 6. Complete the checkout
 
-## Test Cards for Different Scenarios
+## ⚠️ LIVE MODE WARNING
 
-- **Successful payment**: `4242 4242 4242 4242`
-- **Declined payment**: `4000 0000 0000 0002`
-- **Requires authentication**: `4000 0025 0000 3155`
+**You are now in LIVE mode! Real charges will be processed.**
+- Only use real credit cards
+- Real money will be charged
+- For testing, create a small amount product first
 
 ## What Should Happen
 

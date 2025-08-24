@@ -20,7 +20,8 @@
       "Bash(powershell:*)",
       "Bash(copy:*)",
       "Bash(cp:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(.deploy_functions.ps1)"
     ],
     "deny": []
   }
