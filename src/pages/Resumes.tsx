@@ -98,40 +98,34 @@ const Resumes = () => {
       return;
     }
     
-    console.log('✅ Access granted! Opening resume modal...');
+    console.log('✅ Access granted! Opening resume modal IMMEDIATELY...');
+    
+    // FORCE OPEN MODAL FIRST - no delays, no async operations
+    console.log('🚨 EMERGENCY: Opening modal before anything else...');
+    setSelectedResume(resume);
+    setIsViewDialogOpen(true);
+    console.log('🚨 MODAL FORCED OPEN IMMEDIATELY!');
+    
+    // Show a toast to confirm it's working
+    toast.success('Resume access granted! Modal should be open.');
+
+    // Do the recording in background (don't wait for it)
     console.log('📊 hasActiveSubscription:', hasActiveSubscription);
-
-    try {
-      // Record access for free users
-      if (!hasActiveSubscription) {
-        console.log('📝 Recording resume access...');
-        await recordResumeAccess(resume.id);
-        console.log('✅ Resume access recorded');
-      }
-
-      console.log('📈 Incrementing view count...');
-      await ResumeService.incrementViewCount(resume.id);
-      console.log('✅ View count incremented');
-      
-      console.log('🖼️ Setting selected resume and opening modal...');
-      console.log('📄 Resume data:', resume);
-      
-      // Force set the modal state with a small delay to ensure React renders
-      setSelectedResume(resume);
-      
-      // Use setTimeout to ensure state is set before opening modal
-      setTimeout(() => {
-        console.log('⏰ Forcing modal open after timeout...');
-        setIsViewDialogOpen(true);
-        console.log('✅ Modal forced open! Current state:', {
-          selectedResume: resume?.title,
-          isViewDialogOpen: true
-        });
-      }, 100);
-    } catch (error) {
-      console.error('❌ Error in resume opening process:', error);
-      toast.error('Error opening resume. Please try again.');
+    if (!hasActiveSubscription) {
+      console.log('📝 Recording resume access in background...');
+      recordResumeAccess(resume.id).then(() => {
+        console.log('✅ Resume access recorded in background');
+      }).catch(error => {
+        console.log('⚠️ Background recording failed:', error);
+      });
     }
+
+    // Increment view count in background too
+    ResumeService.incrementViewCount(resume.id).then(() => {
+      console.log('✅ View count incremented in background');
+    }).catch(error => {
+      console.log('⚠️ Background view count failed:', error);
+    });
     
     // Update the view count in the local state
     setResumes(prev => prev.map(r => 
