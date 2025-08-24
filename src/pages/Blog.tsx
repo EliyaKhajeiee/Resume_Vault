@@ -1,16 +1,25 @@
-import { Calendar, User, ArrowRight } from "lucide-react";
+import { Calendar, User, ArrowRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const Blog = () => {
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  const handlePostClick = (post) => {
+    setSelectedPost(post);
+    setIsModalOpen(true);
+  };
 
   const featuredPost = {
     title: "Why We Started Resume Proof: Leveling the Playing Field in a Tough Job Market",
@@ -349,7 +358,80 @@ const Blog = () => {
       date: "Jan 3, 2025",
       readTime: "6 min read",
       category: "Consulting",
-      image: "https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&fit=crop"
+      image: "https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&fit=crop",
+      content: `
+        McKinsey, BCG, and Bain receive thousands of resumes for each position. After analyzing successful consultant resumes, here's exactly what they're looking for.
+
+        ## The McKinsey Resume Formula
+
+        **1. Achievement-Driven Structure**
+        Consulting firms want to see your ability to drive results. Every bullet point should follow this structure:
+        "Action + Context + Result + So What"
+
+        **Example:**
+        "Led cross-functional team of 8 to optimize supply chain operations for $500M manufacturing client, reducing costs by 15% and saving $2.3M annually, which became the firm's methodology for similar engagements."
+
+        ## Essential Sections
+
+        **1. Professional Experience**
+        - Start with most impactful roles
+        - Use consulting language: "analyzed," "recommended," "implemented"
+        - Show progression in responsibility and impact
+        - Include specific industries and company sizes
+
+        **2. Academic Excellence**
+        - GPA if above 3.5
+        - Relevant coursework (economics, statistics, strategy)
+        - Academic honors and scholarships
+        - Study abroad or international experience
+
+        **3. Leadership & Activities**
+        - Student government, club leadership
+        - Case competition wins
+        - Volunteer work with measurable impact
+        - Entrepreneurial ventures
+
+        ## What McKinsey Looks For
+
+        **Problem-Solving Ability**
+        Show you can break down complex problems:
+        "Analyzed declining sales performance across 15 product lines, identified 3 root causes, and developed targeted solutions resulting in 12% revenue recovery."
+
+        **Leadership Experience**
+        Demonstrate your ability to influence without authority:
+        "Led volunteer team of 25 to organize charity event, coordinating with 10+ sponsors and raising $50K for local education programs."
+
+        **Analytical Skills**
+        Highlight your comfort with data and frameworks:
+        "Built financial model to evaluate acquisition target, analyzing 5 years of financial data and market trends to recommend $12M investment."
+
+        ## Common Consulting Resume Mistakes
+
+        **Mistake #1: Generic Business Language**
+        Avoid buzzwords like "synergy" and "leverage." Use specific, measurable language.
+
+        **Mistake #2: No International Experience**
+        Global firms value diverse perspectives. Highlight study abroad, international internships, or multicultural projects.
+
+        **Mistake #3: Weak Case Interview Prep**
+        Your resume gets you the interview, but case performance determines the offer. Practice extensively.
+
+        ## McKinsey-Style Bullet Points
+
+        - "Conducted market research across 3 European markets, interviewing 50+ customers and analyzing competitor strategies to identify $20M growth opportunity"
+        - "Designed and executed post-merger integration plan for two $100M divisions, achieving 95% employee retention and $5M in cost synergies"
+        - "Led due diligence team for private equity acquisition, analyzing financial projections and market dynamics to support $50M investment decision"
+
+        ## Pro Tips
+
+        1. **Use the STAR Method:** Situation, Task, Action, Result
+        2. **Show Progression:** Each role should demonstrate increased responsibility
+        3. **Be Specific:** Instead of "large company," say "$2B manufacturing firm"
+        4. **Quantify Everything:** Revenue impact, team sizes, timeframes
+        5. **Global Perspective:** Highlight international experience and language skills
+
+        Remember: McKinsey doesn't just hire smart people—they hire smart people who can solve complex business problems and work effectively with clients at the C-suite level.
+      `
     },
     {
       title: "Resume Keywords That Actually Matter in 2025",
@@ -358,7 +440,110 @@ const Blog = () => {
       date: "Dec 30, 2024",
       readTime: "5 min read",
       category: "ATS Optimization",
-      image: "https://images.pexels.com/photos/3184454/pexels-photo-3184454.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&fit=crop"
+      image: "https://images.pexels.com/photos/3184454/pexels-photo-3184454.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&fit=crop",
+      content: `
+        ATS systems have evolved significantly in 2025. Here's what actually works for getting your resume past the robots and into human hands.
+
+        ## The New ATS Reality
+
+        Modern ATS systems are smarter than ever. They don't just scan for keywords—they understand context, synonyms, and relevance. This means the old strategy of keyword stuffing is not only ineffective, it can hurt you.
+
+        ## Keywords That Actually Work in 2025
+
+        **1. Skills-Based Keywords**
+        Use exact phrases from the job description, but integrate them naturally:
+        - "Machine learning algorithms" instead of just "ML"
+        - "Cross-functional collaboration" instead of just "teamwork"
+        - "Agile development methodologies" instead of just "Agile"
+
+        **2. Industry-Specific Terms**
+        Include relevant industry jargon and certifications:
+        - Software: "CI/CD pipelines," "microservices architecture," "cloud-native applications"
+        - Marketing: "conversion rate optimization," "marketing automation," "customer acquisition cost"
+        - Finance: "financial modeling," "risk management," "regulatory compliance"
+
+        **3. Action-Oriented Keywords**
+        ATS systems now recognize strong action verbs:
+        - "Implemented," "optimized," "architected," "spearheaded"
+        - "Delivered," "achieved," "transformed," "scaled"
+        - "Collaborated," "mentored," "facilitated," "drove"
+
+        ## The 2025 ATS Strategy
+
+        **1. Natural Integration**
+        Don't create a separate "Keywords" section. Integrate terms naturally throughout your experience:
+
+        **Wrong:** "Skills: Python, Data Analysis, Machine Learning"
+        **Right:** "Developed machine learning models using Python to analyze customer behavior data, improving prediction accuracy by 25%"
+
+        **2. Use Synonyms and Variations**
+        ATS systems understand multiple ways to express the same concept:
+        - "Project management" / "Project coordination" / "Program management"
+        - "Software development" / "Application development" / "Software engineering"
+        - "Customer service" / "Client relations" / "Customer support"
+
+        **3. Include Relevant Acronyms and Full Forms**
+        Use both versions when space permits:
+        - "Search Engine Optimization (SEO)"
+        - "Customer Relationship Management (CRM)"
+        - "Software as a Service (SaaS)"
+
+        ## Industry-Specific Keywords for 2025
+
+        **Technology**
+        - Cloud platforms: AWS, Azure, Google Cloud Platform
+        - Programming: Full-stack development, API integration, database optimization
+        - Methodologies: DevOps, continuous integration, test-driven development
+
+        **Product Management**
+        - Strategy: Product roadmap, market research, competitive analysis
+        - Execution: Agile/Scrum, user stories, A/B testing
+        - Metrics: KPIs, user engagement, conversion optimization
+
+        **Marketing**
+        - Digital: SEO/SEM, social media marketing, content marketing
+        - Analytics: Google Analytics, marketing attribution, ROI measurement
+        - Automation: Marketing automation, lead nurturing, email campaigns
+
+        **Finance**
+        - Analysis: Financial modeling, variance analysis, forecasting
+        - Systems: ERP systems, financial reporting, compliance
+        - Strategy: Budget planning, cost optimization, risk assessment
+
+        ## What Doesn't Work Anymore
+
+        **1. Keyword Stuffing**
+        Repeating keywords unnaturally hurts your ranking and readability.
+
+        **2. Invisible Text**
+        White text on white background is easily detected and will get you rejected.
+
+        **3. Generic Skills Lists**
+        Long lists of disconnected skills without context are ignored by modern ATS.
+
+        **4. Outdated Keywords**
+        Using old technology terms or deprecated frameworks signals you're behind.
+
+        ## ATS Optimization Checklist
+
+        ✅ **Use job description language naturally**
+        ✅ **Include both acronyms and full terms**
+        ✅ **Integrate keywords into context, not lists**
+        ✅ **Use standard section headings**
+        ✅ **Save as .docx or PDF (check job posting)**
+        ✅ **Use standard fonts (Arial, Calibri, Times New Roman)**
+        ✅ **Avoid complex formatting, tables, or graphics**
+
+        ## Pro Tips for 2025
+
+        1. **Tailor for Each Application:** Adjust keywords based on specific job descriptions
+        2. **Use Jobscan or Similar Tools:** Test your resume against specific job postings
+        3. **Focus on Relevance:** Quality over quantity—use fewer, more relevant keywords
+        4. **Keep It Natural:** Your resume should read well to humans too
+        5. **Update Regularly:** Keep current with industry terminology and trends
+
+        Remember: The goal isn't to trick the ATS—it's to clearly communicate your relevant experience in language the ATS (and hiring managers) understand.
+      `
     }
   ];
 
@@ -393,7 +578,7 @@ const Blog = () => {
         {/* Featured Post */}
         <div className="mb-16">
           <h2 className="text-2xl font-bold text-black mb-8">Featured Article</h2>
-          <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
+          <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handlePostClick(featuredPost)}>
             <div className="md:flex">
               <div className="md:w-1/2">
                 <img 
@@ -473,7 +658,7 @@ const Blog = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {blogPosts.map((post, index) => (
-                <Card key={index} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group">
+                <Card key={index} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => handlePostClick(post)}>
                   <div className="aspect-video overflow-hidden">
                     <img 
                       src={post.image} 
@@ -538,6 +723,83 @@ const Blog = () => {
           </div>
         </div>
       </section>
+
+      {/* Blog Post Modal */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold pr-8">
+              {selectedPost?.title}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedPost && (
+            <div className="space-y-6">
+              <div className="flex items-center gap-4 text-sm text-gray-500">
+                <Badge>{selectedPost.category}</Badge>
+                <div className="flex items-center">
+                  <User className="w-4 h-4 mr-1" />
+                  <span className="mr-3">{selectedPost.author}</span>
+                </div>
+                <div className="flex items-center">
+                  <Calendar className="w-4 h-4 mr-1" />
+                  <span className="mr-3">{selectedPost.date}</span>
+                </div>
+                <span>{selectedPost.readTime}</span>
+              </div>
+              
+              <img 
+                src={selectedPost.image} 
+                alt={selectedPost.title}
+                className="w-full h-64 object-cover rounded-lg"
+              />
+              
+              <div className="prose prose-lg max-w-none">
+                {selectedPost.content?.split('\n').map((paragraph, index) => {
+                  if (paragraph.trim() === '') return null;
+                  
+                  // Handle headers
+                  if (paragraph.startsWith('## ')) {
+                    return <h2 key={index} className="text-xl font-bold mt-6 mb-3">{paragraph.replace('## ', '')}</h2>;
+                  }
+                  if (paragraph.startsWith('# ')) {
+                    return <h1 key={index} className="text-2xl font-bold mt-6 mb-4">{paragraph.replace('# ', '')}</h1>;
+                  }
+                  
+                  // Handle bold text
+                  if (paragraph.includes('**')) {
+                    const parts = paragraph.split('**');
+                    return (
+                      <p key={index} className="mb-4">
+                        {parts.map((part, partIndex) => 
+                          partIndex % 2 === 1 ? <strong key={partIndex}>{part}</strong> : part
+                        )}
+                      </p>
+                    );
+                  }
+                  
+                  // Handle bullet points
+                  if (paragraph.trim().startsWith('- ')) {
+                    return <li key={index} className="ml-6 mb-2">{paragraph.replace('- ', '')}</li>;
+                  }
+                  
+                  // Handle numbered lists
+                  if (/^\d+\./.test(paragraph.trim())) {
+                    return <li key={index} className="ml-6 mb-2">{paragraph.replace(/^\d+\.\s*/, '')}</li>;
+                  }
+                  
+                  // Handle checkmarks
+                  if (paragraph.includes('✅')) {
+                    return <p key={index} className="mb-2 text-green-700">{paragraph}</p>;
+                  }
+                  
+                  // Regular paragraphs
+                  return <p key={index} className="mb-4 text-gray-700 leading-relaxed">{paragraph}</p>;
+                })}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>

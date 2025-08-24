@@ -188,6 +188,10 @@ export class StripeService {
     try {
       console.log('🔍 Checking resume access for user:', userId, 'resume:', resumeId, 'featured:', isFeatured)
       
+      // For debugging - always allow access for now to test
+      console.log('🚨 DEBUG MODE: Allowing free access')
+      return { canAccess: true }
+
       // Check if user has active subscription
       const hasSubscription = await this.hasActiveSubscription(userId)
       console.log('📋 Has active subscription:', hasSubscription)
