@@ -144,19 +144,25 @@ export class StripeService {
    */
   static async getUserResumeAccessCount(userId: string): Promise<number> {
     try {
+      console.log('📊 Fetching access count for user:', userId)
+      
       const { data, error } = await supabase
         .from('user_resume_access')
         .select('id')
         .eq('user_id', userId)
 
       if (error) {
-        console.error('Error fetching access count:', error)
+        console.error('❌ Database error fetching access count:', error)
+        // Return 0 for new users if table doesn't exist or has permission issues
         return 0
       }
 
-      return data?.length || 0
+      const count = data?.length || 0
+      console.log('✅ Access count retrieved:', count)
+      return count
     } catch (error) {
-      console.error('Unexpected error fetching access count:', error)
+      console.error('❌ Unexpected error fetching access count:', error)
+      // For new users or permission issues, assume 0 accesses
       return 0
     }
   }
@@ -188,22 +194,31 @@ export class StripeService {
     try {
       console.log('🔍 Checking resume access for user:', userId, 'resume:', resumeId, 'featured:', isFeatured)
       
-      // For debugging - always allow access for now to test
-      console.log('🚨 DEBUG MODE: Allowing free access')
-      return { canAccess: true }
-
-      // Check if user has active subscription
-      const hasSubscription = await this.hasActiveSubscription(userId)
-      console.log('📋 Has active subscription:', hasSubscription)
+      // Check if user has active subscription (handle errors gracefully)
+      let hasSubscription = false;
+      try {
+        hasSubscription = await this.hasActiveSubscription(userId)
+        console.log('📋 Has active subscription:', hasSubscription)
+      } catch (subError) {
+        console.log('⚠️ Could not check subscription, treating as free user:', subError)
+        hasSubscription = false;
+      }
       
       if (hasSubscription) {
         console.log('✅ User has subscription - access granted')
         return { canAccess: true }
       }
 
-      // For free users, allow 1 resume access (featured or non-featured)
-      const accessCount = await this.getUserResumeAccessCount(userId)
-      console.log('📊 Current access count:', accessCount)
+      // For free users, allow 1 resume access (handle database errors gracefully)
+      let accessCount = 0;
+      try {
+        accessCount = await this.getUserResumeAccessCount(userId)
+        console.log('📊 Current access count:', accessCount)
+      } catch (accessError) {
+        console.log('⚠️ Could not check access count, allowing first access:', accessError)
+        // If we can't check access count, assume 0 and allow access
+        accessCount = 0;
+      }
       
       if (accessCount >= 1) {
         console.log('❌ Access limit reached (1/1 used)')
@@ -214,7 +229,9 @@ export class StripeService {
       return { canAccess: true }
     } catch (error) {
       console.error('❌ Error checking resume access:', error)
-      return { canAccess: false, reason: 'subscription_required' }
+      // In case of any error, allow access for new users
+      console.log('🔓 Allowing access due to error (treating as new user)')
+      return { canAccess: true }
     }
   }
 
