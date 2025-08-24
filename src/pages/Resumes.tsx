@@ -80,19 +80,25 @@ const Resumes = () => {
     }
 
     // Check if user can access this resume
+    console.log('🎯 About to check access for resume:', resume.id, 'featured:', resume.is_featured);
     const access = await canAccessResume(resume.id, resume.is_featured);
+    console.log('🎯 Access result received:', access);
     
     if (!access.canAccess) {
+      console.log('❌ Access denied with reason:', access.reason);
       if (access.reason === 'limit_reached') {
         toast.error("You've reached your limit of 1 free resume. Upgrade to Pro for unlimited access!");
         setShowUpgradeDialog(true);
         return;
       }
       // For any other reason, show upgrade dialog
+      console.log('❌ Showing upgrade dialog for reason:', access.reason);
       toast.error("This feature requires a Pro subscription");
       setShowUpgradeDialog(true);
       return;
     }
+    
+    console.log('✅ Access granted! Opening resume modal...');
 
     // Record access for free users
     if (!hasActiveSubscription) {
