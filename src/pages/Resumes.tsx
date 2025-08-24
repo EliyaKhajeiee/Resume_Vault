@@ -83,15 +83,15 @@ const Resumes = () => {
     const access = await canAccessResume(resume.id, resume.is_featured);
     
     if (!access.canAccess) {
-      if (access.reason === 'featured_only') {
-        toast.error("Featured resumes require a Pro subscription");
-        setShowUpgradeDialog(true);
-        return;
-      } else if (access.reason === 'limit_reached') {
+      if (access.reason === 'limit_reached') {
         toast.error("You've reached your limit of 1 free resume. Upgrade to Pro for unlimited access!");
         setShowUpgradeDialog(true);
         return;
       }
+      // For any other reason, show upgrade dialog
+      toast.error("This feature requires a Pro subscription");
+      setShowUpgradeDialog(true);
+      return;
     }
 
     // Record access for free users

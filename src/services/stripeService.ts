@@ -193,12 +193,7 @@ export class StripeService {
         return { canAccess: true }
       }
 
-      // For free users, only allow 1 non-featured resume
-      if (isFeatured) {
-        return { canAccess: false, reason: 'featured_only' }
-      }
-
-      // Check if user has already accessed their limit of non-featured resumes
+      // For free users, allow 1 resume access (featured or non-featured)
       const accessCount = await this.getUserResumeAccessCount(userId)
       if (accessCount >= 1) {
         return { canAccess: false, reason: 'limit_reached' }
