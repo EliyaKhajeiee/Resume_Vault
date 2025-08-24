@@ -99,15 +99,28 @@ const Resumes = () => {
     }
     
     console.log('✅ Access granted! Opening resume modal...');
+    console.log('📊 hasActiveSubscription:', hasActiveSubscription);
 
-    // Record access for free users
-    if (!hasActiveSubscription) {
-      await recordResumeAccess(resume.id);
+    try {
+      // Record access for free users
+      if (!hasActiveSubscription) {
+        console.log('📝 Recording resume access...');
+        await recordResumeAccess(resume.id);
+        console.log('✅ Resume access recorded');
+      }
+
+      console.log('📈 Incrementing view count...');
+      await ResumeService.incrementViewCount(resume.id);
+      console.log('✅ View count incremented');
+      
+      console.log('🖼️ Setting selected resume and opening modal...');
+      setSelectedResume(resume);
+      setIsViewDialogOpen(true);
+      console.log('✅ Modal should now be open!');
+    } catch (error) {
+      console.error('❌ Error in resume opening process:', error);
+      toast.error('Error opening resume. Please try again.');
     }
-
-    await ResumeService.incrementViewCount(resume.id);
-    setSelectedResume(resume);
-    setIsViewDialogOpen(true);
     
     // Update the view count in the local state
     setResumes(prev => prev.map(r => 
