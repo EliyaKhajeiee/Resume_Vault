@@ -22,7 +22,13 @@
       "Bash(cp:*)",
       "Bash(git reset:*)",
       "Bash(.deploy_functions.ps1)",
-      "Bash(npx netlify:*)"
+      "Bash(npx netlify:*)",
+      "Bash(npm test)",
+      "Bash(npx tsc:*)",
+      "Bash(if [ -f \".env\" ])",
+      "Bash(then echo \".env file exists\")",
+      "Bash(else echo \"No .env file found\")",
+      "Bash(fi)"
     ],
     "deny": []
   }

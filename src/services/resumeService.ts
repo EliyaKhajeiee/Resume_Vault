@@ -260,7 +260,7 @@ export class ResumeService {
    */
   static async updateResume(resumeId: string, resumeData: Partial<AddResumeData>, file?: File): Promise<{ success: boolean; data?: Resume; error?: string }> {
     try {
-      let updateData = { ...resumeData };
+      const updateData = { ...resumeData };
 
       // Handle file upload if provided
       if (file) {

@@ -30,7 +30,16 @@ const ResumeFormFields = ({
   resetForm,
   onInputChange
 }: {
-  resumeForm: any;
+  resumeForm: {
+    title: string;
+    company: string;
+    role: string;
+    industry: string;
+    experience_level: string;
+    description: string;
+    tags: string;
+    is_featured: boolean;
+  };
   onSubmit: (e: React.FormEvent) => void;
   submitText: string;
   uploadMethod: string;
@@ -41,7 +50,7 @@ const ResumeFormFields = ({
   isUploading: boolean;
   setIsAddResumeOpen: (open: boolean) => void;
   setIsEditResumeOpen: (open: boolean) => void;
-  setEditingResume: (resume: any) => void;
+  setEditingResume: (resume: Resume | null) => void;
   resetForm: () => void;
   onInputChange: (field: string, value: string | boolean) => void;
 }) => {
@@ -409,7 +418,7 @@ const Admin = () => {
     }
   };
 
-  const parseCsvFile = (csvText: string): any[] => {
+  const parseCsvFile = (csvText: string): Record<string, string>[] => {
     const lines = csvText.split('\n').filter(line => line.trim());
     if (lines.length < 2) return [];
 
@@ -419,7 +428,7 @@ const Admin = () => {
     for (let i = 1; i < lines.length; i++) {
       const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
       if (values.length >= headers.length) {
-        const row: any = {};
+        const row: Record<string, string> = {};
         headers.forEach((header, index) => {
           row[header] = values[index] || '';
         });
