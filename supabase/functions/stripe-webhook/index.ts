@@ -72,12 +72,17 @@ serve(async (req) => {
     console.log('Processing webhook event:', event.type)
     
     switch (event.type) {
+      case 'checkout.session.completed':
+        console.log('Handling checkout session completed event')
+        await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session)
+        break
+
       case 'customer.subscription.created':
       case 'customer.subscription.updated':
         console.log('Handling subscription change event')
         await handleSubscriptionChange(event.data.object as Stripe.Subscription)
         break
-      
+
       case 'customer.subscription.deleted':
         console.log('Handling subscription deletion event')
         await handleSubscriptionDeleted(event.data.object as Stripe.Subscription)
@@ -90,7 +95,7 @@ serve(async (req) => {
       case 'invoice.payment_failed':
         console.log('Payment failed - no action needed')
         break
-        
+
       default:
         console.log('Unhandled event type:', event.type)
     }
@@ -118,6 +123,44 @@ serve(async (req) => {
   }
 })
 
+async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+  console.log('Processing checkout session:', session.id)
+  console.log('Session metadata:', session.metadata)
+  console.log('Session mode:', session.mode)
+
+  // Only handle subscription checkouts
+  if (session.mode !== 'subscription') {
+    console.log('Skipping non-subscription checkout')
+    return
+  }
+
+  const userId = session.subscription_data?.metadata?.userId || session.metadata?.userId
+  if (!userId) {
+    console.error('No userId found in checkout session metadata')
+    return
+  }
+
+  console.log('User ID from checkout session:', userId)
+
+  // Get the subscription from Stripe
+  const subscriptionId = session.subscription as string
+  if (!subscriptionId) {
+    console.error('No subscription ID found in checkout session')
+    return
+  }
+
+  try {
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+    console.log('Retrieved subscription from checkout:', subscription.id)
+
+    // Process the subscription immediately
+    await handleSubscriptionChange(subscription)
+  } catch (error) {
+    console.error('Error retrieving subscription from checkout:', error)
+    throw error
+  }
+}
+
 async function handleSubscriptionChange(subscription: Stripe.Subscription) {
   console.log('Processing subscription change:', subscription.id)
   console.log('Subscription metadata:', subscription.metadata)
@@ -140,6 +183,7 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
   // Map Stripe price IDs to our plan IDs
   const priceIdToPlanId: { [key: string]: string } = {
     'price_1RschKPMCgCvdUp8NBMoHXSI': 'pro-monthly',
+    'price_1S58Q2AdBHYS516Elg0sC5Ak': 'pro-monthly', // $1 test price
     // Add more mappings as needed
   }
 
