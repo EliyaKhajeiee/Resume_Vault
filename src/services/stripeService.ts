@@ -18,7 +18,7 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     name: 'Resume Access Pack',
     price: 9.99,
     interval: 'one-time' as any,
-    stripePriceId: 'price_REPLACE_WITH_ONETIME_PRICE_ID', // Replace with your $9.99 one-time price ID
+    stripePriceId: 'price_1S7i2iAdBHYS516EX1FCq84E', // $9.99 one-time price ID
     features: [
       'Access to 5 premium resumes',
       'Download in PDF format',
@@ -31,7 +31,7 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     name: 'Pro Monthly',
     price: 29.99,
     interval: 'month',
-    stripePriceId: 'price_REPLACE_WITH_MONTHLY_PRICE_ID', // Replace with your $29.99 monthly price ID
+    stripePriceId: 'price_1Ruy4kAdBHYS516EV50u326a', // $29.99 monthly price ID
     features: [
       'Unlimited resume access',
       'Advanced search and filters',

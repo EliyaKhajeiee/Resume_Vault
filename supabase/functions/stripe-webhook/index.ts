@@ -234,9 +234,10 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
 
   // Map Stripe price IDs to our plan IDs
   const priceIdToPlanId: { [key: string]: string } = {
-    'price_1RschKPMCgCvdUp8NBMoHXSI': 'pro-monthly',
-    'price_1S58Q2AdBHYS516Elg0sC5Ak': 'pro-monthly', // $1 test price
-    // Add more mappings as needed
+    'price_1Ruy4kAdBHYS516EV50u326a': 'pro-monthly', // $29.99 monthly
+    'price_1S7i2iAdBHYS516EX1FCq84E': 'access-pack', // $9.99 one-time
+    'price_1RschKPMCgCvdUp8NBMoHXSI': 'pro-monthly', // Legacy
+    'price_1S58Q2AdBHYS516Elg0sC5Ak': 'pro-monthly', // Legacy test price
   }
 
   if (priceId && priceIdToPlanId[priceId]) {
