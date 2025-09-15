@@ -77,6 +77,11 @@ serve(async (req) => {
         await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session)
         break
 
+      case 'payment_intent.succeeded':
+        console.log('Handling payment intent succeeded event')
+        await handlePaymentIntentSucceeded(event.data.object as Stripe.PaymentIntent)
+        break
+
       case 'customer.subscription.created':
       case 'customer.subscription.updated':
         console.log('Handling subscription change event')
@@ -128,37 +133,84 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   console.log('Session metadata:', session.metadata)
   console.log('Session mode:', session.mode)
 
-  // Only handle subscription checkouts
-  if (session.mode !== 'subscription') {
-    console.log('Skipping non-subscription checkout')
-    return
-  }
+  if (session.mode === 'subscription') {
+    const userId = session.subscription_data?.metadata?.userId || session.metadata?.userId
+    if (!userId) {
+      console.error('No userId found in checkout session metadata')
+      return
+    }
 
-  const userId = session.subscription_data?.metadata?.userId || session.metadata?.userId
+    console.log('User ID from checkout session:', userId)
+
+    // Get the subscription from Stripe
+    const subscriptionId = session.subscription as string
+    if (!subscriptionId) {
+      console.error('No subscription ID found in checkout session')
+      return
+    }
+
+    try {
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+      console.log('Retrieved subscription from checkout:', subscription.id)
+
+      // Process the subscription immediately
+      await handleSubscriptionChange(subscription)
+    } catch (error) {
+      console.error('Error retrieving subscription from checkout:', error)
+      throw error
+    }
+  } else if (session.mode === 'payment') {
+    // One-time payment - will be handled by payment_intent.succeeded
+    console.log('One-time payment checkout completed - will be handled by payment_intent.succeeded')
+  }
+}
+
+async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
+  console.log('Processing payment intent:', paymentIntent.id)
+  console.log('Payment intent metadata:', paymentIntent.metadata)
+
+  const userId = paymentIntent.metadata.userId
+  const planId = paymentIntent.metadata.planId || 'access-pack'
+
   if (!userId) {
-    console.error('No userId found in checkout session metadata')
+    console.error('No userId found in payment intent metadata')
     return
   }
 
-  console.log('User ID from checkout session:', userId)
+  console.log('User ID from payment intent:', userId)
+  console.log('Plan ID:', planId)
 
-  // Get the subscription from Stripe
-  const subscriptionId = session.subscription as string
-  if (!subscriptionId) {
-    console.error('No subscription ID found in checkout session')
-    return
+  // Calculate expiry date (30 days from now)
+  const expiresAt = new Date()
+  expiresAt.setDate(expiresAt.getDate() + 30)
+
+  const purchaseData = {
+    user_id: userId,
+    stripe_payment_intent_id: paymentIntent.id,
+    plan_id: planId,
+    amount: paymentIntent.amount / 100, // Convert from cents
+    status: 'succeeded',
+    resumes_remaining: 5, // 5 resumes for $9.99 pack
+    expires_at: expiresAt.toISOString(),
+    updated_at: new Date().toISOString()
   }
 
-  try {
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId)
-    console.log('Retrieved subscription from checkout:', subscription.id)
+  console.log('Upserting purchase data:', purchaseData)
 
-    // Process the subscription immediately
-    await handleSubscriptionChange(subscription)
-  } catch (error) {
-    console.error('Error retrieving subscription from checkout:', error)
+  // Upsert purchase
+  const { data, error } = await supabase
+    .from('user_purchases')
+    .upsert(purchaseData, {
+      onConflict: 'stripe_payment_intent_id'
+    })
+    .select()
+
+  if (error) {
+    console.error('Error upserting purchase:', error)
     throw error
   }
+
+  console.log('Successfully upserted purchase:', data)
 }
 
 async function handleSubscriptionChange(subscription: Stripe.Subscription) {

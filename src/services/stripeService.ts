@@ -14,13 +14,26 @@ export interface SubscriptionPlan {
 
 export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
   {
-    id: 'pro-monthly',
-    name: 'Pro',
-    price: 29,
-    interval: 'month',
-    stripePriceId: 'price_1Ruy4kAdBHYS516EV50u326a', // Your actual Stripe LIVE price ID
+    id: 'access-pack',
+    name: 'Resume Access Pack',
+    price: 9.99,
+    interval: 'one-time' as any,
+    stripePriceId: 'price_REPLACE_WITH_ONETIME_PRICE_ID', // Replace with your $9.99 one-time price ID
     features: [
-      'Access to 500+ resume examples',
+      'Access to 5 premium resumes',
+      'Download in PDF format',
+      'Basic search and filters',
+      '30-day access period'
+    ]
+  },
+  {
+    id: 'pro-monthly',
+    name: 'Pro Monthly',
+    price: 29.99,
+    interval: 'month',
+    stripePriceId: 'price_REPLACE_WITH_MONTHLY_PRICE_ID', // Replace with your $29.99 monthly price ID
+    features: [
+      'Unlimited resume access',
       'Advanced search and filters',
       'AI-powered insights',
       'Download in multiple formats',
@@ -44,17 +57,36 @@ export interface UserSubscription {
   updated_at: string
 }
 
+export interface UserPurchase {
+  id: string
+  user_id: string
+  stripe_payment_intent_id: string
+  plan_id: string
+  amount: number
+  status: 'succeeded' | 'pending' | 'failed'
+  resumes_remaining: number
+  expires_at: string
+  created_at: string
+  updated_at: string
+}
+
 export class StripeService {
   /**
-   * Create checkout session for subscription
+   * Create checkout session for subscription or one-time payment
    */
-  static async createCheckoutSession(priceId: string, userId: string): Promise<{ url?: string; error?: string }> {
+  static async createCheckoutSession(priceId: string, userId: string, planId: string): Promise<{ url?: string; error?: string }> {
     try {
+      // Determine if this is a one-time purchase or subscription
+      const plan = SUBSCRIPTION_PLANS.find(p => p.stripePriceId === priceId)
+      const isOneTime = plan?.interval === 'one-time'
+
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
         body: {
           priceId,
           userId,
-          successUrl: `${window.location.origin}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
+          planId,
+          mode: isOneTime ? 'payment' : 'subscription',
+          successUrl: `${window.location.origin}/${isOneTime ? 'purchase' : 'subscription'}/success?session_id={CHECKOUT_SESSION_ID}`,
           cancelUrl: `${window.location.origin}/pricing`
         }
       })
@@ -132,11 +164,45 @@ export class StripeService {
   }
 
   /**
+   * Get user's one-time purchase
+   */
+  static async getUserPurchase(userId: string): Promise<{ data: UserPurchase | null; error?: string }> {
+    try {
+      const { data, error } = await supabase
+        .from('user_purchases')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('status', 'succeeded')
+        .gt('expires_at', new Date().toISOString())
+        .gt('resumes_remaining', 0)
+        .single()
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+        console.error('Error fetching purchase:', error)
+        return { data: null, error: 'Failed to fetch purchase' }
+      }
+
+      return { data: data || null }
+    } catch (error) {
+      console.error('Unexpected error fetching purchase:', error)
+      return { data: null, error: 'An unexpected error occurred' }
+    }
+  }
+
+  /**
    * Check if user has active subscription
    */
   static async hasActiveSubscription(userId: string): Promise<boolean> {
     const { data } = await this.getUserSubscription(userId)
     return !!data && data.status === 'active' && new Date(data.current_period_end) > new Date()
+  }
+
+  /**
+   * Check if user has active purchase (with remaining resumes)
+   */
+  static async hasActivePurchase(userId: string): Promise<boolean> {
+    const { data } = await this.getUserPurchase(userId)
+    return !!data && data.resumes_remaining > 0 && new Date(data.expires_at) > new Date()
   }
 
   /**
@@ -185,7 +251,27 @@ export class StripeService {
   }
 
   /**
-   * Check if user can access resume (based on subscription and limits)
+   * Decrement resume count for purchased pack
+   */
+  static async decrementPurchaseCount(userId: string): Promise<void> {
+    try {
+      const { data: purchase } = await this.getUserPurchase(userId)
+      if (purchase && purchase.resumes_remaining > 0) {
+        await supabase
+          .from('user_purchases')
+          .update({
+            resumes_remaining: purchase.resumes_remaining - 1,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', purchase.id)
+      }
+    } catch (error) {
+      console.error('Error decrementing purchase count:', error)
+    }
+  }
+
+  /**
+   * Check if user can access resume (subscription, purchase, or free limit)
    */
   static async canAccessResume(userId: string, resumeId: string, isFeatured: boolean): Promise<{
     canAccess: boolean
@@ -193,35 +279,49 @@ export class StripeService {
   }> {
     try {
       console.log('🔍 Checking resume access for user:', userId, 'resume:', resumeId, 'featured:', isFeatured)
-      
-      // Check if user has active subscription (handle errors gracefully)
+
+      // Check if user has active subscription
       let hasSubscription = false;
       try {
         hasSubscription = await this.hasActiveSubscription(userId)
         console.log('📋 Has active subscription:', hasSubscription)
       } catch (subError) {
-        console.log('⚠️ Could not check subscription, treating as free user:', subError)
+        console.log('⚠️ Could not check subscription:', subError)
         hasSubscription = false;
       }
-      
+
       if (hasSubscription) {
-        console.log('✅ User has subscription - access granted')
+        console.log('✅ User has unlimited subscription - access granted')
         return { canAccess: true }
       }
 
-      // For free users, allow 1 resume access (handle database errors gracefully)
+      // Check if user has active purchase (5 resume pack)
+      let hasPurchase = false;
+      try {
+        hasPurchase = await this.hasActivePurchase(userId)
+        console.log('📋 Has active purchase:', hasPurchase)
+      } catch (purchaseError) {
+        console.log('⚠️ Could not check purchase:', purchaseError)
+        hasPurchase = false;
+      }
+
+      if (hasPurchase) {
+        console.log('✅ User has paid access pack - access granted')
+        return { canAccess: true }
+      }
+
+      // For free users, allow 1 resume access
       let accessCount = 0;
       try {
         accessCount = await this.getUserResumeAccessCount(userId)
-        console.log('📊 Current access count:', accessCount)
+        console.log('📊 Current free access count:', accessCount)
       } catch (accessError) {
         console.log('⚠️ Could not check access count, allowing first access:', accessError)
-        // If we can't check access count, assume 0 and allow access
         accessCount = 0;
       }
-      
+
       if (accessCount >= 1) {
-        console.log('❌ Access limit reached (1/1 used)')
+        console.log('❌ Free access limit reached (1/1 used)')
         return { canAccess: false, reason: 'limit_reached' }
       }
 
@@ -229,7 +329,6 @@ export class StripeService {
       return { canAccess: true }
     } catch (error) {
       console.error('❌ Error checking resume access:', error)
-      // In case of any error, allow access for new users
       console.log('🔓 Allowing access due to error (treating as new user)')
       return { canAccess: true }
     }
