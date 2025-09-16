@@ -85,6 +85,22 @@ const Pricing = () => {
       ],
       cta: "Subscribe now",
       popular: false
+    },
+    {
+      name: "Enterprise",
+      price: "Custom",
+      period: "contact us",
+      description: "For teams and organizations",
+      features: [
+        "Everything in Pro",
+        "Team collaboration tools",
+        "Custom branding",
+        "Dedicated account manager",
+        "Custom integrations",
+        "Advanced analytics"
+      ],
+      cta: "Contact sales",
+      popular: false
     }
   ];
 
@@ -138,7 +154,7 @@ const Pricing = () => {
       {/* Pricing Cards */}
       <section className="py-20">
         <div className="container max-w-6xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {plans.map((plan, index) => (
               <Card key={index} className={`relative transition-all duration-300 hover:scale-105 ${
                 plan.popular 
@@ -188,6 +204,8 @@ const Pricing = () => {
                         handleSubscribe('access-pack');
                       } else if (plan.name === 'Pro') {
                         handleSubscribe('pro-monthly');
+                      } else if (plan.name === 'Enterprise') {
+                        navigate('/contact');
                       }
                     }}
                     disabled={plan.name === 'Pro' && hasActiveSubscription}
@@ -220,22 +238,25 @@ const Pricing = () => {
                     <th className="text-center py-4 px-6 font-semibold">Free</th>
                     <th className="text-center py-4 px-6 font-semibold">Resume Pack</th>
                     <th className="text-center py-4 px-6 font-semibold">Pro</th>
+                    <th className="text-center py-4 px-6 font-semibold">Enterprise</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {[
-                    { feature: "Resume Examples", free: "1", pack: "5", pro: "Unlimited" },
-                    { feature: "Search & Filters", free: "Basic", pack: "Basic", pro: "Advanced" },
-                    { feature: "Download Formats", free: "❌", pack: "PDF", pro: "PDF, Word, Templates" },
-                    { feature: "AI Insights", free: "❌", pack: "❌", pro: "✅" },
-                    { feature: "Priority Support", free: "❌", pack: "❌", pro: "✅" },
-                    { feature: "Access Period", free: "Forever", pack: "30 days", pro: "Monthly billing" },
+                    { feature: "Resume Examples", free: "1", pack: "5", pro: "Unlimited", enterprise: "Unlimited" },
+                    { feature: "Search & Filters", free: "Basic", pack: "Basic", pro: "Advanced", enterprise: "Advanced" },
+                    { feature: "Download Formats", free: "❌", pack: "PDF", pro: "PDF, Word, Templates", enterprise: "All formats" },
+                    { feature: "AI Insights", free: "❌", pack: "❌", pro: "✅", enterprise: "✅" },
+                    { feature: "Priority Support", free: "❌", pack: "❌", pro: "✅", enterprise: "✅" },
+                    { feature: "Team Collaboration", free: "❌", pack: "❌", pro: "❌", enterprise: "✅" },
+                    { feature: "Access Period", free: "Forever", pack: "30 days", pro: "Monthly billing", enterprise: "Custom" },
                   ].map((row, index) => (
                     <tr key={index}>
                       <td className="py-4 px-6 font-medium">{row.feature}</td>
                       <td className="py-4 px-6 text-center">{row.free}</td>
                       <td className="py-4 px-6 text-center">{row.pack}</td>
                       <td className="py-4 px-6 text-center">{row.pro}</td>
+                      <td className="py-4 px-6 text-center">{row.enterprise}</td>
                     </tr>
                   ))}
                 </tbody>
