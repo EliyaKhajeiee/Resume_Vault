@@ -184,13 +184,21 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
   const expiresAt = new Date()
   expiresAt.setDate(expiresAt.getDate() + 30)
 
+  // Determine resume count based on amount paid
+  let resumesRemaining = 5; // Default for $1.01 pack gives 5 resumes
+  const amountInDollars = paymentIntent.amount / 100;
+
+  if (amountInDollars >= 1.01) {
+    resumesRemaining = 5; // 5 resumes for $1.01 pack
+  }
+
   const purchaseData = {
     user_id: userId,
     stripe_payment_intent_id: paymentIntent.id,
     plan_id: planId,
-    amount: paymentIntent.amount / 100, // Convert from cents
+    amount: amountInDollars,
     status: 'succeeded',
-    resumes_remaining: 5, // 5 resumes for $9.99 pack
+    resumes_remaining: resumesRemaining,
     expires_at: expiresAt.toISOString(),
     updated_at: new Date().toISOString()
   }
