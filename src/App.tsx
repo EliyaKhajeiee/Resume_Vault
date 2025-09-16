@@ -19,6 +19,7 @@ import AuthCallback from "./pages/auth/AuthCallback";
 import ResetPassword from "./pages/auth/ResetPassword";
 import Subscription from "./pages/Subscription";
 import SubscriptionSuccess from "./pages/SubscriptionSuccess";
+import PurchaseSuccess from "./pages/PurchaseSuccess";
 import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
@@ -45,6 +46,7 @@ const App = () => (
           <Route path="/auth/reset-password" element={<ResetPassword />} />
           <Route path="/subscription" element={<Subscription />} />
           <Route path="/subscription/success" element={<SubscriptionSuccess />} />
+          <Route path="/purchase/success" element={<PurchaseSuccess />} />
           <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
