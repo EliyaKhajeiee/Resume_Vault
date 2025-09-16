@@ -77,7 +77,6 @@ const Pricing = () => {
       features: [
         "Unlimited resume access",
         "Advanced search and filters",
-        "AI-powered insights",
         "Download in multiple formats",
         "Priority support",
         "Resume review checklist",
@@ -90,14 +89,15 @@ const Pricing = () => {
       name: "Enterprise",
       price: "Custom",
       period: "contact us",
-      description: "For teams and organizations",
+      description: "Bulk deals for universities, schools, and organizations",
       features: [
         "Everything in Pro",
         "Team collaboration tools",
         "Custom branding",
         "Dedicated account manager",
         "Custom integrations",
-        "Advanced analytics"
+        "Advanced analytics",
+        "Volume discounts"
       ],
       cta: "Contact sales",
       popular: false
@@ -246,9 +246,9 @@ const Pricing = () => {
                     { feature: "Resume Examples", free: "1", pack: "5", pro: "Unlimited", enterprise: "Unlimited" },
                     { feature: "Search & Filters", free: "Basic", pack: "Basic", pro: "Advanced", enterprise: "Advanced" },
                     { feature: "Download Formats", free: "❌", pack: "PDF", pro: "PDF, Word, Templates", enterprise: "All formats" },
-                    { feature: "AI Insights", free: "❌", pack: "❌", pro: "✅", enterprise: "✅" },
                     { feature: "Priority Support", free: "❌", pack: "❌", pro: "✅", enterprise: "✅" },
                     { feature: "Team Collaboration", free: "❌", pack: "❌", pro: "❌", enterprise: "✅" },
+                    { feature: "Volume Discounts", free: "❌", pack: "❌", pro: "❌", enterprise: "✅" },
                     { feature: "Access Period", free: "Forever", pack: "30 days", pro: "Monthly billing", enterprise: "Custom" },
                   ].map((row, index) => (
                     <tr key={index}>
