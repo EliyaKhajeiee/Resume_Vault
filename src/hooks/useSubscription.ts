@@ -59,7 +59,7 @@ export const useSubscription = () => {
     }
 
     const { url, error } = await StripeService.createPortalSession(subscription.stripe_customer_id)
-    
+
     if (error) {
       throw new Error(error)
     }
@@ -67,6 +67,30 @@ export const useSubscription = () => {
     if (url) {
       window.location.href = url
     }
+  }
+
+  const cancelSubscription = async (feedback?: {
+    reason: string
+    comments: string
+    satisfaction: string
+  }) => {
+    if (!subscription?.stripe_subscription_id) {
+      throw new Error('No active subscription found')
+    }
+
+    const { success, error } = await StripeService.cancelSubscription(
+      subscription.stripe_subscription_id,
+      feedback
+    )
+
+    if (error) {
+      throw new Error(error)
+    }
+
+    // Refresh subscription data after cancellation
+    await fetchSubscription()
+
+    return { success }
   }
 
   const hasActiveSubscription = subscription?.status === 'active' && 
@@ -94,6 +118,7 @@ export const useSubscription = () => {
     hasActiveSubscription,
     createCheckoutSession,
     createPortalSession,
+    cancelSubscription,
     canAccessResume,
     canDownloadResume,
     recordResumeAccess,

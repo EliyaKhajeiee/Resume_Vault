@@ -2,19 +2,21 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, Calendar, ExternalLink } from "lucide-react";
+import { CreditCard, Calendar, ExternalLink, XCircle } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import CancellationDialog, { type CancellationFeedback } from "@/components/CancellationDialog";
 
 const Subscription = () => {
   const { isAuthenticated } = useAuth();
-  const { subscription, hasActiveSubscription, createPortalSession, loading } = useSubscription();
+  const { subscription, hasActiveSubscription, createPortalSession, cancelSubscription, loading } = useSubscription();
   const navigate = useNavigate();
   const [portalLoading, setPortalLoading] = useState(false);
+  const [showCancellationDialog, setShowCancellationDialog] = useState(false);
 
   if (!isAuthenticated) {
     navigate('/pricing');
@@ -35,6 +37,18 @@ const Subscription = () => {
       toast.error("Failed to open subscription management");
     } finally {
       setPortalLoading(false);
+    }
+  };
+
+  const handleCancelSubscription = async (feedback: CancellationFeedback) => {
+    try {
+      await cancelSubscription(feedback);
+      toast.success("Your subscription has been cancelled successfully");
+      setShowCancellationDialog(false);
+    } catch (error) {
+      console.error('Error cancelling subscription:', error);
+      toast.error("Failed to cancel subscription. Please try again.");
+      throw error; // Re-throw to prevent dialog from closing
     }
   };
 
@@ -116,14 +130,24 @@ const Subscription = () => {
                   </div>
                   
                   <div className="pt-4 border-t">
-                    <Button 
-                      onClick={handleManageSubscription}
-                      disabled={portalLoading}
-                      className="flex items-center gap-2"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                      {portalLoading ? 'Loading...' : 'Manage Billing & Payment'}
-                    </Button>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Button
+                        onClick={handleManageSubscription}
+                        disabled={portalLoading}
+                        className="flex items-center gap-2"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        {portalLoading ? 'Loading...' : 'Manage Billing & Payment'}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowCancellationDialog(true)}
+                        className="flex items-center gap-2 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                      >
+                        <XCircle className="w-4 h-4" />
+                        Cancel Subscription
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -180,12 +204,6 @@ const Subscription = () => {
                   <div className="flex items-center gap-2">
                     <div className={`w-4 h-4 rounded-full ${hasActiveSubscription ? 'bg-green-500' : 'bg-gray-300'}`} />
                     <span className={hasActiveSubscription ? 'text-gray-900' : 'text-gray-500'}>
-                      AI-powered insights
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className={`w-4 h-4 rounded-full ${hasActiveSubscription ? 'bg-green-500' : 'bg-gray-300'}`} />
-                    <span className={hasActiveSubscription ? 'text-gray-900' : 'text-gray-500'}>
                       Priority support
                     </span>
                   </div>
@@ -227,8 +245,16 @@ const Subscription = () => {
           </Card>
         </div>
       </div>
-      
+
       <Footer />
+
+      {/* Cancellation Dialog */}
+      <CancellationDialog
+        open={showCancellationDialog}
+        onOpenChange={setShowCancellationDialog}
+        onConfirmCancel={handleCancelSubscription}
+        subscription={subscription}
+      />
     </div>
   );
 };

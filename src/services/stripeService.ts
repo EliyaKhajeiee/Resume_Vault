@@ -128,6 +128,34 @@ export class StripeService {
   }
 
   /**
+   * Cancel subscription
+   */
+  static async cancelSubscription(subscriptionId: string, feedback?: {
+    reason: string
+    comments: string
+    satisfaction: string
+  }): Promise<{ success?: boolean; error?: string }> {
+    try {
+      const { data, error } = await supabase.functions.invoke('cancel-subscription', {
+        body: {
+          subscriptionId,
+          feedback
+        }
+      })
+
+      if (error) {
+        console.error('Error cancelling subscription:', error)
+        return { error: 'Failed to cancel subscription' }
+      }
+
+      return { success: true }
+    } catch (error) {
+      console.error('Unexpected error cancelling subscription:', error)
+      return { error: 'An unexpected error occurred' }
+    }
+  }
+
+  /**
    * Get user's subscription
    */
   static async getUserSubscription(userId: string): Promise<{ data: UserSubscription | null; error?: string }> {
