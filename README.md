@@ -70,3 +70,4 @@ The app will be available at `http://localhost:8080`
 - **Backend**: Supabase (Database + Auth + Storage)
 - **Routing**: React Router
 - **State Management**: React Query + Custom Hooks
+# Environment variables configured - Mon, Sep 15, 2025  6:36:15 PM

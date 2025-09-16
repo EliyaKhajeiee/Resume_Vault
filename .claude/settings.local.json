@@ -34,7 +34,10 @@
       "Bash(else echo \"❌ VITE_STRIPE_PUBLISHABLE_KEY missing\")",
       "WebFetch(domain:resumeproof.com)",
       "Bash(curl:*)",
-      "Bash(deploy_functions.bat)"
+      "Bash(deploy_functions.bat)",
+      "Bash(if grep -q \"SUPABASE_SERVICE_ROLE_KEY\" .env)",
+      "Bash(then echo \"✅ SUPABASE_SERVICE_ROLE_KEY found\")",
+      "Bash(else echo \"❌ SUPABASE_SERVICE_ROLE_KEY missing\")"
     ],
     "deny": []
   }
