@@ -1,12 +1,15 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+// Import modules but don't initialize with environment variables yet
+const Stripe = require('stripe');
 const { createClient } = require('@supabase/supabase-js');
 
-const supabase = createClient(
-  process.env.VITE_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
-
 exports.handler = async (event, context) => {
+  // Initialize Stripe and Supabase here, inside the handler where env vars are available
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+  const supabase = createClient(
+    process.env.VITE_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+
   // Handle CORS
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -33,6 +36,9 @@ exports.handler = async (event, context) => {
 
   try {
     console.log('🎯 Netlify webhook received');
+    console.log('🔑 Stripe key exists:', !!process.env.STRIPE_SECRET_KEY);
+    console.log('🔑 Supabase URL exists:', !!process.env.VITE_SUPABASE_URL);
+    console.log('🔑 Service role key exists:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
 
     // Parse the event
     let stripeEvent;
