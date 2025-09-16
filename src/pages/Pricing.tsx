@@ -56,12 +56,26 @@ const Pricing = () => {
       popular: false
     },
     {
-      name: "Pro",
-      price: "$29",
-      period: "month",
-      description: "Everything you need to land your dream job",
+      name: "Resume Pack",
+      price: "$1.01",
+      period: "one-time",
+      description: "Get access to 5 premium resumes",
       features: [
-        "Access to 500+ resume examples",
+        "Access to 5 premium resumes",
+        "Download in PDF format",
+        "Basic search and filters",
+        "30-day access period"
+      ],
+      cta: "Buy now",
+      popular: true
+    },
+    {
+      name: "Pro",
+      price: "$1.00",
+      period: "month",
+      description: "Unlimited access to all resumes",
+      features: [
+        "Unlimited resume access",
         "Advanced search and filters",
         "AI-powered insights",
         "Download in multiple formats",
@@ -70,22 +84,6 @@ const Pricing = () => {
         "Industry-specific templates"
       ],
       cta: "Subscribe now",
-      popular: true
-    },
-    {
-      name: "Enterprise",
-      price: "Custom",
-      period: "contact us",
-      description: "For teams and organizations",
-      features: [
-        "Everything in Pro",
-        "Team collaboration tools",
-        "Custom branding",
-        "Dedicated account manager",
-        "Custom integrations",
-        "Advanced analytics"
-      ],
-      cta: "Contact sales",
       popular: false
     }
   ];
@@ -125,7 +123,7 @@ const Pricing = () => {
             Choose your <span className="text-blue-600">career path</span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-            Start free with 1 resume view, then unlock unlimited access with proven resume examples.
+            Start free with 1 resume view, get 5 resumes for $1.01, or unlimited access for $1/month.
           </p>
           <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
             <span>✅ No hidden fees</span>
@@ -186,11 +184,10 @@ const Pricing = () => {
                     onClick={() => {
                       if (plan.name === 'Free') {
                         navigate('/resumes');
+                      } else if (plan.name === 'Resume Pack') {
+                        handleSubscribe('access-pack');
                       } else if (plan.name === 'Pro') {
                         handleSubscribe('pro-monthly');
-                      } else {
-                        // Contact sales for enterprise
-                        navigate('/contact');
                       }
                     }}
                     disabled={plan.name === 'Pro' && hasActiveSubscription}
@@ -221,24 +218,24 @@ const Pricing = () => {
                   <tr>
                     <th className="text-left py-4 px-6 font-semibold">Features</th>
                     <th className="text-center py-4 px-6 font-semibold">Free</th>
+                    <th className="text-center py-4 px-6 font-semibold">Resume Pack</th>
                     <th className="text-center py-4 px-6 font-semibold">Pro</th>
-                    <th className="text-center py-4 px-6 font-semibold">Enterprise</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {[
-                    { feature: "Resume Examples", free: "1", pro: "500+", enterprise: "500+" },
-                    { feature: "Search & Filters", free: "Basic", pro: "Advanced", enterprise: "Advanced" },
-                    { feature: "Download Formats", free: "❌", pro: "PDF, Word, Templates", enterprise: "All formats" },
-                    { feature: "AI Insights", free: "❌", pro: "✅", enterprise: "✅" },
-                    { feature: "Priority Support", free: "❌", pro: "✅", enterprise: "✅" },
-                    { feature: "Team Collaboration", free: "❌", pro: "❌", enterprise: "✅" },
+                    { feature: "Resume Examples", free: "1", pack: "5", pro: "Unlimited" },
+                    { feature: "Search & Filters", free: "Basic", pack: "Basic", pro: "Advanced" },
+                    { feature: "Download Formats", free: "❌", pack: "PDF", pro: "PDF, Word, Templates" },
+                    { feature: "AI Insights", free: "❌", pack: "❌", pro: "✅" },
+                    { feature: "Priority Support", free: "❌", pack: "❌", pro: "✅" },
+                    { feature: "Access Period", free: "Forever", pack: "30 days", pro: "Monthly billing" },
                   ].map((row, index) => (
                     <tr key={index}>
                       <td className="py-4 px-6 font-medium">{row.feature}</td>
                       <td className="py-4 px-6 text-center">{row.free}</td>
+                      <td className="py-4 px-6 text-center">{row.pack}</td>
                       <td className="py-4 px-6 text-center">{row.pro}</td>
-                      <td className="py-4 px-6 text-center">{row.enterprise}</td>
                     </tr>
                   ))}
                 </tbody>
