@@ -279,6 +279,34 @@ export class StripeService {
   }
 
   /**
+   * Process resume access - handles both free users and paid pack users
+   */
+  static async processResumeAccess(userId: string, resumeId: string): Promise<void> {
+    try {
+      // Check if user has active subscription (unlimited access)
+      const hasSubscription = await this.hasActiveSubscription(userId)
+      if (hasSubscription) {
+        console.log('✅ User has subscription - no tracking needed')
+        return
+      }
+
+      // Check if user has active purchase (5 resume pack)
+      const hasPurchase = await this.hasActivePurchase(userId)
+      if (hasPurchase) {
+        console.log('📦 User has purchase pack - decrementing count')
+        await this.decrementPurchaseCount(userId)
+        return
+      }
+
+      // Free user - record access for limit tracking
+      console.log('🆓 Free user - recording access')
+      await this.recordResumeAccess(userId, resumeId)
+    } catch (error) {
+      console.error('Error processing resume access:', error)
+    }
+  }
+
+  /**
    * Decrement resume count for purchased pack
    */
   static async decrementPurchaseCount(userId: string): Promise<void> {
@@ -367,5 +395,26 @@ export class StripeService {
    */
   static async canDownloadResume(userId: string): Promise<boolean> {
     return await this.hasActiveSubscription(userId)
+  }
+
+  /**
+   * Create test purchase for development/testing (gives 5 resume access for 30 days)
+   */
+  static async createTestPurchase(): Promise<{ success?: boolean; error?: string; purchase?: any }> {
+    try {
+      const { data, error } = await supabase.functions.invoke('create-test-purchase', {
+        body: {}
+      })
+
+      if (error) {
+        console.error('Error creating test purchase:', error)
+        return { error: 'Failed to create test purchase' }
+      }
+
+      return { success: true, purchase: data.purchase }
+    } catch (error) {
+      console.error('Unexpected error creating test purchase:', error)
+      return { error: 'An unexpected error occurred' }
+    }
   }
 }

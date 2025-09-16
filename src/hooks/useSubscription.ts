@@ -108,7 +108,7 @@ export const useSubscription = () => {
 
   const recordResumeAccess = async (resumeId: string) => {
     if (!user) return
-    await StripeService.recordResumeAccess(user.id, resumeId)
+    await StripeService.processResumeAccess(user.id, resumeId)
   }
 
   return {

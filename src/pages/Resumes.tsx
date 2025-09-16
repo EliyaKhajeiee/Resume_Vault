@@ -109,16 +109,14 @@ const Resumes = () => {
     // Show a toast to confirm it's working
     toast.success('Resume access granted! Modal should be open.');
 
-    // Do the recording in background (don't wait for it)
+    // Process resume access for all user types (free, paid pack, subscription)
     console.log('📊 hasActiveSubscription:', hasActiveSubscription);
-    if (!hasActiveSubscription) {
-      console.log('📝 Recording resume access in background...');
-      recordResumeAccess(resume.id).then(() => {
-        console.log('✅ Resume access recorded in background');
-      }).catch(error => {
-        console.log('⚠️ Background recording failed:', error);
-      });
-    }
+    console.log('📝 Processing resume access in background...');
+    recordResumeAccess(resume.id).then(() => {
+      console.log('✅ Resume access processed in background');
+    }).catch(error => {
+      console.log('⚠️ Background processing failed:', error);
+    });
 
     // Increment view count in background too
     ResumeService.incrementViewCount(resume.id).then(() => {

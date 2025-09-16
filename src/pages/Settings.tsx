@@ -10,12 +10,14 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
+import { StripeService } from "@/services/stripeService";
 import { toast } from "sonner";
 
 const Settings = () => {
   const { user } = useAuth();
-  const { subscription, hasActiveSubscription, createPortalSession } = useSubscription();
+  const { subscription, hasActiveSubscription, createPortalSession, refetch } = useSubscription();
   const [isManagingSubscription, setIsManagingSubscription] = useState(false);
+  const [isCreatingTestPurchase, setIsCreatingTestPurchase] = useState(false);
 
   const handleManageSubscription = async () => {
     if (!subscription?.stripe_customer_id) {
@@ -31,6 +33,25 @@ const Settings = () => {
       console.error(error);
     } finally {
       setIsManagingSubscription(false);
+    }
+  };
+
+  const handleCreateTestPurchase = async () => {
+    setIsCreatingTestPurchase(true);
+    try {
+      const { success, error } = await StripeService.createTestPurchase();
+      if (error) {
+        toast.error(error);
+      } else {
+        toast.success("Test purchase created! You now have 5 resume access for 30 days.");
+        // Refresh subscription data to show the purchase
+        await refetch();
+      }
+    } catch (error) {
+      toast.error("Failed to create test purchase");
+      console.error(error);
+    } finally {
+      setIsCreatingTestPurchase(false);
     }
   };
 
@@ -165,6 +186,38 @@ const Settings = () => {
             </CardContent>
           </Card>
 
+          {/* Test Purchase - Development Only */}
+          {process.env.NODE_ENV === 'development' && (
+            <Card className="border-orange-200 bg-orange-50">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-orange-600" />
+                  <CardTitle className="text-orange-800">Development Testing</CardTitle>
+                </div>
+                <CardDescription className="text-orange-700">
+                  Create a test purchase to test the 5-resume pack functionality
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="p-4 bg-white rounded-lg border border-orange-200">
+                    <h4 className="font-semibold text-orange-800 mb-2">Test $1.01 Resume Pack</h4>
+                    <p className="text-sm text-orange-700 mb-3">
+                      This will give you 5 resume access for 30 days to test the purchase functionality.
+                    </p>
+                    <Button
+                      onClick={handleCreateTestPurchase}
+                      disabled={isCreatingTestPurchase}
+                      variant="outline"
+                      className="border-orange-300 text-orange-700 hover:bg-orange-100"
+                    >
+                      {isCreatingTestPurchase ? "Creating..." : "Create Test Purchase"}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Support & Contact */}
           <Card>
