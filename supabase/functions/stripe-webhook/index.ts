@@ -15,16 +15,20 @@ const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET')!
 
 serve(async (req) => {
   console.log('Webhook received:', req.method)
-  
+
+  // Set CORS headers for all responses
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, stripe-signature',
+    'Content-Type': 'application/json',
+  }
+
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST',
-        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, stripe-signature',
-      },
+      headers: corsHeaders,
     })
   }
 
@@ -106,24 +110,18 @@ serve(async (req) => {
     }
 
     console.log('Webhook processed successfully')
-    return new Response(JSON.stringify({ received: true }), { 
+    return new Response(JSON.stringify({ received: true }), {
       status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      }
+      headers: corsHeaders
     })
   } catch (error) {
     console.error('Error processing webhook:', error)
-    return new Response(JSON.stringify({ 
-      error: 'Internal server error', 
-      details: error.message 
-    }), { 
+    return new Response(JSON.stringify({
+      error: 'Internal server error',
+      details: error.message
+    }), {
       status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      }
+      headers: corsHeaders
     })
   }
 })
