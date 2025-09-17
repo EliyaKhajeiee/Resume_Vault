@@ -22,7 +22,7 @@ const About = () => {
       name: "Eliya Khajeie",
       role: "CTO & Co-Founder",
       bio: "Owner of a premier software engineering firm serving multi-million dollar enterprises. Expert in scaling technical teams and building world-class products.",
-      image: "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop"
+      image: "/images/eliya-profile.webp"
     }
   ];
 

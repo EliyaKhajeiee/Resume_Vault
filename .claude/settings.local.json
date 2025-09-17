@@ -41,7 +41,8 @@
       "WebFetch(domain:dashboard.stripe.com)",
       "Bash(deploy_cancel_function.bat)",
       "Bash(./deploy_cancel_function.bat)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(./deploy_migration.bat)"
     ],
     "deny": []
   }
