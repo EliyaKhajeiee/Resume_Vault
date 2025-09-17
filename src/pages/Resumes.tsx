@@ -111,6 +111,12 @@ const Resumes = () => {
     setSelectedResume(resume);
     setIsViewDialogOpen(true);
 
+    // Debug: Force check modal state
+    setTimeout(() => {
+      console.log('🔍 Modal Debug - isViewDialogOpen:', isViewDialogOpen);
+      console.log('🔍 Modal Debug - selectedResume:', selectedResume?.title);
+    }, 100);
+
     // IMPORTANT: Only record access AFTER modal opens successfully
     // This ensures the user actually gets to see the resume before consuming their free use
     if (!hasActiveSubscription && !hasActivePurchase) {
@@ -362,6 +368,7 @@ const Resumes = () => {
       </div>
 
       {/* Resume View Dialog */}
+      {console.log('🔍 Rendering Dialog - isViewDialogOpen:', isViewDialogOpen, 'selectedResume:', selectedResume?.title)}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
