@@ -10,27 +10,46 @@ const AuthCallback = () => {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // Handle the auth callback from email confirmation
-        const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.search);
-        
+        console.log('Auth callback - URL:', window.location.href);
+        console.log('Auth callback - Search:', window.location.search);
+        console.log('Auth callback - Hash:', window.location.hash);
+
+        // For PKCE flow, use the full URL instead of just search params
+        const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+
         if (error) {
           console.error('Auth callback error:', error);
-          // Try to get existing session as fallback
+
+          // Check if user is already authenticated
           const { data: sessionData } = await supabase.auth.getSession();
           if (sessionData.session) {
-            toast.success('Email confirmed successfully! You are now signed in.');
+            console.log('User already has session, redirecting...');
+            toast.success('You are already signed in!');
             navigate('/');
             return;
           }
+
+          // Check if this is just a URL visit without auth codes
+          const urlParams = new URLSearchParams(window.location.search);
+          const hasAuthCode = urlParams.has('code') || window.location.hash.includes('access_token');
+
+          if (!hasAuthCode) {
+            console.log('No auth code found, redirecting to home...');
+            navigate('/');
+            return;
+          }
+
           toast.error('Email confirmation failed. The link may have expired.');
           navigate('/');
           return;
         }
 
         if (data?.session) {
+          console.log('Auth callback successful, session created');
           toast.success('Email confirmed successfully! You are now signed in.');
           navigate('/');
         } else {
+          console.log('Auth callback returned no session');
           toast.error('Email confirmation failed. Please try again.');
           navigate('/');
         }
