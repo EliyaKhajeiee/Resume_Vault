@@ -70,6 +70,22 @@ export interface UserPurchase {
   updated_at: string
 }
 
+// Simple cache to prevent excessive API calls
+const cache = new Map()
+const CACHE_TIME = 300000 // 5 minutes
+
+const getCachedData = (key: string) => {
+  const cached = cache.get(key)
+  if (cached && Date.now() - cached.timestamp < CACHE_TIME) {
+    return cached.data
+  }
+  return null
+}
+
+const setCachedData = (key: string, data: any) => {
+  cache.set(key, { data, timestamp: Date.now() })
+}
+
 export class StripeService {
   /**
    * Create checkout session for subscription or one-time payment
@@ -108,16 +124,30 @@ export class StripeService {
    */
   static async createPortalSession(customerId: string): Promise<{ url?: string; error?: string }> {
     try {
-      const { data, error } = await supabase.functions.invoke('create-portal-session', {
-        body: {
+      console.log('🔑 Creating portal session for customer:', customerId)
+
+      const response = await fetch('/.netlify/functions/create-portal-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           customerId,
-          returnUrl: `${window.location.origin}/subscription`
-        }
+          returnUrl: `${window.location.origin}/settings`
+        })
       })
 
-      if (error) {
-        console.error('Error creating portal session:', error)
-        return { error: 'Failed to create portal session' }
+      const data = await response.json()
+
+      if (!response.ok) {
+        console.error('Portal session error:', data)
+        return { error: data.error || 'Failed to create portal session' }
+      }
+
+      console.log('✅ Portal session created successfully')
+
+      if (data.isTestCustomer) {
+        console.log('⚠️ Test customer - redirecting to support')
       }
 
       return { url: data.url }
@@ -136,21 +166,47 @@ export class StripeService {
     satisfaction: string
   }): Promise<{ success?: boolean; error?: string }> {
     try {
-      const { data, error } = await supabase.functions.invoke('cancel-subscription', {
-        body: {
+      console.log('🔗 StripeService.cancelSubscription called with:', subscriptionId)
+
+      // Get current user session for auth token
+      const { data: { session } } = await supabase.auth.getSession()
+      console.log('🔗 Session exists:', !!session?.access_token)
+
+      if (!session?.access_token) {
+        return { error: 'Not authenticated' }
+      }
+
+      console.log('🔗 Making request to cancel-subscription function...')
+
+      const response = await fetch('/.netlify/functions/cancel-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
           subscriptionId,
           feedback
-        }
+        })
       })
 
-      if (error) {
-        console.error('Error cancelling subscription:', error)
-        return { error: 'Failed to cancel subscription' }
+      console.log('🔗 Response status:', response.status)
+
+      const data = await response.json()
+      console.log('🔗 Response data:', data)
+
+      if (!response.ok) {
+        console.error('🔗 Cancellation error:', data)
+        return { error: data.error || 'Failed to cancel subscription' }
       }
+
+      // Clear cache after successful cancellation to force fresh data
+      cache.clear()
+      console.log('🔗 Cache cleared, cancellation successful')
 
       return { success: true }
     } catch (error) {
-      console.error('Unexpected error cancelling subscription:', error)
+      console.error('🔗 Unexpected cancellation error:', error)
       return { error: 'An unexpected error occurred' }
     }
   }
@@ -159,35 +215,24 @@ export class StripeService {
    * Get user's subscription
    */
   static async getUserSubscription(userId: string): Promise<{ data: UserSubscription | null; error?: string }> {
+    const cacheKey = `subscription_${userId}`
+    const cached = getCachedData(cacheKey)
+    if (cached !== null) return { data: cached }
+
     try {
-      console.log('Querying subscriptions for user_id:', userId)
-      
-      // First, let's check all subscriptions for this user (for debugging)
-      const { data: allSubs, error: allError } = await supabase
+      const { data: subscription, error } = await supabase
         .from('user_subscriptions')
         .select('*')
         .eq('user_id', userId)
-      
-      console.log('All subscriptions for user:', allSubs)
-      
-      const { data, error } = await supabase
-        .from('user_subscriptions')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('status', 'active')
+        .order('updated_at', { ascending: false })
+        .limit(1)
         .single()
 
-      console.log('Active subscription query result:', { data, error })
-
-      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
-        console.error('Error fetching subscription:', error)
-        return { data: null, error: 'Failed to fetch subscription' }
-      }
-
-      return { data: data || null }
+      const result = (error && error.code !== 'PGRST116') ? null : (subscription || null)
+      setCachedData(cacheKey, result)
+      return { data: result }
     } catch (error) {
-      console.error('Unexpected error fetching subscription:', error)
-      return { data: null, error: 'An unexpected error occurred' }
+      return { data: null }
     }
   }
 
@@ -195,25 +240,25 @@ export class StripeService {
    * Get user's one-time purchase
    */
   static async getUserPurchase(userId: string): Promise<{ data: UserPurchase | null; error?: string }> {
+    const cacheKey = `purchase_${userId}`
+    const cached = getCachedData(cacheKey)
+    if (cached !== null) return { data: cached }
+
     try {
-      const { data, error } = await supabase
+      const { data: purchases, error } = await supabase
         .from('user_purchases')
         .select('*')
         .eq('user_id', userId)
         .eq('status', 'succeeded')
         .gt('expires_at', new Date().toISOString())
-        .gt('resumes_remaining', 0)
-        .single()
+        .order('created_at', { ascending: false })
+        .limit(1)
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
-        console.error('Error fetching purchase:', error)
-        return { data: null, error: 'Failed to fetch purchase' }
-      }
-
-      return { data: data || null }
+      const result = error ? null : (purchases?.[0] || null)
+      setCachedData(cacheKey, result)
+      return { data: result }
     } catch (error) {
-      console.error('Unexpected error fetching purchase:', error)
-      return { data: null, error: 'An unexpected error occurred' }
+      return { data: null }
     }
   }
 
@@ -229,8 +274,23 @@ export class StripeService {
    * Check if user has active purchase (with remaining resumes)
    */
   static async hasActivePurchase(userId: string): Promise<boolean> {
-    const { data } = await this.getUserPurchase(userId)
-    return !!data && data.resumes_remaining > 0 && new Date(data.expires_at) > new Date()
+    try {
+      console.log('🔍 Checking if user has active purchase:', userId)
+      const { data, error } = await this.getUserPurchase(userId)
+
+      if (error) {
+        console.log('❌ Error checking purchase:', error)
+        return false
+      }
+
+      const hasActive = !!data && data.resumes_remaining > 0 && new Date(data.expires_at) > new Date()
+      console.log('🔍 Has active purchase result:', hasActive, data ? `(${data.resumes_remaining} resumes left)` : '(no purchase)')
+
+      return hasActive
+    } catch (error) {
+      console.error('Error in hasActivePurchase:', error)
+      return false
+    }
   }
 
   /**
@@ -311,6 +371,9 @@ export class StripeService {
    */
   static async decrementPurchaseCount(userId: string): Promise<void> {
     try {
+      // Clear cache to get fresh data
+      cache.delete(`purchase_${userId}`)
+
       const { data: purchase } = await this.getUserPurchase(userId)
       if (purchase && purchase.resumes_remaining > 0) {
         await supabase
@@ -320,6 +383,9 @@ export class StripeService {
             updated_at: new Date().toISOString()
           })
           .eq('id', purchase.id)
+
+        // Clear cache again after update
+        cache.delete(`purchase_${userId}`)
       }
     } catch (error) {
       console.error('Error decrementing purchase count:', error)

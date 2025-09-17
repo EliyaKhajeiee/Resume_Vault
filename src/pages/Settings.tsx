@@ -12,12 +12,15 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { StripeService } from "@/services/stripeService";
 import { toast } from "sonner";
+import CancellationDialog, { type CancellationFeedback } from "@/components/CancellationDialog";
 
 const Settings = () => {
   const { user } = useAuth();
-  const { subscription, hasActiveSubscription, createPortalSession, refetch } = useSubscription();
+  const { subscription, purchase, hasActiveSubscription, hasActivePurchase, createPortalSession, cancelSubscription, refetch } = useSubscription();
+
   const [isManagingSubscription, setIsManagingSubscription] = useState(false);
   const [isCreatingTestPurchase, setIsCreatingTestPurchase] = useState(false);
+  const [showCancellationDialog, setShowCancellationDialog] = useState(false);
 
   const handleManageSubscription = async () => {
     if (!subscription?.stripe_customer_id) {
@@ -27,12 +30,40 @@ const Settings = () => {
 
     setIsManagingSubscription(true);
     try {
-      await createPortalSession();
+      const { url, error } = await StripeService.createPortalSession(subscription.stripe_customer_id);
+
+      if (error) {
+        toast.error(error);
+        return;
+      }
+
+      if (url) {
+        // Check if this is a test customer redirect
+        if (url.includes('/contact')) {
+          toast.info("For subscription management assistance, please contact support");
+        }
+        window.location.href = url;
+      }
     } catch (error) {
       toast.error("Failed to open subscription management");
       console.error(error);
     } finally {
       setIsManagingSubscription(false);
+    }
+  };
+
+  const handleCancelSubscription = async (feedback: CancellationFeedback) => {
+    try {
+      console.log('🚫 Starting cancellation process...');
+      await cancelSubscription(feedback);
+      toast.success("Your subscription has been cancelled successfully");
+      setShowCancellationDialog(false);
+
+      refetch();
+
+    } catch (error) {
+      toast.error("Failed to cancel subscription. Please try again.");
+      throw error; // Re-throw to prevent dialog from closing
     }
   };
 
@@ -107,8 +138,22 @@ const Settings = () => {
                 <div>
                   <Label htmlFor="status">Account Status</Label>
                   <div className="mt-2">
-                    <Badge variant={hasActiveSubscription ? "default" : "secondary"}>
-                      {hasActiveSubscription ? "Pro Member" : "Free Account"}
+                    <Badge variant={
+                      hasActiveSubscription
+                        ? "default"
+                        : subscription?.status === 'canceled'
+                        ? "destructive"
+                        : hasActivePurchase
+                        ? "outline"
+                        : "secondary"
+                    }>
+                      {hasActiveSubscription
+                        ? "Pro Member"
+                        : subscription?.status === 'canceled'
+                        ? "Pro Member (Canceled)"
+                        : hasActivePurchase
+                        ? `Resume Pack (${purchase?.resumes_remaining} left)`
+                        : "Free Account"}
                     </Badge>
                   </div>
                 </div>
@@ -128,13 +173,16 @@ const Settings = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {hasActiveSubscription && subscription ? (
+              {subscription ? (
+                hasActiveSubscription ? (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label>Current Plan</Label>
                       <div className="mt-1">
-                        <Badge className="bg-blue-600">Pro - $29/month</Badge>
+                        <Badge className="bg-blue-600">
+                          {subscription.plan_id === 'pro-monthly' ? 'Pro - $1/month' : subscription.plan_id}
+                        </Badge>
                       </div>
                     </div>
                     <div>
@@ -160,18 +208,81 @@ const Settings = () => {
                   </div>
                   
                   <div className="pt-4 border-t">
-                    <Button 
-                      onClick={handleManageSubscription}
-                      disabled={isManagingSubscription}
-                      className="w-full sm:w-auto"
-                    >
-                      {isManagingSubscription ? "Opening..." : "Manage Subscription & Billing"}
-                    </Button>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Button
+                        onClick={handleManageSubscription}
+                        disabled={isManagingSubscription}
+                        className="flex-1 sm:flex-initial"
+                      >
+                        {isManagingSubscription ? "Opening..." : "Manage Billing"}
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={() => setShowCancellationDialog(true)}
+                        className="flex-1 sm:flex-initial"
+                      >
+                        Cancel Subscription
+                      </Button>
+                    </div>
                     <p className="text-xs text-gray-500 mt-2">
-                      Update payment methods, view invoices, or cancel your subscription
+                      {subscription.stripe_customer_id?.startsWith('cus_test_')
+                        ? "Cancel anytime - no commitments or contracts"
+                        : "Update payment methods, view invoices, or cancel your subscription"
+                      }
                     </p>
                   </div>
                 </div>
+                ) : (
+                  // Canceled subscription display
+                  <div className="space-y-4">
+                    <div className="text-center py-6 bg-red-50 rounded-lg border border-red-200">
+                      <div className="mb-4">
+                        <h3 className="text-lg font-semibold text-red-900">Subscription Canceled</h3>
+                        <p className="text-red-700">Your Pro subscription has been canceled</p>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 text-left">
+                        <div>
+                          <Label>Plan</Label>
+                          <div className="mt-1">
+                            <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300">
+                              {subscription.plan_id === 'pro-monthly' ? 'Pro - $1/month (Canceled)' : `${subscription.plan_id} (Canceled)`}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Status</Label>
+                          <div className="mt-1">
+                            <Badge variant="destructive">
+                              Canceled
+                            </Badge>
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Access Until</Label>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {formatDate(subscription.current_period_end)}
+                          </p>
+                        </div>
+                        <div>
+                          <Label>Next Billing</Label>
+                          <p className="text-sm text-gray-600 mt-1">
+                            No future charges
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="pt-4 border-t border-red-200">
+                        <Button onClick={() => window.location.href = '/pricing'} className="bg-blue-600 hover:bg-blue-700">
+                          Resubscribe to Pro
+                        </Button>
+                        <p className="text-xs text-red-600 mt-2">
+                          You'll continue to have Pro access until {formatDate(subscription.current_period_end)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )
               ) : (
                 <div className="text-center py-6">
                   <div className="mb-4">
@@ -185,6 +296,61 @@ const Settings = () => {
               )}
             </CardContent>
           </Card>
+
+          {/* Purchase History */}
+          {hasActivePurchase && purchase && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Shield className="w-5 h-5" />
+                  <CardTitle>Resume Pack</CardTitle>
+                </div>
+                <CardDescription>
+                  Your current resume access pack
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Pack Type</Label>
+                      <div className="mt-1">
+                        <Badge variant="outline">5-Resume Access Pack</Badge>
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Resumes Remaining</Label>
+                      <div className="mt-1">
+                        <Badge variant={purchase.resumes_remaining > 0 ? "default" : "secondary"}>
+                          {purchase.resumes_remaining} left
+                        </Badge>
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Expires</Label>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {formatDate(purchase.expires_at)}
+                      </p>
+                    </div>
+                    <div>
+                      <Label>Status</Label>
+                      <div className="mt-1">
+                        <Badge variant={purchase.status === 'succeeded' ? 'default' : 'destructive'}>
+                          {purchase.status === 'succeeded' ? 'Active' : purchase.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t">
+                    <p className="text-xs text-gray-500">
+                      Need more resumes? You can purchase additional packs or upgrade to Pro for unlimited access.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Test Purchase - Development Only */}
           {process.env.NODE_ENV === 'development' && (
@@ -311,6 +477,14 @@ const Settings = () => {
       </div>
 
       <Footer />
+
+      {/* Cancellation Dialog */}
+      <CancellationDialog
+        open={showCancellationDialog}
+        onOpenChange={setShowCancellationDialog}
+        onConfirmCancel={handleCancelSubscription}
+        subscription={subscription}
+      />
     </div>
   );
 };

@@ -1,0 +1,26 @@
+{
+  "id": "evt_test_subscription",
+  "object": "event",
+  "api_version": "2025-07-30.basil",
+  "created": 1696511999,
+  "data": {
+    "object": {
+      "id": "in_test_invoice_123",
+      "object": "invoice",
+      "amount_paid": 100,
+      "customer": "cus_test_customer_123",
+      "customer_email": "ekhajeie@uci.edu",
+      "subscription": "sub_test_subscription_123",
+      "period_start": 1696511999,
+      "period_end": 1699190399,
+      "status": "paid"
+    }
+  },
+  "livemode": false,
+  "pending_webhooks": 1,
+  "request": {
+    "id": "req_test_webhook",
+    "idempotency_key": null
+  },
+  "type": "invoice.payment_succeeded"
+}

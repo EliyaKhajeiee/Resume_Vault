@@ -24,7 +24,7 @@ const Resumes = () => {
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   
   const { user, isAuthenticated } = useAuth();
-  const { hasActiveSubscription, canAccessResume, canDownloadResume, recordResumeAccess } = useSubscription();
+  const { hasActiveSubscription, hasActivePurchase, canAccessResume, canDownloadResume, recordResumeAccess } = useSubscription();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -79,23 +79,37 @@ const Resumes = () => {
       return;
     }
 
-    // Check if user can access this resume
-    console.log('🎯 About to check access for resume:', resume.id, 'featured:', resume.is_featured);
-    const access = await canAccessResume(resume.id, resume.is_featured);
-    console.log('🎯 Access result received:', access);
-    
-    if (!access.canAccess) {
-      console.log('❌ Access denied with reason:', access.reason);
-      if (access.reason === 'limit_reached') {
-        toast.error("You've reached your limit of 1 free resume. Upgrade to Pro for unlimited access!");
+    // URGENT FIX: Check purchase status directly from useSubscription hook
+    console.log('🎯 Direct purchase check - hasActivePurchase:', hasActivePurchase);
+    console.log('🎯 Direct subscription check - hasActiveSubscription:', hasActiveSubscription);
+
+    // If user has active subscription, grant unlimited access
+    if (hasActiveSubscription) {
+      console.log('✅ SUBSCRIPTION ACCESS - Unlimited access granted');
+      // Grant access directly for subscription users
+    } else if (hasActivePurchase) {
+      console.log('📦 PURCHASE ACCESS - Decrementing resume count');
+      // For purchase users, we need to track usage
+      await recordResumeAccess(resume.id);
+    } else {
+      // Only for users with no subscription or purchase, check access normally
+      console.log('🎯 About to check access for resume:', resume.id, 'featured:', resume.is_featured);
+      const access = await canAccessResume(resume.id, resume.is_featured);
+      console.log('🎯 Access result received:', access);
+
+      if (!access.canAccess) {
+        console.log('❌ Access denied with reason:', access.reason);
+        if (access.reason === 'limit_reached') {
+          toast.error("You've reached your limit of 1 free resume. Upgrade to Pro for unlimited access!");
+          setShowUpgradeDialog(true);
+          return;
+        }
+        // For any other reason, show upgrade dialog
+        console.log('❌ Showing upgrade dialog for reason:', access.reason);
+        toast.error("This feature requires a Pro subscription");
         setShowUpgradeDialog(true);
         return;
       }
-      // For any other reason, show upgrade dialog
-      console.log('❌ Showing upgrade dialog for reason:', access.reason);
-      toast.error("This feature requires a Pro subscription");
-      setShowUpgradeDialog(true);
-      return;
     }
     
     console.log('✅ Access granted! Opening resume modal IMMEDIATELY...');
@@ -109,14 +123,20 @@ const Resumes = () => {
     // Show a toast to confirm it's working
     toast.success('Resume access granted! Modal should be open.');
 
-    // Process resume access for all user types (free, paid pack, subscription)
+    // Only process resume access tracking for free users (not subscription/purchase users)
     console.log('📊 hasActiveSubscription:', hasActiveSubscription);
-    console.log('📝 Processing resume access in background...');
-    recordResumeAccess(resume.id).then(() => {
-      console.log('✅ Resume access processed in background');
-    }).catch(error => {
-      console.log('⚠️ Background processing failed:', error);
-    });
+    console.log('📦 hasActivePurchase:', hasActivePurchase);
+
+    if (!hasActiveSubscription && !hasActivePurchase) {
+      console.log('📝 Processing resume access for free user...');
+      recordResumeAccess(resume.id).then(() => {
+        console.log('✅ Resume access processed in background');
+      }).catch(error => {
+        console.log('⚠️ Background processing failed:', error);
+      });
+    } else {
+      console.log('✅ Skipping access tracking - user has paid access');
+    }
 
     // Increment view count in background too
     ResumeService.incrementViewCount(resume.id).then(() => {
@@ -138,12 +158,21 @@ const Resumes = () => {
       return;
     }
 
-    const canDownload = await canDownloadResume();
-    
-    if (!canDownload) {
-      toast.error("Downloads require a Pro subscription");
-      setShowUpgradeDialog(true);
-      return;
+    // URGENT FIX: Check purchase status directly for downloads too
+    console.log('🔽 Download check - hasActivePurchase:', hasActivePurchase);
+    console.log('🔽 Download check - hasActiveSubscription:', hasActiveSubscription);
+
+    // If user has active subscription or purchase, allow download
+    if (!hasActiveSubscription && !hasActivePurchase) {
+      const canDownload = await canDownloadResume();
+
+      if (!canDownload) {
+        toast.error("Downloads require a Pro subscription or Resume Pack");
+        setShowUpgradeDialog(true);
+        return;
+      }
+    } else {
+      console.log('✅ DOWNLOAD ACCESS GRANTED - User has active subscription or purchase');
     }
 
     if (resume.file_url) {

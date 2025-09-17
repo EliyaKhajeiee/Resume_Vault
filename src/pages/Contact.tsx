@@ -10,16 +10,29 @@ import { toast } from "sonner";
 import { useEffect } from "react";
 
 const Contact = () => {
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     subject: "",
     message: ""
   });
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+
+    // Check for URL parameters to pre-fill form
+    const urlParams = new URLSearchParams(window.location.search);
+    const subject = urlParams.get('subject');
+    const message = urlParams.get('message');
+
+    if (subject || message) {
+      setFormData(prev => ({
+        ...prev,
+        subject: subject || prev.subject,
+        message: message || prev.message
+      }));
+    }
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +85,7 @@ const Contact = () => {
       </section>
 
       <div className="container max-w-7xl mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
           {/* Contact Form */}
           <div>
             <Card className="shadow-lg">
@@ -162,7 +175,7 @@ const Contact = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-6">
               {contactInfo.map((info, index) => (
                 <Card key={index} className="border-none shadow-md">
                   <CardContent className="p-6">
@@ -170,7 +183,7 @@ const Contact = () => {
                       <div className="flex-shrink-0">
                         {info.icon}
                       </div>
-                      <div>
+                      <div className="flex-1">
                         <h3 className="font-semibold text-gray-900 mb-1">{info.title}</h3>
                         <p className="text-blue-600 font-medium mb-1">{info.content}</p>
                         <p className="text-sm text-gray-500">{info.description}</p>
@@ -182,9 +195,9 @@ const Contact = () => {
             </div>
 
             {/* FAQ Section */}
-            <div className="mt-12">
+            <div className="mt-16 pt-8 border-t border-gray-200">
               <h3 className="text-2xl font-bold text-black mb-6">Frequently Asked Questions</h3>
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div className="border-b border-gray-200 pb-4">
                   <h4 className="font-semibold text-gray-900 mb-2">How quickly do you respond to inquiries?</h4>
                   <p className="text-gray-600 text-sm">We typically respond to all inquiries within 24 hours during business days.</p>

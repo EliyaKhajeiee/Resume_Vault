@@ -37,7 +37,10 @@
       "Bash(deploy_functions.bat)",
       "Bash(if grep -q \"SUPABASE_SERVICE_ROLE_KEY\" .env)",
       "Bash(then echo \"✅ SUPABASE_SERVICE_ROLE_KEY found\")",
-      "Bash(else echo \"❌ SUPABASE_SERVICE_ROLE_KEY missing\")"
+      "Bash(else echo \"❌ SUPABASE_SERVICE_ROLE_KEY missing\")",
+      "WebFetch(domain:dashboard.stripe.com)",
+      "Bash(deploy_cancel_function.bat)",
+      "Bash(./deploy_cancel_function.bat)"
     ],
     "deny": []
   }
