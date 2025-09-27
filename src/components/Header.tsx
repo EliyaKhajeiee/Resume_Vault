@@ -18,7 +18,6 @@ const Header = () => {
     { name: "Browse Resumes", href: "/resumes" },
     { name: "Pricing", href: "/pricing" },
     { name: "Blog", href: "/blog" },
-    { name: "About", href: "/about" },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -45,8 +44,13 @@ const Header = () => {
       <header className="border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50">
       <div className="container max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="flex items-center space-x-2" onClick={handleNavClick}>
-          <div className="font-bold text-2xl text-black">Resume Proof</div>
+        <Link to="/" className="flex items-center space-x-3" onClick={handleNavClick}>
+          <img
+            src="/logo.jpeg"
+            alt="Resume Proof"
+            className="h-12 w-12 object-cover rounded-full border-2 border-gray-200 bg-white shadow-sm"
+          />
+          <div className="font-bold text-xl text-black">Resume Proof</div>
         </Link>
 
         {/* Desktop Navigation */}

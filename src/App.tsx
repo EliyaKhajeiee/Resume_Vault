@@ -14,6 +14,12 @@ import Terms from "./pages/Terms";
 import Contact from "./pages/Contact";
 import Templates from "./pages/Templates";
 import Guides from "./pages/Guides";
+import TechResumeGuide from "./pages/guides/TechResumeGuide";
+import QuantifyImpactGuide from "./pages/guides/QuantifyImpactGuide";
+import ProductManagerGuide from "./pages/guides/ProductManagerGuide";
+import ConsultingGuide from "./pages/guides/ConsultingGuide";
+import ATSGuide from "./pages/guides/ATSGuide";
+import CareerTransitionGuide from "./pages/guides/CareerTransitionGuide";
 import NotFound from "./pages/NotFound";
 import AuthCallback from "./pages/auth/AuthCallback";
 import ResetPassword from "./pages/auth/ResetPassword";
@@ -21,6 +27,7 @@ import Subscription from "./pages/Subscription";
 import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 import PurchaseSuccess from "./pages/PurchaseSuccess";
 import Settings from "./pages/Settings";
+import Luna from "./pages/Luna";
 
 const queryClient = new QueryClient();
 
@@ -42,12 +49,19 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/templates" element={<Templates />} />
           <Route path="/guides" element={<Guides />} />
+          <Route path="/guides/tech-resume" element={<TechResumeGuide />} />
+          <Route path="/guides/quantify-impact" element={<QuantifyImpactGuide />} />
+          <Route path="/guides/product-manager" element={<ProductManagerGuide />} />
+          <Route path="/guides/consulting" element={<ConsultingGuide />} />
+          <Route path="/guides/ats-optimization" element={<ATSGuide />} />
+          <Route path="/guides/career-transition" element={<CareerTransitionGuide />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/auth/reset-password" element={<ResetPassword />} />
           <Route path="/subscription" element={<Subscription />} />
           <Route path="/subscription/success" element={<SubscriptionSuccess />} />
           <Route path="/purchase/success" element={<PurchaseSuccess />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/luna" element={<Luna />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
