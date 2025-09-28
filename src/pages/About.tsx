@@ -1,4 +1,4 @@
-import { Users, Target, Award, Heart } from "lucide-react";
+import { Users, Target, Award, Heart, Check, Filter, Search, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/Header";
@@ -50,10 +50,13 @@ const About = () => {
       <section className="py-20 bg-gradient-to-b from-blue-50 to-white">
         <div className="container max-w-4xl mx-auto px-4 text-center">
           <h1 className="text-5xl font-bold text-black mb-6">
-            We understand the job market is brutal
+            Applied to 100 jobs and heard nothing back?
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            With years of experience in this industry, we've seen talented professionals apply to hundreds of jobs without success. We know the problem isn't your skills—it's your resume.
+          <p className="text-2xl font-semibold text-red-600 mb-6">
+            Your resume is the problem.
+          </p>
+          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+            Every company, every industry, looks for different things. ATS filters make it even harder. If your resume doesn't match what companies already hire, it gets filtered out. ResumeProof gives you access to real resumes that landed interviews and offers, so you can see exactly what works and apply it to yours.
           </p>
         </div>
       </section>
@@ -140,43 +143,56 @@ const About = () => {
         </div>
       </section>
 
-      {/* Why We're Different Section */}
+      {/* Benefits Section */}
       <section className="py-20 bg-gray-50">
         <div className="container max-w-6xl mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-black mb-6">Why We're Different</h2>
+            <h2 className="text-4xl font-bold text-black mb-6">Why ResumeProof Works</h2>
             <p className="text-xl text-gray-600">
-              We don't just give you templates. We give you the exact resumes that won.
+              We don't guess what works—we show you exactly what got people hired.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="text-center border-none shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-2xl text-blue-600">Real Results</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">Every resume in our database led to an actual job offer. No theory, no guesswork—just proven success.</p>
-              </CardContent>
-            </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <div className="flex items-start gap-4 p-6 bg-white rounded-lg border">
+              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <Check className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Built only from resumes that led to real offers</h3>
+                <p className="text-gray-600">No templates or theories. Every single resume in our database actually landed a job at top companies.</p>
+              </div>
+            </div>
 
-            <Card className="text-center border-none shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-2xl text-green-600">Insider Access</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">See exactly how successful candidates presented their experience to land offers at the world's most competitive companies.</p>
-              </CardContent>
-            </Card>
+            <div className="flex items-start gap-4 p-6 bg-white rounded-lg border">
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <Filter className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Filter by company, role, and industry</h3>
+                <p className="text-gray-600">Find exactly what you need. See how people in your field presented their experience to get hired.</p>
+              </div>
+            </div>
 
-            <Card className="text-center border-none shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-2xl text-purple-600">Competitive Edge</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">Stop competing on equal terms. Get the unfair advantage that comes from knowing what actually works in today's market.</p>
-              </CardContent>
-            </Card>
+            <div className="flex items-start gap-4 p-6 bg-white rounded-lg border">
+              <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <Search className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Learn the keywords & formats recruiters scan for</h3>
+                <p className="text-gray-600">Beat the ATS filters. See exactly how successful candidates structure their experience to get past automated screening.</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4 p-6 bg-white rounded-lg border">
+              <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <TrendingUp className="w-5 h-5 text-orange-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Stay updated with new resumes each month</h3>
+                <p className="text-gray-600">Hiring trends change. We continuously add fresh examples to keep you ahead of the curve.</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>

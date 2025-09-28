@@ -151,21 +151,21 @@ const Index = () => {
 
   const testimonials = [
     {
-      name: "Sarah M.",
-      role: "Software Engineer",
-      content: "I was applying to 200+ roles and I didn't know why I wasn't getting interviews. I used ResumeProof to land my role at JP Morgan, the resume examples were spot on.",
+      name: "Kelan L.",
+      role: "Software Engineer at Google",
+      content: "I was applying to 200+ roles and I didn't know why I wasn't getting interviews. I used ResumeProof to land my role at Google, the resume examples were spot on.",
       rating: 5
     },
     {
-      name: "Jake L.",
-      role: "Product Manager",
-      content: "Seeing PM resumes from actual Google hires gave me the insight as to what works and helped me change mine, and I got the interview.",
+      name: "Rod R.",
+      role: "Product Manager at BlackRock",
+      content: "Seeing PM resumes from actual BlackRock hires gave me the insight as to what works and helped me change mine, and I got the interview.",
       rating: 5
     },
     {
-      name: "Maria T.",
-      role: "Consultant",
-      content: "I kept getting rejected from consulting firms and didn't know why. ResumeProof showed me how MBB resumes are structured — I updated mine and finally landed interviews.",
+      name: "Nathan L.",
+      role: "Consultant at Citadel",
+      content: "I kept getting rejected from consulting firms and didn't know why. ResumeProof showed me how top-tier resumes are structured — I updated mine and finally landed interviews at Citadel.",
       rating: 5
     }
   ];
