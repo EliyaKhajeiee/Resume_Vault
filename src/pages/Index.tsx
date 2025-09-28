@@ -70,62 +70,102 @@ const Index = () => {
     {
       name: "Software Engineer",
       icon: <Code className="w-6 h-6 text-blue-600" />,
-      href: "/resumes?role=Software%20Engineer"
+      href: "/resumes?role=Software%20Engineer",
+      companyLogos: [
+        "https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg",
+        "https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg",
+        "https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg"
+      ]
     },
     {
       name: "Product Manager",
       icon: <Briefcase className="w-6 h-6 text-blue-600" />,
-      href: "/resumes?role=Product%20Manager"
+      href: "/resumes?role=Product%20Manager",
+      companyLogos: [
+        "https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg",
+        "https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg",
+        "https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg"
+      ]
     },
     {
       name: "Data Scientist",
       icon: <BarChart3 className="w-6 h-6 text-blue-600" />,
-      href: "/resumes?role=Data%20Scientist"
+      href: "/resumes?role=Data%20Scientist",
+      companyLogos: [
+        "https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg",
+        "https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_Logo_B%C3%A9lo.svg",
+        "https://upload.wikimedia.org/wikipedia/commons/b/bb/Tesla_T_symbol.svg"
+      ]
     },
     {
       name: "Machine Learning",
       icon: <Brain className="w-6 h-6 text-blue-600" />,
-      href: "/resumes?role=Machine%20Learning%20Engineer"
+      href: "/resumes?role=Machine%20Learning%20Engineer",
+      companyLogos: [
+        "https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg",
+        "https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg",
+        "https://upload.wikimedia.org/wikipedia/commons/b/bb/Tesla_T_symbol.svg"
+      ]
     },
     {
       name: "Consultant",
       icon: <Users className="w-6 h-6 text-blue-600" />,
-      href: "/resumes?role=Consultant"
+      href: "/resumes?role=Consultant",
+      companyLogos: [
+        "/mckinsey-clean.png",
+        "https://upload.wikimedia.org/wikipedia/commons/3/3e/BCG_Logo.svg",
+        "https://upload.wikimedia.org/wikipedia/commons/5/56/Deloitte.svg"
+      ]
     },
     {
       name: "Marketing",
       icon: <Megaphone className="w-6 h-6 text-blue-600" />,
-      href: "/resumes?role=Marketing"
+      href: "/resumes?role=Marketing",
+      companyLogos: [
+        "https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg",
+        "https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_Logo_B%C3%A9lo.svg",
+        "https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg"
+      ]
     },
     {
       name: "Finance",
       icon: <DollarSign className="w-6 h-6 text-blue-600" />,
-      href: "/resumes?role=Finance"
+      href: "/resumes?role=Finance",
+      companyLogos: [
+        "https://upload.wikimedia.org/wikipedia/commons/6/61/Goldman_Sachs.svg",
+        "https://upload.wikimedia.org/wikipedia/commons/1/1e/JPMorgan_Chase_logo.svg",
+        "https://upload.wikimedia.org/wikipedia/commons/d/da/BlackRock_logo.svg"
+      ]
     },
     {
       name: "Investment Banking",
       icon: <PiggyBank className="w-6 h-6 text-blue-600" />,
-      href: "/resumes?role=Investment%20Banking"
+      href: "/resumes?role=Investment%20Banking",
+      companyLogos: [
+        "https://upload.wikimedia.org/wikipedia/commons/6/61/Goldman_Sachs.svg",
+        "https://upload.wikimedia.org/wikipedia/commons/1/1e/JPMorgan_Chase_logo.svg",
+        "https://upload.wikimedia.org/wikipedia/commons/d/da/BlackRock_logo.svg"
+      ]
     }
   ];
 
   const testimonials = [
     {
-      name: "Kelan Lohler",
-      role: "Software Engineer at Lockden",
-      content: "Found the perfect resume template that helped me land my dream job at Lockden. The examples were incredibly detailed and relevant.",
+      name: "Sarah M.",
+      role: "Software Engineer",
+      content: "I was applying to 200+ roles and I didn't know why I wasn't getting interviews. I used ResumeProof to land my role at JP Morgan, the resume examples were spot on.",
       rating: 5
     },
     {
-      name: "Jake Miller",
-      role: "Product Manager at Tesla",
-      content: "Resume Proof showed me exactly what top companies are looking for. Got 3 offers within 2 weeks of updating my resume.",
+      name: "Jake L.",
+      role: "Product Manager",
+      content: "Seeing PM resumes from actual Google hires gave me the insight as to what works and helped me change mine, and I got the interview.",
       rating: 5
     },
     {
-      name: "Rod Razaghzadegan",
-      role: "CEO of Bikar LLC",
-      content: "The industry-specific examples were game-changing. Finally understood how to present my experience effectively for maximum impact.",
+      name: "Maria T.",
+      role: "Consultant",
+      content: "I kept getting rejected from consulting firms and didn't know why. ResumeProof showed me how MBB resumes are structured — I updated mine and finally landed interviews.",
       rating: 5
     }
   ];
@@ -252,18 +292,34 @@ const Index = () => {
                       {/* Company Logos Section */}
                       <div className="pt-2 border-t">
                         <p className="text-xs text-gray-500 text-center mb-2">Got offers from:</p>
-                        <div className="grid grid-cols-2 gap-1 text-center">
-                          <div className="bg-gray-50 rounded px-1 py-0.5">
-                            <span className="text-xs font-semibold text-blue-600">Tesla</span>
+                        <div className="grid grid-cols-2 gap-1">
+                          <div className="bg-gray-50 rounded px-1 py-1 flex items-center justify-center">
+                            <img
+                              src="https://upload.wikimedia.org/wikipedia/commons/b/bb/Tesla_T_symbol.svg"
+                              alt="Tesla"
+                              className="h-3 w-3 object-contain"
+                            />
                           </div>
-                          <div className="bg-gray-50 rounded px-1 py-0.5">
-                            <span className="text-xs font-semibold text-green-600">Google</span>
+                          <div className="bg-gray-50 rounded px-1 py-1 flex items-center justify-center">
+                            <img
+                              src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg"
+                              alt="Google"
+                              className="h-2 w-auto max-w-8 object-contain"
+                            />
                           </div>
-                          <div className="bg-gray-50 rounded px-1 py-0.5">
-                            <span className="text-xs font-semibold text-purple-600">Microsoft</span>
+                          <div className="bg-gray-50 rounded px-1 py-1 flex items-center justify-center">
+                            <img
+                              src="https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg"
+                              alt="Microsoft"
+                              className="h-2 w-auto max-w-8 object-contain"
+                            />
                           </div>
-                          <div className="bg-gray-50 rounded px-1 py-0.5">
-                            <span className="text-xs font-semibold text-gray-800">BlackRock</span>
+                          <div className="bg-gray-50 rounded px-1 py-1 flex items-center justify-center">
+                            <img
+                              src="https://upload.wikimedia.org/wikipedia/commons/d/da/BlackRock_logo.svg"
+                              alt="BlackRock"
+                              className="h-2 w-auto max-w-8 object-contain"
+                            />
                           </div>
                         </div>
                       </div>
@@ -298,7 +354,19 @@ const Index = () => {
                     <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
                       {role.icon}
                     </div>
-                    <h3 className="font-medium text-sm text-gray-900">{role.name}</h3>
+                    <h3 className="font-medium text-sm text-gray-900 mb-2">{role.name}</h3>
+                    {/* Company Logos */}
+                    <div className="flex justify-center gap-1 mb-1">
+                      {role.companyLogos.slice(0, 3).map((logo, logoIndex) => (
+                        <div key={logoIndex} className="w-4 h-4 flex items-center justify-center">
+                          <img
+                            src={logo}
+                            alt={`Company ${logoIndex + 1}`}
+                            className="max-w-full max-h-full object-contain opacity-60"
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </Link>
