@@ -21,20 +21,38 @@ export const useSubscription = () => {
   }, [user])
 
   const fetchSubscription = async (force: boolean = false) => {
-    if (!user || loading) return
+    if (!user || (loading && !force)) return
 
     setLoading(true)
     setError(null)
 
     try {
+      // Clear cache if force refresh is requested
+      if (force) {
+        StripeService.clearUserCache(user.id)
+        console.log('🔄 Force refresh: clearing cache and fetching fresh data')
+      }
+
       const [subscriptionResult, purchaseResult] = await Promise.all([
-        StripeService.getUserSubscription(user.id),
+        StripeService.getUserSubscription(user.id, force),
         StripeService.getUserPurchase(user.id)
       ])
+
+      if (subscriptionResult.error) {
+        console.error('❌ Subscription fetch error:', subscriptionResult.error)
+      }
+
+      if (purchaseResult.error) {
+        console.error('❌ Purchase fetch error:', purchaseResult.error)
+      }
+
+      console.log('🔍 Setting subscription data:', subscriptionResult.data)
+      console.log('🔍 Setting purchase data:', purchaseResult.data)
 
       setSubscription(subscriptionResult.data)
       setPurchase(purchaseResult.data)
     } catch (err) {
+      console.error('❌ fetchSubscription: Error:', err)
       setError('Network error')
     }
 
@@ -104,8 +122,9 @@ export const useSubscription = () => {
     return { success }
   }
 
-  const hasActiveSubscription = subscription?.status === 'active' &&
-    subscription && new Date(subscription.current_period_end) > new Date()
+  const hasActiveSubscription = subscription &&
+    (subscription.status === 'active' || subscription.status === 'canceled') &&
+    new Date(subscription.current_period_end) > new Date()
 
   const hasActivePurchase = purchase &&
     purchase.resumes_remaining > 0 &&

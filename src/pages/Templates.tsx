@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Download, Eye, Star } from "lucide-react";
+import { Download, Eye, Star, Loader2 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 
 const Templates = () => {
   useEffect(() => {
@@ -13,6 +14,61 @@ const Templates = () => {
   }, []);
 
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [downloadingTemplates, setDownloadingTemplates] = useState<Set<number>>(new Set());
+
+  const handleDownload = async (downloadUrl: string, templateName: string, templateId: number) => {
+    // Add to downloading set
+    setDownloadingTemplates(prev => new Set([...prev, templateId]));
+
+    try {
+      toast.info(`Preparing download for ${templateName}...`);
+
+      // Try to fetch the file first to check if it exists
+      const response = await fetch(downloadUrl);
+      if (!response.ok) {
+        throw new Error(`File not found: ${response.status}`);
+      }
+
+      // Create a blob from the response
+      const blob = await response.blob();
+
+      // Create a temporary URL for the blob
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      // Create a temporary link element and trigger download
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `${templateName.replace(/\s+/g, '-').toLowerCase()}-resume-template.docx`;
+      document.body.appendChild(link);
+      link.click();
+
+      // Clean up
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+
+      toast.success(`${templateName} template downloaded successfully!`);
+      console.log(`Downloaded: ${templateName}`);
+    } catch (error) {
+      console.error('Download failed:', error);
+      toast.error(`Download failed. Opening in new tab instead.`);
+
+      // Fallback to direct link method
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `${templateName.replace(/\s+/g, '-').toLowerCase()}-resume-template.docx`;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } finally {
+      // Remove from downloading set
+      setDownloadingTemplates(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(templateId);
+        return newSet;
+      });
+    }
+  };
 
   const categories = ["All", "Tech", "Finance", "Consulting", "Product", "Design"];
 
@@ -25,7 +81,8 @@ const Templates = () => {
       image: "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=400&h=500&fit=crop",
       downloads: 2847,
       rating: 4.9,
-      featured: true
+      featured: true,
+      downloadUrl: "/templates/google-software-engineer.docx"
     },
     {
       id: 2,
@@ -35,7 +92,8 @@ const Templates = () => {
       image: "https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=400&h=500&fit=crop",
       downloads: 1923,
       rating: 4.8,
-      featured: true
+      featured: true,
+      downloadUrl: "/templates/mckinsey-consultant.docx"
     },
     {
       id: 3,
@@ -45,7 +103,8 @@ const Templates = () => {
       image: "https://images.pexels.com/photos/3861958/pexels-photo-3861958.jpeg?auto=compress&cs=tinysrgb&w=400&h=500&fit=crop",
       downloads: 1654,
       rating: 4.7,
-      featured: false
+      featured: false,
+      downloadUrl: "/templates/meta-product-manager.docx"
     },
     {
       id: 4,
@@ -55,7 +114,8 @@ const Templates = () => {
       image: "https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=400&h=500&fit=crop",
       downloads: 1432,
       rating: 4.6,
-      featured: false
+      featured: false,
+      downloadUrl: "/templates/goldman-sachs-analyst.docx"
     },
     {
       id: 5,
@@ -65,7 +125,8 @@ const Templates = () => {
       image: "https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=400&h=500&fit=crop",
       downloads: 1287,
       rating: 4.8,
-      featured: false
+      featured: false,
+      downloadUrl: "/templates/apple-design-lead.docx"
     },
     {
       id: 6,
@@ -75,7 +136,8 @@ const Templates = () => {
       image: "https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=400&h=500&fit=crop",
       downloads: 1156,
       rating: 4.7,
-      featured: true
+      featured: true,
+      downloadUrl: "/templates/netflix-data-scientist.docx"
     }
   ];
 
@@ -158,6 +220,17 @@ const Templates = () => {
                       <Eye className="w-4 h-4 mr-2" />
                       Preview
                     </Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleDownload(template.downloadUrl, template.name);
+                      }}
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Download
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -190,7 +263,10 @@ const Templates = () => {
                 </div>
                 
                 <div className="flex gap-2">
-                  <Button className="flex-1 bg-blue-600 hover:bg-blue-700">
+                  <Button
+                    className="flex-1 bg-blue-600 hover:bg-blue-700"
+                    onClick={() => handleDownload(template.downloadUrl, template.name)}
+                  >
                     <Download className="w-4 h-4 mr-2" />
                     Download
                   </Button>

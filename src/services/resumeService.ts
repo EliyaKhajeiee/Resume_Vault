@@ -110,6 +110,8 @@ export class ResumeService {
    */
   static async searchResumes(filters: SearchFilters = {}): Promise<{ data: Resume[] | null; error?: string }> {
     try {
+      console.log('🔍 searchResumes called with filters:', filters);
+
       let query = supabase
         .from('resumes')
         .select('*')
@@ -117,21 +119,27 @@ export class ResumeService {
 
       // Apply filters
       if (filters.company) {
+        console.log('🏢 Applying company filter:', filters.company);
         query = query.ilike('company', `%${filters.company}%`)
       }
       if (filters.role) {
+        console.log('👷 Applying role filter:', filters.role);
         query = query.ilike('role', `%${filters.role}%`)
       }
       if (filters.industry) {
+        console.log('🏭 Applying industry filter:', filters.industry);
         query = query.ilike('industry', `%${filters.industry}%`)
       }
       if (filters.experienceLevel) {
+        console.log('📈 Applying experience filter:', filters.experienceLevel);
         query = query.eq('experience_level', filters.experienceLevel)
       }
       if (filters.searchQuery) {
+        console.log('🔍 Applying search query:', filters.searchQuery);
         query = query.or(`title.ilike.%${filters.searchQuery}%,description.ilike.%${filters.searchQuery}%,company.ilike.%${filters.searchQuery}%,role.ilike.%${filters.searchQuery}%`)
       }
       if (filters.featured !== undefined) {
+        console.log('⭐ Applying featured filter:', filters.featured);
         query = query.eq('is_featured', filters.featured)
       }
 
@@ -140,6 +148,14 @@ export class ResumeService {
       if (error) {
         console.error('Error searching resumes:', error)
         return { data: null, error: 'Failed to search resumes' }
+      }
+
+      console.log(`📊 Query returned ${data?.length || 0} results`);
+      if (data && data.length > 0) {
+        console.log('📝 Sample results (first 3):');
+        data.slice(0, 3).forEach((resume, i) => {
+          console.log(`  ${i + 1}. ${resume.title} | ${resume.company} | ${resume.role}`);
+        });
       }
 
       return { data }
@@ -324,30 +340,67 @@ export class ResumeService {
   }
 
   /**
-   * Get unique filter values
+   * Get curated filter values - static list of top tier companies only
    */
-  static async getFilterOptions(): Promise<{
+  static getFilterOptions(): {
     companies: string[]
     roles: string[]
     industries: string[]
     experienceLevels: string[]
-  }> {
-    try {
-      const { data } = await supabase
-        .from('resumes')
-        .select('company, role, industry, experience_level')
+  } {
+    // Tech (FAANG + others)
+    const techCompanies = [
+      'Google', 'Meta', 'Amazon', 'Apple', 'Microsoft', 'Netflix',
+      'Tesla', 'NVIDIA', 'OpenAI'
+    ]
 
-      if (!data) return { companies: [], roles: [], industries: [], experienceLevels: [] }
+    // Quant / Hedge Funds
+    const quantCompanies = [
+      'Citadel', 'Citadel Securities'
+    ]
 
-      const companies = [...new Set(data.map(r => r.company))].filter(Boolean).sort()
-      const roles = [...new Set(data.map(r => r.role))].filter(Boolean).sort()
-      const industries = [...new Set(data.map(r => r.industry))].filter(Boolean).sort()
-      const experienceLevels = [...new Set(data.map(r => r.experience_level))].filter(Boolean).sort()
+    // Investment Banking / Finance
+    const financeCompanies = [
+      'Goldman Sachs', 'JPMorgan', 'Morgan Stanley', 'BlackRock',
+      'Evercore', 'MassInvest'
+    ]
 
-      return { companies, roles, industries, experienceLevels }
-    } catch (error) {
-      console.error('Error fetching filter options:', error)
-      return { companies: [], roles: [], industries: [], experienceLevels: [] }
+    // Consulting
+    const consultingCompanies = [
+      'McKinsey', 'BCG', 'Bain', 'Deloitte'
+    ]
+
+    const topCompanies = [
+      ...techCompanies,
+      ...quantCompanies,
+      ...financeCompanies,
+      ...consultingCompanies
+    ].sort()
+
+    // Keep same roles as homepage (exact match)
+    const topRoles = [
+      'Software Engineer', 'Product Manager', 'Data Scientist',
+      'Machine Learning Engineer', 'Consultant', 'Marketing',
+      'Finance', 'Investment Banking'
+    ].sort()
+
+    // Updated industries to match new structure
+    const topIndustries = [
+      'Tech', 'Quant / Hedge Funds', 'Investment Banking / Finance',
+      'Consulting', 'Marketing / CPG', 'Financial Technology (FinTech)',
+      'Financial Services', 'Investment Management', 'Private Equity'
+    ].sort()
+
+    // Experience levels that actually exist in database
+    const experienceLevels = [
+      'Entry-level', 'Mid-level', 'Senior-level', 'Executive-level'
+    ]
+
+    return {
+      companies: topCompanies,
+      roles: topRoles,
+      industries: topIndustries,
+      experienceLevels
     }
   }
 

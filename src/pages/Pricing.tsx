@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +15,11 @@ const Pricing = () => {
   const { isAuthenticated } = useAuth();
   const { hasActiveSubscription, createCheckoutSession } = useSubscription();
   const navigate = useNavigate();
+
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleSubscribe = async (planId: string) => {
     if (!isAuthenticated) {
@@ -57,7 +63,7 @@ const Pricing = () => {
     },
     {
       name: "Resume Pack",
-      price: "$1.01",
+      price: "$9.99",
       period: "one-time",
       description: "Get access to 5 premium resumes",
       features: [
@@ -71,7 +77,7 @@ const Pricing = () => {
     },
     {
       name: "Pro",
-      price: "$1.00",
+      price: "$29.99",
       period: "month",
       description: "Unlimited access to all resumes",
       features: [
@@ -139,7 +145,7 @@ const Pricing = () => {
             Choose your <span className="text-blue-600">career path</span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-            Start free with 1 resume view, get 5 resumes for $1.01, or unlimited access for $1/month.
+            Start free with 1 resume view, get 5 resumes for $9.99, or unlimited access for $29.99/month.
           </p>
           <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
             <span>✅ No hidden fees</span>
@@ -310,10 +316,10 @@ const Pricing = () => {
             >
               {hasActiveSubscription ? '✅ Current Plan' : '💼 Subscribe now'}
             </Button>
-            <Button 
-              variant="outline" 
-              size="lg" 
-              className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 font-semibold text-lg"
+            <Button
+              variant="outline"
+              size="lg"
+              className="border-2 border-blue-600 bg-white text-blue-600 hover:bg-blue-50 px-8 py-4 font-semibold text-lg"
               onClick={() => navigate('/resumes')}
             >
               👀 View examples

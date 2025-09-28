@@ -323,9 +323,9 @@ const Admin = () => {
     }
   };
 
-  const loadFilterOptions = async () => {
+  const loadFilterOptions = () => {
     try {
-      const options = await ResumeService.getFilterOptions();
+      const options = ResumeService.getFilterOptions();
       setFilterOptions({
         companies: options.companies,
         industries: options.industries

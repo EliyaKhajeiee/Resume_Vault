@@ -205,7 +205,7 @@ const About = () => {
               </Button>
             </Link>
             <Link to="/pricing">
-              <Button variant="outline" size="lg" className="border-white border-2 text-white hover:bg-white hover:text-blue-600 px-8 py-4">
+              <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 border-2 border-white px-8 py-4">
                 View Pricing
               </Button>
             </Link>

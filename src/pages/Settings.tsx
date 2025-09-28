@@ -1,16 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Settings as SettingsIcon, User, CreditCard, Mail, HelpCircle, Shield } from "lucide-react";
+import { Settings as SettingsIcon, User, CreditCard, Mail, HelpCircle, Shield, X, CheckCircle } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { StripeService } from "@/services/stripeService";
+import { EmailPreferencesService, type EmailPreferences } from "@/services/emailPreferencesService";
 import { toast } from "sonner";
 import CancellationDialog, { type CancellationFeedback } from "@/components/CancellationDialog";
 
@@ -21,6 +22,13 @@ const Settings = () => {
   const [isManagingSubscription, setIsManagingSubscription] = useState(false);
   const [isCreatingTestPurchase, setIsCreatingTestPurchase] = useState(false);
   const [showCancellationDialog, setShowCancellationDialog] = useState(false);
+  const [emailPreferences, setEmailPreferences] = useState<EmailPreferences>({
+    marketing_emails: true,
+    product_updates: true,
+    security_alerts: true
+  });
+  const [isUpdatingEmailPrefs, setIsUpdatingEmailPrefs] = useState(false);
+  const [isLoadingEmailPrefs, setIsLoadingEmailPrefs] = useState(true);
 
   const handleManageSubscription = async () => {
     if (!subscription?.stripe_customer_id) {
@@ -86,6 +94,70 @@ const Settings = () => {
     }
   };
 
+  // Load email preferences on component mount
+  useEffect(() => {
+    const loadEmailPreferences = async () => {
+      if (!user) return;
+
+      setIsLoadingEmailPrefs(true);
+      try {
+        const { preferences, error } = await EmailPreferencesService.getEmailPreferences();
+
+        if (error) {
+          console.error('Failed to load email preferences:', error);
+          toast.error("Failed to load email preferences");
+        } else if (preferences) {
+          setEmailPreferences(preferences);
+        }
+      } catch (error) {
+        console.error('Unexpected error loading email preferences:', error);
+        toast.error("Failed to load email preferences");
+      } finally {
+        setIsLoadingEmailPrefs(false);
+      }
+    };
+
+    loadEmailPreferences();
+  }, [user]);
+
+  const handleUpdateEmailPreferences = async (newPreferences: Partial<EmailPreferences>) => {
+    setIsUpdatingEmailPrefs(true);
+    try {
+      const { success, preferences, error } = await EmailPreferencesService.updateEmailPreferences(newPreferences);
+
+      if (success && preferences) {
+        setEmailPreferences(preferences);
+        toast.success("Email preferences updated successfully");
+      } else {
+        toast.error(error || "Failed to update email preferences");
+      }
+    } catch (error) {
+      toast.error("Failed to update email preferences");
+      console.error(error);
+    } finally {
+      setIsUpdatingEmailPrefs(false);
+    }
+  };
+
+  const handleUnsubscribeAll = async () => {
+    setIsUpdatingEmailPrefs(true);
+    try {
+      const { success, preferences, error } = await EmailPreferencesService.unsubscribeFromAll();
+
+      if (success && preferences) {
+        setEmailPreferences(preferences);
+        toast.success("Unsubscribed from all marketing emails successfully");
+      } else {
+        toast.error(error || "Failed to unsubscribe from emails");
+      }
+    } catch (error) {
+      toast.error("Failed to unsubscribe from emails");
+      console.error(error);
+    } finally {
+      setIsUpdatingEmailPrefs(false);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -141,16 +213,14 @@ const Settings = () => {
                     <Badge variant={
                       hasActiveSubscription
                         ? "default"
-                        : subscription?.status === 'canceled'
-                        ? "destructive"
                         : hasActivePurchase
                         ? "outline"
                         : "secondary"
                     }>
                       {hasActiveSubscription
-                        ? "Pro Member"
-                        : subscription?.status === 'canceled'
-                        ? "Pro Member (Canceled)"
+                        ? subscription?.status === 'canceled'
+                          ? "Pro Member (Cancels at period end)"
+                          : "Pro Member"
                         : hasActivePurchase
                         ? `Resume Pack (${purchase?.resumes_remaining} left)`
                         : "Free Account"}
@@ -181,15 +251,19 @@ const Settings = () => {
                       <Label>Current Plan</Label>
                       <div className="mt-1">
                         <Badge className="bg-blue-600">
-                          {subscription.plan_id === 'pro-monthly' ? 'Pro - $1/month' : subscription.plan_id}
+                          {subscription.plan_id === 'pro-monthly' ? 'Pro - $29.99/month' : subscription.plan_id}
                         </Badge>
                       </div>
                     </div>
                     <div>
                       <Label>Status</Label>
                       <div className="mt-1">
-                        <Badge variant={subscription.status === 'active' ? 'default' : 'destructive'}>
-                          {subscription.status === 'active' ? 'Active' : subscription.status}
+                        <Badge variant={hasActiveSubscription ? 'default' : 'destructive'}>
+                          {subscription.status === 'active'
+                            ? 'Active'
+                            : subscription.status === 'canceled' && hasActiveSubscription
+                              ? 'Active (Cancels at period end)'
+                              : subscription.status}
                         </Badge>
                       </div>
                     </div>
@@ -216,13 +290,15 @@ const Settings = () => {
                       >
                         {isManagingSubscription ? "Opening..." : "Manage Billing"}
                       </Button>
-                      <Button
-                        variant="destructive"
-                        onClick={() => setShowCancellationDialog(true)}
-                        className="flex-1 sm:flex-initial"
-                      >
-                        Cancel Subscription
-                      </Button>
+                      {subscription.status === 'active' && (
+                        <Button
+                          variant="destructive"
+                          onClick={() => setShowCancellationDialog(true)}
+                          className="flex-1 sm:flex-initial"
+                        >
+                          Cancel Subscription
+                        </Button>
+                      )}
                     </div>
                     <p className="text-xs text-gray-500 mt-2">
                       {subscription.stripe_customer_id?.startsWith('cus_test_')
@@ -246,7 +322,7 @@ const Settings = () => {
                           <Label>Plan</Label>
                           <div className="mt-1">
                             <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300">
-                              {subscription.plan_id === 'pro-monthly' ? 'Pro - $1/month (Canceled)' : `${subscription.plan_id} (Canceled)`}
+                              {subscription.plan_id === 'pro-monthly' ? 'Pro - $29.99/month (Canceled)' : `${subscription.plan_id} (Canceled)`}
                             </Badge>
                           </div>
                         </div>
@@ -367,7 +443,7 @@ const Settings = () => {
               <CardContent>
                 <div className="space-y-4">
                   <div className="p-4 bg-white rounded-lg border border-orange-200">
-                    <h4 className="font-semibold text-orange-800 mb-2">Test $1.01 Resume Pack</h4>
+                    <h4 className="font-semibold text-orange-800 mb-2">Test $9.99 Resume Pack</h4>
                     <p className="text-sm text-orange-700 mb-3">
                       This will give you 5 resume access for 30 days to test the purchase functionality.
                     </p>
@@ -384,6 +460,156 @@ const Settings = () => {
               </CardContent>
             </Card>
           )}
+
+          {/* Email Preferences */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Mail className="w-5 h-5" />
+                <CardTitle>Email Preferences</CardTitle>
+              </div>
+              <CardDescription>
+                Manage your email subscription and notification preferences
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {isLoadingEmailPrefs ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+                    <p className="text-gray-500 mt-2">Loading preferences...</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="space-y-1">
+                          <Label className="text-base font-medium">Marketing Emails</Label>
+                          <p className="text-sm text-gray-500">
+                            Resume tips, career advice, and special offers
+                          </p>
+                        </div>
+                        <Button
+                          variant={emailPreferences.marketing_emails ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => handleUpdateEmailPreferences({
+                            ...emailPreferences,
+                            marketing_emails: !emailPreferences.marketing_emails
+                          })}
+                          disabled={isUpdatingEmailPrefs}
+                        >
+                          {emailPreferences.marketing_emails ? (
+                            <>
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              Subscribed
+                            </>
+                          ) : (
+                            <>
+                              <X className="w-4 h-4 mr-1" />
+                              Unsubscribed
+                            </>
+                          )}
+                        </Button>
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="space-y-1">
+                          <Label className="text-base font-medium">Product Updates</Label>
+                          <p className="text-sm text-gray-500">
+                            New features, improvements, and platform updates
+                          </p>
+                        </div>
+                        <Button
+                          variant={emailPreferences.product_updates ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => handleUpdateEmailPreferences({
+                            ...emailPreferences,
+                            product_updates: !emailPreferences.product_updates
+                          })}
+                          disabled={isUpdatingEmailPrefs}
+                        >
+                          {emailPreferences.product_updates ? (
+                            <>
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              Subscribed
+                            </>
+                          ) : (
+                            <>
+                              <X className="w-4 h-4 mr-1" />
+                              Unsubscribed
+                            </>
+                          )}
+                        </Button>
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="space-y-1">
+                          <Label className="text-base font-medium">Security Alerts</Label>
+                          <p className="text-sm text-gray-500">
+                            Important account security and login notifications
+                          </p>
+                        </div>
+                        <Button
+                          variant={emailPreferences.security_alerts ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => handleUpdateEmailPreferences({
+                            ...emailPreferences,
+                            security_alerts: !emailPreferences.security_alerts
+                          })}
+                          disabled={isUpdatingEmailPrefs}
+                        >
+                          {emailPreferences.security_alerts ? (
+                            <>
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              Subscribed
+                            </>
+                          ) : (
+                            <>
+                              <X className="w-4 h-4 mr-1" />
+                              Unsubscribed
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="text-base font-medium">Unsubscribe from All</Label>
+                          <p className="text-sm text-gray-500">
+                            Stop receiving all marketing and product emails (security alerts will remain active)
+                          </p>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleUnsubscribeAll}
+                          disabled={isUpdatingEmailPrefs}
+                          className="text-red-600 border-red-300 hover:bg-red-50"
+                        >
+                          {isUpdatingEmailPrefs ? "Updating..." : "Unsubscribe All"}
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                      <div className="flex items-start gap-3">
+                        <Mail className="w-5 h-5 text-blue-600 mt-0.5" />
+                        <div>
+                          <h4 className="font-medium text-blue-900 mb-1">Email Delivery</h4>
+                          <p className="text-sm text-blue-800">
+                            Emails are sent to <strong>{user?.email}</strong>.
+                            To change your email address, please update it through your authentication provider.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Support & Contact */}
           <Card>
@@ -411,16 +637,18 @@ const Settings = () => {
                       We typically respond within 24 hours
                     </p>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <Label>Help Center</Label>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full sm:w-auto"
-                      onClick={() => window.location.href = '/pricing#faq'}
-                    >
-                      View FAQ
-                    </Button>
+                    <div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full sm:w-auto"
+                        onClick={() => window.location.href = '/pricing#faq'}
+                      >
+                        View FAQ
+                      </Button>
+                    </div>
                     <p className="text-xs text-gray-500">
                       Find answers to common questions
                     </p>

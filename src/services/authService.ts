@@ -174,6 +174,34 @@ export class AuthService {
   }
 
   /**
+   * Sign in with Google OAuth
+   */
+  static async signInWithGoogle(): Promise<AuthResponse> {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        }
+      })
+
+      if (error) {
+        console.error('Google sign in error:', error)
+        return { success: false, error: error.message }
+      }
+
+      return { success: true }
+    } catch (error) {
+      console.error('Unexpected Google sign in error:', error)
+      return { success: false, error: 'An unexpected error occurred during Google sign in' }
+    }
+  }
+
+  /**
    * Listen to auth state changes
    */
   static onAuthStateChange(callback: (user: User | null) => void) {

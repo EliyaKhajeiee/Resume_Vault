@@ -7,16 +7,19 @@ import { ResumeService, type SearchFilters } from "@/services/resumeService";
 
 interface SearchFiltersProps {
   onFiltersChange: (filters: SearchFilters) => void;
+  initialFilters?: SearchFilters;
   className?: string;
 }
 
-const SearchFiltersComponent = ({ onFiltersChange, className = "" }: SearchFiltersProps) => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCompany, setSelectedCompany] = useState("");
-  const [selectedRole, setSelectedRole] = useState("");
-  const [selectedIndustry, setSelectedIndustry] = useState("");
-  const [selectedExperience, setSelectedExperience] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
+const SearchFiltersComponent = ({ onFiltersChange, initialFilters, className = "" }: SearchFiltersProps) => {
+  const [searchQuery, setSearchQuery] = useState(initialFilters?.searchQuery || "");
+  const [selectedCompany, setSelectedCompany] = useState(initialFilters?.company || "");
+  const [selectedRole, setSelectedRole] = useState(initialFilters?.role || "");
+  const [selectedIndustry, setSelectedIndustry] = useState(initialFilters?.industry || "");
+  const [selectedExperience, setSelectedExperience] = useState(initialFilters?.experienceLevel || "");
+  const [showFilters, setShowFilters] = useState(
+    !!(initialFilters?.company || initialFilters?.role || initialFilters?.industry || initialFilters?.experienceLevel)
+  );
   
   const [filterOptions, setFilterOptions] = useState({
     companies: [] as string[],
@@ -29,6 +32,18 @@ const SearchFiltersComponent = ({ onFiltersChange, className = "" }: SearchFilte
     loadFilterOptions();
   }, []);
 
+  // Update internal state when initialFilters prop changes
+  useEffect(() => {
+    if (initialFilters) {
+      setSearchQuery(initialFilters.searchQuery || "");
+      setSelectedCompany(initialFilters.company || "");
+      setSelectedRole(initialFilters.role || "");
+      setSelectedIndustry(initialFilters.industry || "");
+      setSelectedExperience(initialFilters.experienceLevel || "");
+      setShowFilters(!!(initialFilters.company || initialFilters.role || initialFilters.industry || initialFilters.experienceLevel));
+    }
+  }, [initialFilters]);
+
   useEffect(() => {
     const filters: SearchFilters = {
       searchQuery: searchQuery || undefined,
@@ -40,8 +55,8 @@ const SearchFiltersComponent = ({ onFiltersChange, className = "" }: SearchFilte
     onFiltersChange(filters);
   }, [searchQuery, selectedCompany, selectedRole, selectedIndustry, selectedExperience, onFiltersChange]);
 
-  const loadFilterOptions = async () => {
-    const options = await ResumeService.getFilterOptions();
+  const loadFilterOptions = () => {
+    const options = ResumeService.getFilterOptions();
     setFilterOptions(options);
   };
 
@@ -69,13 +84,13 @@ const SearchFiltersComponent = ({ onFiltersChange, className = "" }: SearchFilte
     <div className="flex flex-wrap gap-2">
       <span className="text-sm font-medium text-gray-700 py-2 min-w-fit">{placeholder}:</span>
       <div className="flex flex-wrap gap-2">
-        {options.slice(0, 10).map((option) => (
+        {options.map((option) => (
           <Badge
             key={option}
             variant={selected === option ? "default" : "outline"}
             className={`cursor-pointer transition-colors ${
-              selected === option 
-                ? "bg-blue-600 text-white hover:bg-blue-700" 
+              selected === option
+                ? "bg-blue-600 text-white hover:bg-blue-700"
                 : "hover:bg-gray-100"
             }`}
             onClick={() => onSelect(selected === option ? "" : option)}
@@ -84,11 +99,6 @@ const SearchFiltersComponent = ({ onFiltersChange, className = "" }: SearchFilte
             {selected === option && <X className="w-3 h-3 ml-1" />}
           </Badge>
         ))}
-        {options.length > 10 && (
-          <Badge variant="outline" className="cursor-default">
-            +{options.length - 10} more
-          </Badge>
-        )}
       </div>
     </div>
   );
@@ -141,7 +151,7 @@ const SearchFiltersComponent = ({ onFiltersChange, className = "" }: SearchFilte
               placeholder="Company"
             />
           )}
-          
+
           {filterOptions.roles.length > 0 && (
             <FilterBubble
               options={filterOptions.roles}
@@ -150,7 +160,7 @@ const SearchFiltersComponent = ({ onFiltersChange, className = "" }: SearchFilte
               placeholder="Role"
             />
           )}
-          
+
           {filterOptions.industries.length > 0 && (
             <FilterBubble
               options={filterOptions.industries}

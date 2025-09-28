@@ -29,7 +29,20 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const { customerId, returnUrl } = JSON.parse(event.body);
+    let customerId, returnUrl;
+
+    try {
+      const parsed = JSON.parse(event.body);
+      customerId = parsed.customerId;
+      returnUrl = parsed.returnUrl;
+    } catch (parseError) {
+      console.error('❌ Error parsing request body:', parseError);
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'Invalid request body' }),
+      };
+    }
 
     console.log('🔑 Creating portal session for customer:', customerId);
     console.log('🔄 Return URL:', returnUrl);
@@ -55,25 +68,30 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Create portal session for real customers
-    const session = await stripe.billingPortal.sessions.create({
-      customer: customerId,
-      return_url: returnUrl,
-    });
-
-    console.log('✅ Portal session created:', session.id);
+    // For now, redirect all users to contact page for billing management
+    console.log('🔄 Redirecting to contact page for billing management');
+    const baseUrl = event.headers.origin || 'https://resumeproof.com';
 
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ url: session.url }),
+      body: JSON.stringify({
+        url: `${baseUrl}/contact?subject=subscription-management&message=I need help managing my subscription`,
+        isRedirect: true
+      }),
     };
 
   } catch (error) {
     console.error('❌ Error creating portal session:', error);
+    console.error('❌ Error details:', {
+      code: error.code,
+      type: error.type,
+      message: error.message
+    });
 
     // If customer doesn't exist, redirect to support
     if (error.code === 'resource_missing') {
+      console.log('⚠️ Customer not found in Stripe - redirecting to support');
       const baseUrl = event.headers.origin || 'https://resumeproof.com';
       return {
         statusCode: 200,
@@ -88,7 +106,10 @@ exports.handler = async (event, context) => {
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: 'Failed to create portal session' }),
+      body: JSON.stringify({
+        error: 'Failed to create portal session',
+        details: error.message
+      }),
     };
   }
 };

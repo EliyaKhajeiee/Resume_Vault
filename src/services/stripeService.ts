@@ -16,9 +16,9 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
   {
     id: 'access-pack',
     name: 'Resume Access Pack',
-    price: 1.01,
+    price: 9.99,
     interval: 'one-time' as any,
-    stripePriceId: 'price_1S7i2iAdBHYS516EX1FCq84E', // $1.01 one-time price ID
+    stripePriceId: 'price_1S9CZkAdBHYS516EzVkWRfPj', // $9.99 one-time price ID
     features: [
       'Access to 5 premium resumes',
       'Download in PDF format',
@@ -29,9 +29,9 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
   {
     id: 'pro-monthly',
     name: 'Pro Monthly',
-    price: 1.00,
+    price: 29.99,
     interval: 'month',
-    stripePriceId: 'price_1S7i8SAdBHYS516EGeFCDYrG', // $1.00 monthly price ID
+    stripePriceId: 'price_1S9CrwAdBHYS516Ed7j5YYaf', // $29.99 monthly price ID
     features: [
       'Unlimited resume access',
       'Advanced search and filters',
@@ -84,6 +84,12 @@ const getCachedData = (key: string) => {
 
 const setCachedData = (key: string, data: any) => {
   cache.set(key, { data, timestamp: Date.now() })
+}
+
+const clearUserCache = (userId: string) => {
+  cache.delete(`subscription_${userId}`)
+  cache.delete(`purchase_${userId}`)
+  console.log('🧹 Cleared cache for user:', userId)
 }
 
 export class StripeService {
@@ -212,27 +218,35 @@ export class StripeService {
   }
 
   /**
+   * Clear cache for a user (useful after subscription changes)
+   */
+  static clearUserCache(userId: string): void {
+    clearUserCache(userId)
+  }
+
+  /**
    * Get user's subscription
    */
-  static async getUserSubscription(userId: string): Promise<{ data: UserSubscription | null; error?: string }> {
-    const cacheKey = `subscription_${userId}`
-    const cached = getCachedData(cacheKey)
-    if (cached !== null) return { data: cached }
-
+  static async getUserSubscription(userId: string, forceRefresh: boolean = false): Promise<{ data: UserSubscription | null; error?: string }> {
     try {
-      const { data: subscription, error } = await supabase
+      const { data: subscriptions, error } = await supabase
         .from('user_subscriptions')
         .select('*')
         .eq('user_id', userId)
-        .order('updated_at', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(1)
-        .single()
 
-      const result = (error && error.code !== 'PGRST116') ? null : (subscription || null)
-      setCachedData(cacheKey, result)
-      return { data: result }
+      if (error) {
+        console.error('❌ getUserSubscription error:', error)
+        setCachedData(cacheKey, null)
+        return { data: null, error: error.message }
+      }
+
+      const subscription = subscriptions && subscriptions.length > 0 ? subscriptions[0] : null
+      return { data: subscription }
     } catch (error) {
-      return { data: null }
+      console.error('❌ getUserSubscription unexpected error:', error)
+      return { data: null, error: 'Unexpected error' }
     }
   }
 
@@ -245,29 +259,38 @@ export class StripeService {
     if (cached !== null) return { data: cached }
 
     try {
+      // Get most recent purchase regardless of expiry to show in UI
       const { data: purchases, error } = await supabase
         .from('user_purchases')
         .select('*')
         .eq('user_id', userId)
         .eq('status', 'succeeded')
-        .gt('expires_at', new Date().toISOString())
         .order('created_at', { ascending: false })
         .limit(1)
 
-      const result = error ? null : (purchases?.[0] || null)
+      if (error) {
+        console.error('❌ getUserPurchase error:', error)
+        setCachedData(cacheKey, null)
+        return { data: null, error: error.message }
+      }
+
+      const result = purchases?.[0] || null
       setCachedData(cacheKey, result)
       return { data: result }
     } catch (error) {
-      return { data: null }
+      console.error('❌ getUserPurchase unexpected error:', error)
+      return { data: null, error: 'Unexpected error' }
     }
   }
 
   /**
-   * Check if user has active subscription
+   * Check if user has active subscription (including cancelled but still in paid period)
    */
   static async hasActiveSubscription(userId: string): Promise<boolean> {
-    const { data } = await this.getUserSubscription(userId)
-    return !!data && data.status === 'active' && new Date(data.current_period_end) > new Date()
+    const { data } = await this.getUserSubscription(userId, true) // Force fresh data
+    return !!data &&
+      (data.status === 'active' || data.status === 'canceled') &&
+      new Date(data.current_period_end) > new Date()
   }
 
   /**
@@ -326,15 +349,19 @@ export class StripeService {
    */
   static async recordResumeAccess(userId: string, resumeId: string): Promise<void> {
     try {
+      // Use upsert to avoid 409 conflicts
       await supabase
         .from('user_resume_access')
-        .insert({
+        .upsert({
           user_id: userId,
           resume_id: resumeId,
           accessed_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,resume_id'
         })
+      console.log('✅ Access recorded successfully')
     } catch (error) {
-      console.error('Error recording resume access:', error)
+      console.error('❌ Error recording resume access:', error)
     }
   }
 
@@ -432,7 +459,7 @@ export class StripeService {
         return { canAccess: true }
       }
 
-      // For free users, allow 1 resume access
+      // For free users, check total access count (strict: 1 resume max, ever)
       let accessCount = 0;
       try {
         accessCount = await this.getUserResumeAccessCount(userId)
@@ -443,11 +470,11 @@ export class StripeService {
       }
 
       if (accessCount >= 1) {
-        console.log('❌ Free access limit reached (1/1 used)')
+        console.log('❌ Free access limit reached - user has already accessed 1 resume')
         return { canAccess: false, reason: 'limit_reached' }
       }
 
-      console.log('✅ Free access granted (0/1 used)')
+      console.log('✅ Free access granted - first resume access')
       return { canAccess: true }
     } catch (error) {
       console.error('❌ Error checking resume access:', error)

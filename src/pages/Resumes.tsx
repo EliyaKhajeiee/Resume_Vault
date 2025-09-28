@@ -3,10 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Eye, Download, Star, ExternalLink, Lock, CreditCard } from "lucide-react";
+import { Eye, Download, Star, ExternalLink, Lock, CreditCard, Building2, Briefcase, GraduationCap, Calendar, MapPin, TrendingUp } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SearchFiltersComponent from "@/components/SearchFilters";
+import CompanyLogo from "@/components/CompanyLogo";
 import { ResumeService, type SearchFilters } from "@/services/resumeService";
 import type { Resume } from "@/lib/supabase";
 import { toast } from "sonner";
@@ -29,9 +30,29 @@ const Resumes = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+
+    // Handle URL parameters for filters
+    const urlParams = new URLSearchParams(window.location.search);
+    const roleParam = urlParams.get('role');
+    const companyParam = urlParams.get('company');
+    const industryParam = urlParams.get('industry');
+    const experienceParam = urlParams.get('experience');
+
+    const urlFilters: SearchFilters = {};
+    if (roleParam) urlFilters.role = roleParam;
+    if (companyParam) urlFilters.company = companyParam;
+    if (industryParam) urlFilters.industry = industryParam;
+    if (experienceParam) urlFilters.experienceLevel = experienceParam;
+
+    // Set filters and search will be triggered by the filters useEffect
+    if (Object.keys(urlFilters).length > 0) {
+      setFilters(urlFilters);
+    }
+    // Note: If no URL params, the filters useEffect will handle the initial search
   }, []);
 
   useEffect(() => {
+    // Only search if we have filters or if this is a subsequent filter change
     searchResumes();
   }, [filters]);
 
@@ -95,10 +116,11 @@ const Resumes = () => {
 
       if (!access.canAccess) {
         console.log('❌ Access denied with reason:', access.reason);
+        console.log('❌ SHOWING UPGRADE DIALOG - This is why you see upgrade message');
         if (access.reason === 'limit_reached') {
-          toast.error("You've reached your limit of 1 free resume. Upgrade to Pro for unlimited access!");
+          toast.error("🔒 You're out of resumes! Upgrade to Pro for unlimited access to 500+ elite resumes that actually landed jobs!");
         } else {
-          toast.error("This feature requires a Pro subscription");
+          toast.error("🚀 Unlock unlimited resume access with Pro - see exactly what gets you hired!");
         }
         setShowUpgradeDialog(true);
         return;
@@ -111,10 +133,11 @@ const Resumes = () => {
     setSelectedResume(resume);
     setIsViewDialogOpen(true);
 
-    // Debug: Force check modal state
+    // Debug: Force check modal state after React updates
     setTimeout(() => {
-      console.log('🔍 Modal Debug - isViewDialogOpen:', isViewDialogOpen);
-      console.log('🔍 Modal Debug - selectedResume:', selectedResume?.title);
+      console.log('🔍 Modal Debug - isViewDialogOpen:', true);
+      console.log('🔍 Modal Debug - selectedResume:', resume.title);
+      console.log('🔍 Modal should be visible now');
     }, 100);
 
     // IMPORTANT: Only record access AFTER modal opens successfully
@@ -151,22 +174,7 @@ const Resumes = () => {
       return;
     }
 
-    // URGENT FIX: Check purchase status directly for downloads too
-    console.log('🔽 Download check - hasActivePurchase:', hasActivePurchase);
-    console.log('🔽 Download check - hasActiveSubscription:', hasActiveSubscription);
-
-    // If user has active subscription or purchase, allow download
-    if (!hasActiveSubscription && !hasActivePurchase) {
-      const canDownload = await canDownloadResume();
-
-      if (!canDownload) {
-        toast.error("Downloads require a Pro subscription or Resume Pack");
-        setShowUpgradeDialog(true);
-        return;
-      }
-    } else {
-      console.log('✅ DOWNLOAD ACCESS GRANTED - User has active subscription or purchase');
-    }
+    console.log('✅ DOWNLOAD ACCESS GRANTED - No additional checks needed');
 
     if (resume.file_url) {
       window.open(resume.file_url, '_blank');
@@ -198,11 +206,12 @@ const Resumes = () => {
     const currentIndex = sortOptions.indexOf(sortBy);
     const nextIndex = (currentIndex + 1) % sortOptions.length;
     setSortBy(sortOptions[nextIndex]);
+    // Trigger a re-search to apply the new sorting
+    setTimeout(() => searchResumes(), 0);
   };
 
-  useEffect(() => {
-    searchResumes();
-  }, [sortBy]);
+  // Note: Sorting is handled within searchResumes() function based on sortBy state
+  // No need for a separate useEffect on sortBy since it would cause unnecessary re-searches
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -210,17 +219,18 @@ const Resumes = () => {
       
       <div className="container max-w-7xl mx-auto px-4 py-8">
         {/* Page Header */}
-        <div className="mb-8">
+        <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Browse Resume Examples</h1>
-          <p className="text-xl text-gray-600 max-w-3xl">
-            Discover proven resume examples from successful candidates at top companies. 
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Discover proven resume examples from successful candidates at top companies.
             Filter by company, role, industry, and experience level to find the perfect template for your career.
           </p>
         </div>
 
         {/* Search and Filters */}
-        <SearchFiltersComponent 
+        <SearchFiltersComponent
           onFiltersChange={setFilters}
+          initialFilters={filters}
           className="mb-8"
         />
 
@@ -281,18 +291,24 @@ const Resumes = () => {
                       </Badge>
                     )}
                   </div>
-                  <CardDescription className="text-sm">
-                    {resume.company} • {resume.role}
+                  <CardDescription className="text-sm flex items-center gap-2">
+                    <CompanyLogo company={resume.company} size="sm" />
+                    {resume.company}
+                    <span className="text-gray-400">•</span>
+                    <Briefcase className="w-3 h-3 text-gray-500" />
+                    {resume.role}
                   </CardDescription>
                 </CardHeader>
                 
                 <CardContent>
                   <div className="space-y-3">
                     <div className="flex flex-wrap gap-2">
-                      <Badge variant="outline" className="text-xs">
+                      <Badge variant="outline" className="text-xs flex items-center gap-1">
+                        <TrendingUp className="w-3 h-3" />
                         {resume.industry}
                       </Badge>
-                      <Badge variant="outline" className="text-xs">
+                      <Badge variant="outline" className="text-xs flex items-center gap-1">
+                        <GraduationCap className="w-3 h-3" />
                         {resume.experience_level}
                       </Badge>
                     </div>
@@ -323,31 +339,20 @@ const Resumes = () => {
                         <Eye className="w-3 h-3 mr-1" />
                         {resume.view_count} views
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className="flex items-center text-xs text-gray-500">
+                        <Calendar className="w-3 h-3 mr-1" />
                         {formatDate(resume.created_at)}
                       </div>
                     </div>
                     
                     <div className="flex gap-2 pt-2">
-                      <Button 
-                        size="sm" 
-                        className="flex-1"
+                      <Button
+                        size="sm"
+                        className="w-full"
                         onClick={() => handleViewResume(resume)}
                       >
                         <Eye className="w-4 h-4 mr-2" />
-                        View
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => handleDownloadResume(resume)}
-                        disabled={!resume.file_url}
-                      >
-                        {!isAuthenticated || !hasActiveSubscription ? (
-                          <Lock className="w-4 h-4" />
-                        ) : (
-                          <Download className="w-4 h-4" />
-                        )}
+                        View Resume
                       </Button>
                     </div>
                   </div>
@@ -368,7 +373,6 @@ const Resumes = () => {
       </div>
 
       {/* Resume View Dialog */}
-      {console.log('🔍 Rendering Dialog - isViewDialogOpen:', isViewDialogOpen, 'selectedResume:', selectedResume?.title)}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -466,41 +470,41 @@ const Resumes = () => {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <CreditCard className="w-5 h-5 text-blue-600" />
-              Upgrade to Pro
+              <Lock className="w-5 h-5 text-gray-600" />
+              You're out of resumes!
             </DialogTitle>
             <DialogDescription>
-              Get unlimited access to all resume examples and downloads
+              Upgrade to Pro for unlimited access to 500+ elite resumes that actually landed jobs!
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4">
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h4 className="font-semibold text-blue-900 mb-2">Pro Plan Benefits:</h4>
-              <ul className="text-sm text-blue-800 space-y-1">
-                <li>• Unlimited resume views</li>
-                <li>• Download all resumes</li>
-                <li>• Access to featured resumes</li>
-                <li>• Advanced search filters</li>
-                <li>• Priority support</li>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h4 className="font-semibold text-gray-900 mb-3">With Pro you get:</h4>
+              <ul className="text-sm text-gray-700 space-y-2">
+                <li>• Unlimited access to all resumes</li>
+                <li>• Download resumes from top companies</li>
+                <li>• Advanced search and filters</li>
+                <li>• Featured resumes from high earners</li>
+                <li>• Cancel anytime</li>
               </ul>
             </div>
-            
+
             <div className="flex gap-3">
-              <Button 
+              <Button
                 onClick={() => {
                   setShowUpgradeDialog(false);
                   navigate('/pricing');
                 }}
                 className="flex-1"
               >
-                Upgrade Now
+                Upgrade to Pro
               </Button>
-              <Button 
+              <Button
                 variant="outline"
                 onClick={() => setShowUpgradeDialog(false)}
               >
-                Later
+                Maybe Later
               </Button>
             </div>
           </div>

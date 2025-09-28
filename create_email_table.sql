@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS email_preferences (id UUID DEFAULT gen_random_uuid() PRIMARY KEY, user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE, marketing_emails BOOLEAN DEFAULT true, product_updates BOOLEAN DEFAULT true, security_alerts BOOLEAN DEFAULT true, created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(), updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW());

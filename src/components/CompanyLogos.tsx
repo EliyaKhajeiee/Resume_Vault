@@ -35,9 +35,9 @@ const CompanyLogos = () => {
       logo: "https://upload.wikimedia.org/wikipedia/commons/b/bb/Tesla_T_symbol.svg",
       alt: "Tesla logo"
     },
-    { 
-      name: "McKinsey & Company", 
-      logo: "https://logos-world.net/wp-content/uploads/2021/02/McKinsey-Company-Logo.png",
+    {
+      name: "McKinsey & Company",
+      logo: "/mckinsey-clean.png",
       alt: "McKinsey logo"
     },
     { 
@@ -45,9 +45,9 @@ const CompanyLogos = () => {
       logo: "https://upload.wikimedia.org/wikipedia/commons/6/61/Goldman_Sachs.svg",
       alt: "Goldman Sachs logo"
     },
-    { 
-      name: "JPMorgan Chase", 
-      logo: "https://logos-world.net/wp-content/uploads/2021/02/JPMorgan-Chase-Logo.png",
+    {
+      name: "JPMorgan Chase",
+      logo: "https://upload.wikimedia.org/wikipedia/commons/1/1e/JPMorgan_Chase_logo.svg",
       alt: "JPMorgan logo"
     },
     { 
@@ -76,11 +76,15 @@ const CompanyLogos = () => {
         <div className="relative overflow-hidden">
           <div className="flex animate-scroll space-x-12 items-center">
             {[...companies, ...companies].map((company, index) => (
-              <div key={`${company.name}-${index}`} className="flex-shrink-0 flex items-center justify-center h-16 w-40">
-                <img 
-                  src={company.logo} 
+              <div key={`${company.name}-${index}`} className={`flex-shrink-0 flex items-center justify-center h-16 ${
+                company.name === "McKinsey & Company" ? "w-48" : "w-40"
+              }`}>
+                <img
+                  src={company.logo}
                   alt={company.alt}
-                  className="max-h-12 max-w-full object-contain opacity-60 hover:opacity-100 transition-opacity filter grayscale hover:grayscale-0"
+                  className={`max-w-full object-contain opacity-90 hover:opacity-100 transition-opacity ${
+                    company.name === "McKinsey & Company" ? "max-h-16 scale-125" : "max-h-12"
+                  }`}
                 />
               </div>
             ))}

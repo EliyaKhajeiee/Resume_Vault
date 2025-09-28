@@ -16,7 +16,7 @@
    - **Name**: Resume Proof Pro
    - **Description**: Unlimited access to resume examples and downloads
 5. Add a **Recurring price**:
-   - **Price**: $29.00
+   - **Price**: $29.99
    - **Billing period**: Monthly
    - **Currency**: USD
 6. **Copy the Price ID** (starts with `price_`) - you'll need this next

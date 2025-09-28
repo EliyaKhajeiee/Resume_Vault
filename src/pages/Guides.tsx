@@ -26,7 +26,8 @@ const Guides = () => {
       author: "Nathan Lee",
       image: "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&fit=crop",
       featured: true,
-      tags: ["Tech", "Resume", "FAANG"]
+      tags: ["Tech", "Resume", "FAANG"],
+      link: "/guides/tech-resume"
     },
     {
       id: 2,
@@ -37,7 +38,8 @@ const Guides = () => {
       author: "Eliya Khajeie",
       image: "https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&fit=crop",
       featured: true,
-      tags: ["Metrics", "Impact", "Results"]
+      tags: ["Metrics", "Impact", "Results"],
+      link: "/guides/quantify-impact"
     },
     {
       id: 3,
@@ -48,7 +50,8 @@ const Guides = () => {
       author: "Nathan Lee",
       image: "https://images.pexels.com/photos/3861958/pexels-photo-3861958.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&fit=crop",
       featured: false,
-      tags: ["Product Management", "Leadership", "Strategy"]
+      tags: ["Product Management", "Leadership", "Strategy"],
+      link: "/guides/product-manager"
     },
     {
       id: 4,
@@ -59,7 +62,8 @@ const Guides = () => {
       author: "Eliya Khajeie",
       image: "https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&fit=crop",
       featured: false,
-      tags: ["Consulting", "Problem Solving", "McKinsey"]
+      tags: ["Consulting", "Problem Solving", "McKinsey"],
+      link: "/guides/consulting"
     },
     {
       id: 5,
@@ -70,7 +74,8 @@ const Guides = () => {
       author: "Nathan Lee",
       image: "https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&fit=crop",
       featured: true,
-      tags: ["ATS", "Keywords", "Optimization"]
+      tags: ["ATS", "Keywords", "Optimization"],
+      link: "/guides/ats-optimization"
     },
     {
       id: 6,
@@ -81,7 +86,8 @@ const Guides = () => {
       author: "Eliya Khajeie",
       image: "https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&fit=crop",
       featured: false,
-      tags: ["Career Change", "Transition", "Strategy"]
+      tags: ["Career Change", "Transition", "Strategy"],
+      link: "/guides/career-transition"
     }
   ];
 
@@ -142,10 +148,12 @@ const Guides = () => {
                       </Badge>
                     ))}
                   </div>
-                  <Button className="bg-blue-600 hover:bg-blue-700">
-                    Read Guide
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
+                  <Link to="/guides/tech-resume">
+                    <Button className="bg-blue-600 hover:bg-blue-700">
+                      Read Guide
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </Card>
@@ -227,9 +235,11 @@ const Guides = () => {
                     </Badge>
                   ))}
                 </div>
-                <Button variant="outline" className="w-full">
-                  Read Guide
-                </Button>
+                <Link to={guide.link}>
+                  <Button variant="outline" className="w-full">
+                    Read Guide
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           ))}

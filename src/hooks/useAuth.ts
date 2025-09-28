@@ -46,6 +46,10 @@ export const useAuth = () => {
     return await AuthService.resendConfirmation(email)
   }
 
+  const signInWithGoogle = async () => {
+    return await AuthService.signInWithGoogle()
+  }
+
   return {
     user,
     loading,
@@ -55,6 +59,7 @@ export const useAuth = () => {
     resetPassword,
     updatePassword,
     resendConfirmation,
+    signInWithGoogle,
     isAuthenticated: !!user,
     isEmailConfirmed: !!user?.email_confirmed_at
   }

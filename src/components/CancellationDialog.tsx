@@ -180,7 +180,7 @@ const CancellationDialog = ({
                   <ul className="text-sm space-y-1 text-blue-800">
                     <li>• Contact support if you're having technical issues</li>
                     <li>• Pause your subscription instead of cancelling</li>
-                    <li>• Check our Resume Pack ($1.01) for limited access</li>
+                    <li>• Check our Resume Pack ($9.99) for limited access</li>
                   </ul>
                 </CardContent>
               </Card>

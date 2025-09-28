@@ -42,7 +42,23 @@
       "Bash(deploy_cancel_function.bat)",
       "Bash(./deploy_cancel_function.bat)",
       "Bash(timeout:*)",
-      "Bash(./deploy_migration.bat)"
+      "Bash(./deploy_migration.bat)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(then echo \"Environment variables:\")",
+      "Bash(dir netlifyfunctions)",
+      "Bash(psql:*)",
+      "Bash(then echo \"✅ .env file exists\")",
+      "Bash(else echo \"❌ No .env file found\")",
+      "Bash(if grep -q \"STRIPE_SECRET_KEY\" .env)",
+      "Bash(then echo \"✅ STRIPE_SECRET_KEY found\")",
+      "Bash(else echo \"❌ STRIPE_SECRET_KEY missing\")",
+      "Bash(./setup-email-preferences.bat)",
+      "Bash(./fix_signup_now.bat)",
+      "Bash(del CREATE_EMAIL_PREFERENCES_TABLE.sql)",
+      "WebFetch(domain:logos-world.net)",
+      "Bash(npm run build:netlify:*)",
+      "Bash(npx netlify-cli deploy:*)"
     ],
     "deny": []
   }

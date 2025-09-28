@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Package } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -27,90 +27,99 @@ const PurchaseSuccess = () => {
   }, [sessionId, refetch]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <Header />
 
-      <div className="container max-w-2xl mx-auto px-4 py-16">
-        <Card className="text-center shadow-xl border-0">
-          <CardHeader className="pb-8 bg-gradient-to-b from-green-50 to-white rounded-t-lg">
-            <div className="mx-auto mb-4">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                <CheckCircle className="w-10 h-10 text-green-600" />
+      <div className="container max-w-2xl mx-auto px-4 py-20">
+        <Card className="border border-gray-200 shadow-sm">
+          <CardHeader className="text-center pb-8 pt-12">
+            <div className="mx-auto mb-6">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-8 h-8 text-gray-600" />
               </div>
             </div>
-            <CardTitle className="text-3xl font-bold text-green-800">
-              🎉 Purchase Successful!
+            <CardTitle className="text-2xl font-medium text-gray-900 mb-2">
+              Purchase Successful
             </CardTitle>
-            <CardDescription className="text-lg text-gray-600">
+            <CardDescription className="text-gray-600">
               Your Resume Pack has been activated
             </CardDescription>
           </CardHeader>
 
-          <CardContent className="space-y-6 p-8">
-            <div className="bg-green-50 border border-green-200 p-6 rounded-lg">
-              <div className="flex items-center justify-center mb-4">
-                <Package className="w-8 h-8 text-green-600 mr-3" />
-                <h3 className="font-semibold text-green-900 text-lg">Your $1.01 Resume Pack</h3>
-              </div>
-              <div className="grid grid-cols-2 gap-4 text-center mb-4">
-                <div className="bg-white p-4 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">5</div>
-                  <div className="text-sm text-green-800">Resume Views</div>
+          <CardContent className="px-12 pb-12">
+            <div className="border border-gray-200 rounded-lg p-6 mb-8">
+              <h3 className="font-medium text-gray-900 mb-6 text-center">Resume Access Pack</h3>
+
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <div className="text-2xl font-medium text-gray-900 mb-1">5</div>
+                  <div className="text-sm text-gray-600">Resume Views</div>
                 </div>
-                <div className="bg-white p-4 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">30</div>
-                  <div className="text-sm text-green-800">Days Access</div>
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <div className="text-2xl font-medium text-gray-900 mb-1">30</div>
+                  <div className="text-sm text-gray-600">Days Access</div>
                 </div>
               </div>
-              <ul className="text-sm text-green-800 space-y-2 text-left max-w-md mx-auto">
-                <li>✅ Access to 5 premium resumes</li>
-                <li>✅ Download in PDF format</li>
-                <li>✅ Basic search and filters</li>
-                <li>✅ 30-day access period</li>
-              </ul>
+
+              <div className="space-y-2 text-sm text-gray-600">
+                <div className="flex items-center">
+                  <span className="w-1.5 h-1.5 bg-gray-400 rounded-full mr-3"></span>
+                  Access to 5 premium resumes
+                </div>
+                <div className="flex items-center">
+                  <span className="w-1.5 h-1.5 bg-gray-400 rounded-full mr-3"></span>
+                  Download in PDF format
+                </div>
+                <div className="flex items-center">
+                  <span className="w-1.5 h-1.5 bg-gray-400 rounded-full mr-3"></span>
+                  Basic search and filters
+                </div>
+                <div className="flex items-center">
+                  <span className="w-1.5 h-1.5 bg-gray-400 rounded-full mr-3"></span>
+                  30-day access period
+                </div>
+              </div>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
-              <h4 className="font-semibold text-blue-900 mb-2">💡 Want unlimited access?</h4>
-              <p className="text-sm text-blue-800 mb-3">
-                Upgrade to Pro for just $1/month and get unlimited resume views, advanced features, and priority support.
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-8">
+              <h4 className="font-medium text-gray-900 mb-2">Need unlimited access?</h4>
+              <p className="text-sm text-gray-600 mb-3">
+                Upgrade to Pro for $1/month and get unlimited resume views and advanced features.
               </p>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => navigate('/pricing')}
-                className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                className="text-gray-700 border-gray-300 hover:bg-gray-100"
               >
                 View Pro Plan
               </Button>
             </div>
 
-            <div className="space-y-6">
-              <p className="text-gray-600 text-base">
-                Start exploring resumes right away! Your 5 resume views are ready to use.
+            <div className="text-center space-y-6">
+              <p className="text-gray-600">
+                Your resume views are ready to use.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button
-                  size="lg"
                   onClick={() => navigate('/resumes')}
-                  className="bg-green-600 hover:bg-green-700 px-8 py-3 text-lg font-semibold"
+                  className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-2"
                 >
-                  🔍 Start Viewing Resumes
+                  Start Viewing Resumes
                 </Button>
                 <Button
                   variant="outline"
-                  size="lg"
                   onClick={() => navigate('/settings')}
-                  className="border-2 border-green-200 text-green-600 hover:bg-green-50 px-8 py-3 text-lg font-semibold"
+                  className="border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-2"
                 >
-                  ⚙️ Account Settings
+                  Account Settings
                 </Button>
               </div>
             </div>
 
-            <div className="text-sm text-gray-500 pt-6 border-t border-gray-200 bg-gray-50 -mx-8 -mb-8 px-8 py-4 rounded-b-lg">
-              💬 Need help? Contact our support team at <a href="mailto:support@resumeproof.com" className="text-blue-600 hover:underline">support@resumeproof.com</a>
+            <div className="text-xs text-gray-500 text-center pt-8 mt-8 border-t border-gray-200">
+              Need help? Contact <a href="mailto:support@resumeproof.com" className="text-gray-700 hover:underline">support@resumeproof.com</a>
             </div>
           </CardContent>
         </Card>

@@ -29,8 +29,18 @@ const AuthCallback = () => {
             return;
           }
 
-          // Check if this is just a URL visit without auth codes
+          // Check for specific error types
           const urlParams = new URLSearchParams(window.location.search);
+          const errorCode = urlParams.get('error_code');
+          const errorDesc = urlParams.get('error_description');
+
+          if (errorCode === 'otp_expired' || errorDesc?.includes('expired')) {
+            toast.error('Email verification link has expired. Please request a new one.');
+            navigate('/auth/signin?expired=true');
+            return;
+          }
+
+          // Check if this is just a URL visit without auth codes
           const hasAuthCode = urlParams.has('code') || window.location.hash.includes('access_token');
 
           if (!hasAuthCode) {
@@ -39,8 +49,8 @@ const AuthCallback = () => {
             return;
           }
 
-          toast.error('Email confirmation failed. The link may have expired.');
-          navigate('/');
+          toast.error('Email confirmation failed. Please try again or request a new link.');
+          navigate('/auth/signin');
           return;
         }
 

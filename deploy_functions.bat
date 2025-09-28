@@ -1,6 +1,5 @@
 @echo off
 set SUPABASE_ACCESS_TOKEN=sbp_7339d52a98830671ce4c2cf2cc229ec929ae5adf
-npx supabase functions deploy create-checkout-session
 npx supabase functions deploy stripe-webhook
-echo Functions deployed successfully!
+echo Improved stripe webhook deployed successfully!
 pause
