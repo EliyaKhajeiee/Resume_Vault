@@ -1,5 +1,3 @@
-import { supabase } from '@/lib/supabase';
-
 export interface EmailPreferences {
   id?: string;
   user_id?: string;
@@ -11,143 +9,77 @@ export interface EmailPreferences {
 }
 
 export class EmailPreferencesService {
+  private static STORAGE_KEY = 'resumeproof_email_preferences';
+
   /**
-   * Get user's email preferences
+   * Get default email preferences
+   */
+  private static getDefaultPreferences(): EmailPreferences {
+    return {
+      marketing_emails: true,
+      product_updates: true,
+      security_alerts: true
+    };
+  }
+
+  /**
+   * Get user's email preferences from localStorage
    */
   static async getEmailPreferences(): Promise<{ preferences: EmailPreferences | null; error?: string }> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const stored = localStorage.getItem(this.STORAGE_KEY);
 
-      if (!user) {
-        return { preferences: null, error: 'User not authenticated' };
+      if (stored) {
+        const preferences = JSON.parse(stored);
+        return { preferences };
       }
 
-      const { data, error } = await supabase
-        .from('email_preferences')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-
-      if (error) {
-        if (error.code === 'PGRST116') {
-          // No preferences found, create default ones
-          return await this.createDefaultPreferences();
-        }
-        if (error.code === '42P01') {
-          // Table doesn't exist, return default preferences without error
-          console.log('Email preferences table not found, using defaults');
-          return {
-            preferences: {
-              marketing_emails: true,
-              product_updates: true,
-              security_alerts: true
-            }
-          };
-        }
-        console.error('Error fetching email preferences:', error);
-        return { preferences: null, error: error.message };
-      }
-
-      return { preferences: data };
+      // Return default preferences if none stored
+      const defaultPrefs = this.getDefaultPreferences();
+      this.saveToLocalStorage(defaultPrefs);
+      return { preferences: defaultPrefs };
     } catch (error) {
-      console.error('Unexpected error fetching email preferences:', error);
-      return { preferences: null, error: 'An unexpected error occurred' };
+      console.error('Error loading email preferences from localStorage:', error);
+      // Return defaults if there's an error
+      const defaultPrefs = this.getDefaultPreferences();
+      return { preferences: defaultPrefs };
     }
   }
 
   /**
-   * Create default email preferences for user
+   * Save preferences to localStorage
    */
-  static async createDefaultPreferences(): Promise<{ preferences: EmailPreferences | null; error?: string }> {
+  private static saveToLocalStorage(preferences: EmailPreferences): void {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (!user) {
-        return { preferences: null, error: 'User not authenticated' };
-      }
-
-      const defaultPreferences = {
-        user_id: user.id,
-        marketing_emails: true,
-        product_updates: true,
-        security_alerts: true
-      };
-
-      const { data, error } = await supabase
-        .from('email_preferences')
-        .insert(defaultPreferences)
-        .select()
-        .single();
-
-      if (error) {
-        if (error.code === '42P01') {
-          // Table doesn't exist, return default preferences without error
-          console.log('Email preferences table not found during creation, using defaults');
-          return {
-            preferences: {
-              marketing_emails: true,
-              product_updates: true,
-              security_alerts: true
-            }
-          };
-        }
-        console.error('Error creating default email preferences:', error);
-        return { preferences: null, error: error.message };
-      }
-
-      return { preferences: data };
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(preferences));
     } catch (error) {
-      console.error('Unexpected error creating default email preferences:', error);
-      return { preferences: null, error: 'An unexpected error occurred' };
+      console.error('Error saving email preferences to localStorage:', error);
     }
   }
 
   /**
-   * Update user's email preferences
+   * Update user's email preferences in localStorage
    */
   static async updateEmailPreferences(preferences: Partial<EmailPreferences>): Promise<{ success: boolean; preferences?: EmailPreferences; error?: string }> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      // Get current preferences
+      const { preferences: currentPrefs } = await this.getEmailPreferences();
 
-      if (!user) {
-        return { success: false, error: 'User not authenticated' };
-      }
-
-      // Remove user_id and other fields that shouldn't be updated
-      const updateData = {
-        marketing_emails: preferences.marketing_emails,
-        product_updates: preferences.product_updates,
-        security_alerts: preferences.security_alerts
+      // Merge with new preferences
+      const updatedPreferences = {
+        ...currentPrefs,
+        marketing_emails: preferences.marketing_emails ?? currentPrefs?.marketing_emails ?? true,
+        product_updates: preferences.product_updates ?? currentPrefs?.product_updates ?? true,
+        security_alerts: preferences.security_alerts ?? currentPrefs?.security_alerts ?? true
       };
 
-      const { data, error } = await supabase
-        .from('email_preferences')
-        .update(updateData)
-        .eq('user_id', user.id)
-        .select()
-        .single();
+      // Save to localStorage
+      this.saveToLocalStorage(updatedPreferences);
 
-      if (error) {
-        if (error.code === '42P01') {
-          // Table doesn't exist, silently succeed with defaults
-          console.log('Email preferences table not found during update, using defaults');
-          return {
-            success: true,
-            preferences: {
-              marketing_emails: updateData.marketing_emails ?? true,
-              product_updates: updateData.product_updates ?? true,
-              security_alerts: updateData.security_alerts ?? true
-            }
-          };
-        }
-        console.error('Error updating email preferences:', error);
-        return { success: false, error: error.message };
-      }
-
-      return { success: true, preferences: data };
+      return { success: true, preferences: updatedPreferences };
     } catch (error) {
-      console.error('Unexpected error updating email preferences:', error);
-      return { success: false, error: 'An unexpected error occurred' };
+      console.error('Error updating email preferences:', error);
+      return { success: false, error: 'Failed to save preferences' };
     }
   }
 
