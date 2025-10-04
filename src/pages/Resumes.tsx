@@ -8,6 +8,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SearchFiltersComponent from "@/components/SearchFilters";
 import CompanyLogo from "@/components/CompanyLogo";
+import { AuthDialog } from "@/components/auth/AuthDialog";
 import { ResumeService, type SearchFilters } from "@/services/resumeService";
 import type { Resume } from "@/lib/supabase";
 import { toast } from "sonner";
@@ -21,9 +22,10 @@ const Resumes = () => {
   const [filters, setFilters] = useState<SearchFilters>({});
   const [selectedResume, setSelectedResume] = useState<Resume | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
-  const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'featured'>('recent');
+  const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'featured'>('featured');
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
-  
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+
   const { user, isAuthenticated } = useAuth();
   const { hasActiveSubscription, hasActivePurchase, canAccessResume, canDownloadResume, recordResumeAccess } = useSubscription();
   const navigate = useNavigate();
@@ -95,8 +97,7 @@ const Resumes = () => {
 
   const handleViewResume = async (resume: Resume) => {
     if (!isAuthenticated) {
-      toast.error("Please sign in to view resumes");
-      navigate('/pricing'); // Redirect to pricing/signup
+      setShowAuthDialog(true);
       return;
     }
 
@@ -169,8 +170,7 @@ const Resumes = () => {
 
   const handleDownloadResume = async (resume: Resume) => {
     if (!isAuthenticated) {
-      toast.error("Please sign in to download resumes");
-      navigate('/pricing');
+      setShowAuthDialog(true);
       return;
     }
 
@@ -510,6 +510,13 @@ const Resumes = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Auth Dialog */}
+      <AuthDialog
+        open={showAuthDialog}
+        onOpenChange={setShowAuthDialog}
+        defaultTab="signup"
+      />
 
       <Footer />
     </div>

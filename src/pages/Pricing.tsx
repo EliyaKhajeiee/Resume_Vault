@@ -1,10 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { SUBSCRIPTION_PLANS } from "@/services/stripeService";
@@ -15,6 +16,7 @@ const Pricing = () => {
   const { isAuthenticated } = useAuth();
   const { hasActiveSubscription, createCheckoutSession } = useSubscription();
   const navigate = useNavigate();
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -23,8 +25,7 @@ const Pricing = () => {
 
   const handleSubscribe = async (planId: string) => {
     if (!isAuthenticated) {
-      toast.error("Please sign in to subscribe");
-      // You might want to redirect to sign in page or show sign in modal
+      setShowAuthDialog(true);
       return;
     }
 
@@ -329,6 +330,13 @@ const Pricing = () => {
       </section>
 
       <Footer />
+
+      {/* Auth Dialog */}
+      <AuthDialog
+        open={showAuthDialog}
+        onOpenChange={setShowAuthDialog}
+        defaultTab="signup"
+      />
     </div>
   );
 };

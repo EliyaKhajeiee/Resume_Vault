@@ -28,6 +28,13 @@ import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 import PurchaseSuccess from "./pages/PurchaseSuccess";
 import Settings from "./pages/Settings";
 import Luna from "./pages/Luna";
+import FieldA from "./pages/FieldA";
+import FieldB from "./pages/FieldB";
+import FieldC from "./pages/FieldC";
+import FieldD from "./pages/FieldD";
+import FieldE from "./pages/FieldE";
+import FieldF from "./pages/FieldF";
+import FieldG from "./pages/FieldG";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +69,13 @@ const App = () => (
           <Route path="/purchase/success" element={<PurchaseSuccess />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/luna" element={<Luna />} />
+          <Route path="/a" element={<FieldA />} />
+          <Route path="/b" element={<FieldB />} />
+          <Route path="/c" element={<FieldC />} />
+          <Route path="/d" element={<FieldD />} />
+          <Route path="/e" element={<FieldE />} />
+          <Route path="/f" element={<FieldF />} />
+          <Route path="/g" element={<FieldG />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

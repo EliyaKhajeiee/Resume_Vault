@@ -124,15 +124,30 @@ export class ResumeService {
       }
       if (filters.role) {
         console.log('👷 Applying role filter:', filters.role);
-        query = query.ilike('role', `%${filters.role}%`)
+        // Special handling for IB and Finance - show both if either is selected
+        if (filters.role === 'Finance' || filters.role === 'Investment Banking') {
+          query = query.or('role.ilike.%Finance%,role.ilike.%Investment Banking%')
+        } else {
+          query = query.ilike('role', `%${filters.role}%`)
+        }
       }
       if (filters.industry) {
         console.log('🏭 Applying industry filter:', filters.industry);
-        query = query.ilike('industry', `%${filters.industry}%`)
+        // Special handling for IB and Finance industries - show both if either is selected
+        if (filters.industry === 'Finance' || filters.industry === 'Investment Banking') {
+          query = query.or('industry.ilike.%Finance%,industry.ilike.%Investment Banking%')
+        } else {
+          query = query.ilike('industry', `%${filters.industry}%`)
+        }
       }
       if (filters.experienceLevel) {
         console.log('📈 Applying experience filter:', filters.experienceLevel);
-        query = query.eq('experience_level', filters.experienceLevel)
+        // Special handling for Intern and Entry-level - show both if either is selected
+        if (filters.experienceLevel === 'Intern' || filters.experienceLevel === 'Entry-level') {
+          query = query.or('experience_level.eq.Intern,experience_level.eq.Entry-level')
+        } else {
+          query = query.eq('experience_level', filters.experienceLevel)
+        }
       }
       if (filters.searchQuery) {
         console.log('🔍 Applying search query:', filters.searchQuery);
@@ -356,13 +371,13 @@ export class ResumeService {
 
     // Quant / Hedge Funds
     const quantCompanies = [
-      'Citadel', 'Citadel Securities'
+      'Citadel'
     ]
 
     // Investment Banking / Finance
     const financeCompanies = [
       'Goldman Sachs', 'JPMorgan', 'Morgan Stanley', 'BlackRock',
-      'Evercore', 'MassInvest'
+      'Evercore'
     ]
 
     // Consulting
@@ -386,14 +401,14 @@ export class ResumeService {
 
     // Updated industries to match new structure
     const topIndustries = [
-      'Tech', 'Quant / Hedge Funds', 'Investment Banking / Finance',
-      'Consulting', 'Marketing / CPG', 'Financial Technology (FinTech)',
+      'Tech', 'Investment Banking', 'Finance',
+      'Consulting', 'Marketing / CPG',
       'Financial Services', 'Investment Management', 'Private Equity'
     ].sort()
 
     // Experience levels that actually exist in database
     const experienceLevels = [
-      'Entry-level', 'Mid-level', 'Senior-level', 'Executive-level'
+      'Intern', 'Entry-level', 'Mid-level', 'Senior-level'
     ]
 
     return {

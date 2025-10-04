@@ -13,9 +13,11 @@ interface AuthDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultTab?: "signin" | "signup";
+  customTitle?: string;
+  customDescription?: string;
 }
 
-export const AuthDialog = ({ open, onOpenChange, defaultTab = "signin" }: AuthDialogProps) => {
+export const AuthDialog = ({ open, onOpenChange, defaultTab = "signin", customTitle, customDescription }: AuthDialogProps) => {
   const { signIn, signUp, resetPassword, resendConfirmation, signInWithGoogle } = useAuth();
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [loading, setLoading] = useState(false);
@@ -157,9 +159,9 @@ export const AuthDialog = ({ open, onOpenChange, defaultTab = "signin" }: AuthDi
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Welcome to Resume Proof</DialogTitle>
+          <DialogTitle>{customTitle || "Welcome to Resume Proof"}</DialogTitle>
           <DialogDescription>
-            Sign in to your account or create a new one to get started.
+            {customDescription || "Sign in to your account or create a new one to get started."}
           </DialogDescription>
         </DialogHeader>
 

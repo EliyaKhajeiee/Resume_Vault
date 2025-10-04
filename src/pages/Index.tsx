@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Check, Mail, ArrowRight, Star, Users, FileText, TrendingUp, Briefcase, Code, Database, BarChart3, Brain, Settings, UserCheck, Eye, Megaphone, DollarSign, PiggyBank, X, Search, Bot, Calendar, Download, GraduationCap, Trophy, RotateCcw } from "lucide-react";
@@ -9,7 +9,7 @@ import Footer from "@/components/Footer";
 import CompanyLogos from "@/components/CompanyLogos";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useAuth } from "@/hooks/useAuth";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const Index = () => {
   const [email, setEmail] = useState("");
@@ -18,6 +18,14 @@ const Index = () => {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
 
   const { isAuthenticated } = useAuth();
+  const location = useLocation();
+
+  // Auto-open auth dialog when redirected from protected pages
+  useEffect(() => {
+    if (!isAuthenticated && location.state?.showAuth) {
+      setShowAuthDialog(true);
+    }
+  }, [isAuthenticated, location.state]);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -290,35 +298,42 @@ const Index = () => {
                       </div>
 
                       {/* Company Logos Section */}
-                      <div className="pt-2 border-t">
-                        <p className="text-xs text-gray-500 text-center mb-2">Got offers from:</p>
-                        <div className="grid grid-cols-2 gap-1">
-                          <div className="bg-gray-50 rounded px-1 py-1 flex items-center justify-center">
+                      <div className="pt-3 border-t">
+                        <p className="text-xs text-gray-500 text-center mb-4">Got offers from:</p>
+                        <div className="flex items-center justify-center relative h-16">
+                          {/* Tesla - Center and largest */}
+                          <div className="relative z-30 flex items-center justify-center w-14 h-14 bg-white rounded-full shadow-lg border-2 border-gray-100">
                             <img
                               src="https://upload.wikimedia.org/wikipedia/commons/b/bb/Tesla_T_symbol.svg"
                               alt="Tesla"
-                              className="h-3 w-3 object-contain"
+                              className="h-8 w-8 object-contain"
                             />
                           </div>
-                          <div className="bg-gray-50 rounded px-1 py-1 flex items-center justify-center">
+
+                          {/* Google - Left overlap */}
+                          <div className="absolute left-1 z-20 flex items-center justify-center w-12 h-12 bg-white rounded-full shadow-md border border-gray-100">
                             <img
                               src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg"
                               alt="Google"
-                              className="h-2 w-auto max-w-8 object-contain"
+                              className="h-5 w-auto max-w-8 object-contain"
                             />
                           </div>
-                          <div className="bg-gray-50 rounded px-1 py-1 flex items-center justify-center">
+
+                          {/* Microsoft - Right overlap */}
+                          <div className="absolute right-1 z-20 flex items-center justify-center w-12 h-12 bg-white rounded-full shadow-md border border-gray-100">
                             <img
                               src="https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg"
                               alt="Microsoft"
-                              className="h-2 w-auto max-w-8 object-contain"
+                              className="h-5 w-auto max-w-8 object-contain"
                             />
                           </div>
-                          <div className="bg-gray-50 rounded px-1 py-1 flex items-center justify-center">
+
+                          {/* BlackRock - Bottom overlap */}
+                          <div className="absolute bottom-0 z-10 flex items-center justify-center w-10 h-10 bg-white rounded-full shadow-md border border-gray-100">
                             <img
                               src="https://upload.wikimedia.org/wikipedia/commons/d/da/BlackRock_logo.svg"
                               alt="BlackRock"
-                              className="h-2 w-auto max-w-8 object-contain"
+                              className="h-4 w-auto max-w-7 object-contain"
                             />
                           </div>
                         </div>
@@ -355,18 +370,6 @@ const Index = () => {
                       {role.icon}
                     </div>
                     <h3 className="font-medium text-sm text-gray-900 mb-2">{role.name}</h3>
-                    {/* Company Logos */}
-                    <div className="flex justify-center gap-1 mb-1">
-                      {role.companyLogos.slice(0, 3).map((logo, logoIndex) => (
-                        <div key={logoIndex} className="w-4 h-4 flex items-center justify-center">
-                          <img
-                            src={logo}
-                            alt={`Company ${logoIndex + 1}`}
-                            className="max-w-full max-h-full object-contain opacity-60"
-                          />
-                        </div>
-                      ))}
-                    </div>
                   </div>
                 </div>
               </Link>
@@ -616,7 +619,7 @@ const Index = () => {
       <AuthDialog
         open={showAuthDialog}
         onOpenChange={setShowAuthDialog}
-        defaultTab="signin"
+        defaultTab="signup"
       />
     </div>
   );

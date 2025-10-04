@@ -58,7 +58,10 @@
       "Bash(del CREATE_EMAIL_PREFERENCES_TABLE.sql)",
       "WebFetch(domain:logos-world.net)",
       "Bash(npm run build:netlify:*)",
-      "Bash(npx netlify-cli deploy:*)"
+      "Bash(npx netlify-cli deploy:*)",
+      "Bash(npm run db:query:*)",
+      "Bash(npm run:*)",
+      "WebFetch(domain:www.productalliance.com)"
     ],
     "deny": []
   }

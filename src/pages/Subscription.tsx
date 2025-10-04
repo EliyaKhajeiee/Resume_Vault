@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CreditCard, Calendar, ExternalLink, XCircle } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useNavigate } from "react-router-dom";
@@ -17,11 +18,13 @@ const Subscription = () => {
   const navigate = useNavigate();
   const [portalLoading, setPortalLoading] = useState(false);
   const [showCancellationDialog, setShowCancellationDialog] = useState(false);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
 
-  if (!isAuthenticated) {
-    navigate('/pricing');
-    return null;
-  }
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setShowAuthDialog(true);
+    }
+  }, [isAuthenticated]);
 
   const handleManageSubscription = async () => {
     if (!subscription?.stripe_customer_id) {
@@ -59,6 +62,22 @@ const Subscription = () => {
       day: 'numeric'
     });
   };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container max-w-4xl mx-auto px-4 py-16">
+          <AuthDialog
+            open={showAuthDialog}
+            onOpenChange={setShowAuthDialog}
+            defaultTab="signup"
+          />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (loading) {
     return (
