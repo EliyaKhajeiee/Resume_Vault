@@ -155,13 +155,24 @@ export const AuthDialog = ({ open, onOpenChange, defaultTab = "signin", customTi
     }
   };
 
+  const renderDescription = (text: string) => {
+    // Convert **text** to <strong>text</strong>
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+    return parts.map((part, index) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return <strong key={index} className="font-bold text-gray-900">{part.slice(2, -2)}</strong>;
+      }
+      return part;
+    });
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{customTitle || "Welcome to Resume Proof"}</DialogTitle>
           <DialogDescription>
-            {customDescription || "Sign in to your account or create a new one to get started."}
+            {renderDescription(customDescription || "Sign in to your account or create a new one to get started.")}
           </DialogDescription>
         </DialogHeader>
 

@@ -61,7 +61,8 @@
       "Bash(npx netlify-cli deploy:*)",
       "Bash(npm run db:query:*)",
       "Bash(npm run:*)",
-      "WebFetch(domain:www.productalliance.com)"
+      "WebFetch(domain:www.productalliance.com)",
+      "WebFetch(domain:gemini.google.com)"
     ],
     "deny": []
   }
