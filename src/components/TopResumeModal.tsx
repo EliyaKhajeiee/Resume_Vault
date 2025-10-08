@@ -42,8 +42,8 @@ export const TopResumeModal = ({ resumeTitle, companies }: TopResumeModalProps) 
 
       {/* Companies */}
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-5">
-        <p className="text-gray-700 font-semibold mb-2 sm:mb-3 text-xs">Landed offers at:</p>
-        <div className="flex flex-wrap gap-1.5 sm:gap-2">
+        <p className="text-gray-700 font-semibold mb-2 sm:mb-3 text-xs text-center">Landed offers at:</p>
+        <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2">
           {companies.map((company, idx) => (
             <span
               key={idx}
@@ -56,8 +56,8 @@ export const TopResumeModal = ({ resumeTitle, companies }: TopResumeModalProps) 
       </div>
 
       {/* Stats */}
-      <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-lg p-3 sm:p-4">
-        <p className="text-gray-700 text-xs leading-relaxed text-center">
+      <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4 sm:p-5">
+        <p className="text-gray-800 text-sm leading-relaxed text-center font-semibold">
           Users who explored our resumes received{" "}
           <span className="font-bold text-green-700">63% more interviews</span>
         </p>
