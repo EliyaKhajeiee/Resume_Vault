@@ -169,9 +169,9 @@ export const AuthDialog = ({ open, onOpenChange, defaultTab = "signin", customTi
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{customTitle || "Welcome to Resume Proof"}</DialogTitle>
-          <DialogDescription>
+        <DialogHeader className="text-center">
+          <DialogTitle className="text-center">{customTitle || "Welcome to Resume Proof"}</DialogTitle>
+          <DialogDescription className="text-center">
             {renderDescription(customDescription || "Sign in to your account or create a new one to get started.")}
           </DialogDescription>
         </DialogHeader>
