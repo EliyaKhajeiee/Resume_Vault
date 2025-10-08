@@ -85,7 +85,7 @@ export const ResumeCarousel = ({ fieldId = "general" }: ResumeCarouselProps) => 
           {resumes.map((card, idx) => (
             <div
               key={idx}
-              onClick={() => navigate('/pricing')}
+              onClick={() => navigate('/resumes')}
               className={`bg-white border-2 ${card.borderColor} ${card.bgColor} rounded-lg p-4 sm:p-5 lg:p-6 hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer`}
             >
               {/* Logo */}

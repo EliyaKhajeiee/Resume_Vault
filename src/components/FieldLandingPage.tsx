@@ -25,28 +25,28 @@ interface FieldLandingPageProps {
 
 const getCustomTitle = (fieldId: string): string => {
   const titles: Record<string, string> = {
-    "general": "Unlock Your Dream Career",
-    "swe": "Break Into FAANG - Sign Up Free",
-    "marketing": "Land Top Marketing Roles - Free Access",
-    "finance": "Break Into Investment Banking - Start Free",
-    "consulting": "Land MBB Consulting Offers - Get Started",
-    "private-equity": "Break Into PE & Startups - Free Resume",
-    "visa-sponsor": "Secure Visa Sponsorship - Sign Up Free"
+    "general": "VIEW RESUMES",
+    "swe": "VIEW RESUMES",
+    "marketing": "VIEW RESUMES",
+    "finance": "VIEW RESUMES",
+    "consulting": "VIEW RESUMES",
+    "private-equity": "VIEW RESUMES",
+    "visa-sponsor": "VIEW RESUMES"
   };
-  return titles[fieldId] || "Unlock This Resume - Sign Up Free";
+  return titles[fieldId] || "VIEW RESUMES";
 };
 
 const getCustomDescription = (fieldId: string, targetGoal: string): string => {
   const descriptions: Record<string, string> = {
-    "general": "Enter your details to unlock this proven resume and see how top professionals structure their resumes.",
-    "swe": "View Resume (Offers from **Google**, **Uber**, and **Meta**). Enter your details to unlock this proven **Software Engineering** resume.",
-    "marketing": "View Resume (Offers from **TikTok**, **Meta**, and **Snapchat**). Enter your details to unlock this proven **Marketing** resume.",
-    "finance": "View Resume (Offers from **Goldman Sachs**, **JP Morgan**, and **Morgan Stanley**). Enter your details to unlock this proven **Investment Banking** resume.",
-    "consulting": "View Resume (Offers from **McKinsey**, **Bain**, and **BCG**). Enter your details to unlock this proven **Consulting** resume.",
-    "private-equity": "View Resume (Offers from **Sequoia**, **A16z**, and top PE firms). Enter your details to unlock this proven **Private Equity** resume.",
-    "visa-sponsor": "View Resume (Offers from **Microsoft**, **Amazon**, and **Google**). Enter your details to unlock this proven resume with **H1B** sponsorship."
+    "general": "Offers at **Google**, **Microsoft**, **Apple**, **Meta**, **Amazon**. Sign up or Sign in to unlock this proven resume.",
+    "swe": "Offers at **Google**, **Microsoft**, **Apple**, **Meta**, **Uber**, **Airbnb**. Sign up or Sign in to unlock this proven **Tech** resume.",
+    "marketing": "Offers at **TikTok**, **Meta**, **Snapchat**, **Google**, **Amazon**. Sign up or Sign in to unlock this proven **Marketing** resume.",
+    "finance": "Offers at **Goldman Sachs**, **J.P. Morgan**, **Morgan Stanley**, **Citadel**, **BlackRock**. Sign up or Sign in to unlock this proven **Finance** resume.",
+    "consulting": "Offers at **McKinsey**, **Bain**, **BCG**, **Deloitte**, **Accenture**. Sign up or Sign in to unlock this proven **Consulting** resume.",
+    "private-equity": "Offers at **Sequoia**, **Andreessen Horowitz**, **KKR**, **Blackstone**, **TPG**. Sign up or Sign in to unlock this proven **Private Equity** resume.",
+    "visa-sponsor": "Offers at **Microsoft**, **Amazon**, **Google**, **Meta**, **Apple**. Sign up or Sign in to unlock this proven resume."
   };
-  return descriptions[fieldId] || `Enter your details to unlock this proven ${targetGoal} resume.`;
+  return descriptions[fieldId] || `Sign up or Sign in to unlock this proven ${targetGoal} resume.`;
 };
 
 const getFieldCompanies = (fieldId: string): string[] => {
@@ -94,7 +94,7 @@ const FieldLandingPage = ({ config }: FieldLandingPageProps) => {
                 >
                   Resume Proof
                 </button>
-                <div className="hidden sm:block text-xs text-gray-500 font-medium">Professional Resume Templates</div>
+                <div className="hidden sm:block text-xs text-gray-500 font-medium">See Real resumes that have worked</div>
               </div>
             </div>
 
@@ -118,7 +118,7 @@ const FieldLandingPage = ({ config }: FieldLandingPageProps) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col lg:flex-row gap-6 lg:gap-8">
           {/* Left: Resume (takes more space) */}
           <div className="flex-1 flex justify-center">
-            <TextResumeDisplay resumeData={resumeDataByField[config.id]} isUnlocked={isUnlocked} />
+            <TextResumeDisplay resumeData={resumeDataByField[config.id]} isUnlocked={isUnlocked} companies={getFieldCompanies(config.id)} />
           </div>
 
           {/* Right: Download Modal Sidebar */}

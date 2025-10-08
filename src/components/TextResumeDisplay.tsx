@@ -35,9 +35,10 @@ interface ResumeData {
 interface TextResumeDisplayProps {
   resumeData: ResumeData;
   isUnlocked?: boolean;
+  companies?: string[];
 }
 
-export const TextResumeDisplay = ({ resumeData, isUnlocked = false }: TextResumeDisplayProps) => {
+export const TextResumeDisplay = ({ resumeData, isUnlocked = false, companies }: TextResumeDisplayProps) => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -52,15 +53,37 @@ export const TextResumeDisplay = ({ resumeData, isUnlocked = false }: TextResume
   };
 
   return (
-    <div className="w-full flex justify-center relative">
-      {/* Blur overlay when not unlocked */}
-      {!isUnlocked && (
-        <div className="absolute inset-0 bg-white/30 backdrop-blur-sm z-10 rounded-lg" />
+    <div className="w-full flex flex-col items-center">
+      {/* Company List on Top */}
+      {companies && companies.length > 0 && (
+        <div className="w-full max-w-[8.5in] mb-4 px-2 sm:px-4">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg p-4 sm:p-5">
+            <p className="text-sm sm:text-base font-bold text-gray-900 mb-3 text-center">
+              Resume landed interviews at:
+            </p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {companies.map((company, idx) => (
+                <span
+                  key={idx}
+                  className="bg-white border-2 border-blue-300 text-gray-900 px-3 py-1.5 rounded-lg font-bold text-xs sm:text-sm shadow-sm"
+                >
+                  {company}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* Paper-like Resume Container */}
-      <div className="bg-white shadow-2xl max-w-[8.5in] w-full mx-2 sm:mx-4 rounded-lg" style={{ aspectRatio: '8.5 / 11' }}>
-        <div className="px-6 sm:px-12 lg:px-16 py-8 sm:py-10 lg:py-12 h-full overflow-auto">
+      <div className="w-full flex justify-center relative">
+        {/* Blur overlay when not unlocked */}
+        {!isUnlocked && (
+          <div className="absolute inset-0 bg-white/30 backdrop-blur-sm z-10 rounded-lg" />
+        )}
+
+        {/* Paper-like Resume Container */}
+        <div className="bg-white shadow-2xl max-w-[8.5in] w-full mx-2 sm:mx-4 rounded-lg" style={{ aspectRatio: '8.5 / 11' }}>
+          <div className="px-6 sm:px-12 lg:px-16 py-8 sm:py-10 lg:py-12 h-full overflow-auto">
         {/* Resume Header */}
         <div className="border-b-2 border-gray-900 pb-4 sm:pb-6 mb-4 sm:mb-6">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 blur-md select-none">
@@ -160,6 +183,7 @@ export const TextResumeDisplay = ({ resumeData, isUnlocked = false }: TextResume
           </p>
         </div>
         </div>
+      </div>
       </div>
     </div>
   );

@@ -21,22 +21,22 @@ export const TopResumeModal = ({ resumeTitle, companies }: TopResumeModalProps) 
       <div className="mb-4 sm:mb-5">
         <button
           onClick={() => navigate('/pricing')}
-          className="w-full bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white font-semibold py-2.5 sm:py-3 px-4 sm:px-5 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 text-xs sm:text-sm"
+          className="w-full bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white font-bold py-3 sm:py-4 px-4 sm:px-5 rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base"
         >
-          <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          <Download className="w-4 h-4 sm:w-5 sm:h-5" />
           <span>Download (PDF/Word)</span>
         </button>
       </div>
 
       {/* Explore Full Vault */}
       <div className="mb-4 sm:mb-5 border-t border-gray-200 pt-4 sm:pt-5">
-        <p className="text-gray-700 font-semibold mb-2 text-xs sm:text-sm">Explore the vault:</p>
+        <p className="text-gray-700 font-semibold mb-3 text-xs sm:text-sm">Explore the vault:</p>
         <button
           onClick={() => navigate('/resumes')}
-          className="text-gray-600 hover:text-gray-900 font-medium flex items-center gap-2 transition-colors text-xs sm:text-sm"
+          className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-3 sm:py-4 px-4 sm:px-5 rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base"
         >
           <span>Browse more resumes</span>
-          <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+          <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
       </div>
 
@@ -56,10 +56,10 @@ export const TopResumeModal = ({ resumeTitle, companies }: TopResumeModalProps) 
       </div>
 
       {/* Stats */}
-      <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-lg p-3 sm:p-4">
-        <p className="text-gray-700 text-xs leading-relaxed">
+      <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 rounded-lg sm:rounded-xl p-5 sm:p-6 shadow-md">
+        <p className="text-gray-800 text-sm sm:text-base font-semibold leading-relaxed text-center">
           Users who explored our resumes received{" "}
-          <span className="font-bold text-green-700">63% more interviews</span>
+          <span className="block mt-2 text-xl sm:text-2xl font-extrabold text-green-700">63% more interviews</span>
         </p>
       </div>
     </div>
