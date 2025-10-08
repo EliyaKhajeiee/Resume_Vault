@@ -100,7 +100,7 @@ const FieldLandingPage = ({ config }: FieldLandingPageProps) => {
 
             {/* CTA Button */}
             <button
-              onClick={() => navigate('/pricing')}
+              onClick={() => navigate('/resumes')}
               className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 sm:px-8 py-2 sm:py-3 rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-1 sm:gap-2"
             >
               <span className="hidden sm:inline">{config.ctaText}</span>
