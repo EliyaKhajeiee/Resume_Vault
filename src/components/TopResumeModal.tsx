@@ -56,10 +56,10 @@ export const TopResumeModal = ({ resumeTitle, companies }: TopResumeModalProps) 
       </div>
 
       {/* Stats */}
-      <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 rounded-lg sm:rounded-xl p-5 sm:p-6 shadow-md">
-        <p className="text-gray-800 text-sm sm:text-base font-semibold leading-relaxed text-center">
+      <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-lg p-3 sm:p-4">
+        <p className="text-gray-700 text-xs leading-relaxed text-center">
           Users who explored our resumes received{" "}
-          <span className="block mt-2 text-xl sm:text-2xl font-extrabold text-green-700">63% more interviews</span>
+          <span className="font-bold text-green-700">63% more interviews</span>
         </p>
       </div>
     </div>

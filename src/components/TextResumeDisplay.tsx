@@ -56,16 +56,16 @@ export const TextResumeDisplay = ({ resumeData, isUnlocked = false, companies }:
     <div className="w-full flex flex-col items-center">
       {/* Company List on Top */}
       {companies && companies.length > 0 && (
-        <div className="w-full max-w-[8.5in] mb-4 px-2 sm:px-4">
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg p-4 sm:p-5">
-            <p className="text-sm sm:text-base font-bold text-gray-900 mb-3 text-center">
+        <div className="w-full max-w-[8.5in] mb-3 px-2 sm:px-4">
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 sm:p-4">
+            <p className="text-xs text-gray-600 mb-2 text-center font-medium">
               Resume landed interviews at:
             </p>
-            <div className="flex flex-wrap justify-center gap-2">
+            <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2">
               {companies.map((company, idx) => (
                 <span
                   key={idx}
-                  className="bg-white border-2 border-blue-300 text-gray-900 px-3 py-1.5 rounded-lg font-bold text-xs sm:text-sm shadow-sm"
+                  className="bg-white border border-gray-300 text-gray-800 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md font-medium text-xs"
                 >
                   {company}
                 </span>
