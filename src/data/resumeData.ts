@@ -70,45 +70,52 @@ export const resumeDataByField: Record<string, ResumeData> = {
     }
   },
   "swe": {
-    name: "Alex Chen",
-    location: "San Francisco, CA",
+    name: "Student Name",
+    location: "Cambridge, MA",
     phone: "(555) 987-6543",
-    email: "alex.chen@email.com",
-    linkedin: "linkedin.com/in/alexchen",
-    summary: "Software Engineer with 4+ years of experience building scalable systems at top tech companies. Expertise in full-stack development, distributed systems, and cloud infrastructure. Shipped features used by millions of users at Google, Uber, and Meta.",
+    email: "student@email.com",
+    linkedin: "linkedin.com/in/student",
+    summary: "Computer Science student at Harvard with internship experience at Meta, Google, and NASA. Strong foundation in data structures, algorithms, and full-stack development. Built scalable backend systems, optimized performance, and created end-to-end features used by millions.",
     experience: [
       {
-        title: "Software Engineer II",
-        company: "Google",
-        dates: "2022 - Present",
+        title: "Software Engineer Intern",
+        company: "Meta",
+        dates: "May 2024 - August 2024",
         bullets: [
-          "Built real-time data pipeline processing 10M+ events/day using Java and GCP",
-          "Reduced API latency by 40% through caching optimization and query improvements",
-          "Led design review for critical infrastructure serving 50M+ daily active users",
-          "Mentored 3 junior engineers on system design and code quality best practices"
+          "Developed and optimized backend services for user data processing using Python, improving response time by 30%",
+          "Collaborated on privacy-preserving API supporting 500,000+ active users",
+          "Created automated testing pipelines using CI/CD tools, reducing manual QA workload by 40%"
         ]
       },
       {
-        title: "Software Engineer",
-        company: "Uber",
-        dates: "2020 - 2022",
+        title: "Software Engineer Intern",
+        company: "Google",
+        dates: "May 2023 - August 2023",
         bullets: [
-          "Developed microservices for rider app using Python, React, and Kubernetes",
-          "Improved app performance by 35% through frontend optimization and lazy loading",
-          "Implemented A/B testing framework that enabled data-driven product decisions",
-          "Collaborated with ML team to integrate recommendation engine into main app"
+          "Designed cloud-based microservice architecture for real-time analytics, improving data processing by 40%",
+          "Built end-to-end features using React and Flask, launching beta product with 15% increase in retention",
+          "Optimized API performance, reducing latency by 50% through query optimization and caching"
+        ]
+      },
+      {
+        title: "Software Engineer Intern",
+        company: "NASA",
+        dates: "May 2022 - August 2022",
+        bullets: [
+          "Developed Python simulation tool modeling spacecraft trajectories, reducing simulation time by 20%",
+          "Built data visualization dashboard for mission telemetry providing real-time analytics to mission control"
         ]
       }
     ],
     education: {
-      degree: "Bachelor of Science in Computer Science",
-      school: "Stanford University",
-      details: "GPA: 3.9/4.0 • ACM Programming Team • AI/ML Specialization",
-      dates: "2016 - 2020"
+      degree: "Bachelor of Arts in Computer Science",
+      school: "Harvard University",
+      details: "Relevant Coursework: Data Structures & Algorithms, Compilers, Operating Systems, Computer Architecture",
+      dates: "August 2022 - May 2026"
     },
     skills: {
-      technical: "Python, Java, JavaScript, React, Node.js, SQL, AWS, GCP, Kubernetes, Docker",
-      other: "System Design, Agile Development, Code Review, Technical Leadership"
+      technical: "Python, C++, JavaScript, HTML/CSS, SQL, Java, R, React, Flask, Node.js, TensorFlow",
+      other: "Git, Docker, Kubernetes, CI/CD (Jenkins), PostgreSQL, MySQL, GPT-2/3, TensorFlow, Keras"
     }
   },
   "marketing": {
@@ -154,44 +161,56 @@ export const resumeDataByField: Record<string, ResumeData> = {
     }
   },
   "finance": {
-    name: "Michael Zhang",
-    location: "New York, NY",
+    name: "Finance Graduate",
+    location: "Miami, FL",
     phone: "(555) 321-9876",
-    email: "michael.zhang@email.com",
-    linkedin: "linkedin.com/in/michaelzhang",
-    summary: "Investment Banking Analyst with 3+ years of experience in M&A, capital markets, and financial modeling. Executed $5B+ in deal volume across technology and healthcare sectors. Strong quantitative skills with expertise in valuation and deal structuring.",
+    email: "finance.grad@email.com",
+    linkedin: "linkedin.com/in/financegrad",
+    summary: "Finance graduate with experience in wealth management, credit analysis, and strategic cost analysis. Strong analytical skills with expertise in financial modeling, portfolio management, and risk assessment. FINRA licenses: SIE, Series 66, Series 7 (in progress).",
     experience: [
       {
-        title: "Investment Banking Analyst",
-        company: "Goldman Sachs",
-        dates: "2021 - Present",
+        title: "Product Control Analyst",
+        company: "Bank (Wealth Management Division)",
+        dates: "Dec 2022 - Present",
         bullets: [
-          "Executed 8 M&A transactions totaling $3.5B in enterprise value across tech sector",
-          "Built comprehensive financial models for DCF, LBO, and merger analysis",
-          "Prepared pitch books and investment memos for C-suite client presentations",
-          "Conducted due diligence on $500M acquisition, identifying key risk factors"
+          "Created automated spreadsheets to analyze portfolio's risk, return and liquidity",
+          "Performed monthly portfolio performance analyses, examining top contributors, detractors, and risk factors",
+          "Streamlined financial models with automated Excel using Bloomberg Query Language, Pivot Tables, XLOOKUP, and SUMIF",
+          "Managed portfolios ensuring appropriate risk levels while monitoring performance and mandate limits",
+          "Conducted financial analyses utilizing DCF, COMPS, and NPV to evaluate investment opportunities"
         ]
       },
       {
-        title: "Investment Banking Summer Analyst",
-        company: "JP Morgan",
-        dates: "Summer 2020",
+        title: "Credit Analyst (Intern)",
+        company: "Bank",
+        dates: "May 2022 - Aug 2022",
         bullets: [
-          "Supported $1.2B healthcare M&A deal through financial analysis and modeling",
-          "Created industry comparable analysis for tech company valuations",
-          "Assisted in preparation of S-1 filing for $400M IPO"
+          "Performed cash flow analysis to determine borrowers' ability to repay loans",
+          "Utilized industry benchmarks to assess creditworthiness and credit score criteria",
+          "Analyzed financial statements, cash flows, and other indicators to evaluate credit risk",
+          "Collaborated with sales, underwriting, and risk management for effective credit risk management"
+        ]
+      },
+      {
+        title: "Strategic Cost Analyst",
+        company: "X Corporation",
+        dates: "Jan 2019 - Dec 2021",
+        bullets: [
+          "Analyzed financial implications of 6 pre-construction land investment projects, resulting in 4 successful investments",
+          "Assisted in creating financial statements including balance sheet, income statement, and cash flow statement",
+          "Conducted project analyses incorporating cost assessment and revenue projections"
         ]
       }
     ],
     education: {
       degree: "Bachelor of Science in Finance",
-      school: "Wharton School, University of Pennsylvania",
-      details: "GPA: 3.9/4.0 • Summa Cum Laude • Finance Club VP",
-      dates: "2017 - 2021"
+      school: "University",
+      details: "Relevant Coursework: Financial Modeling, Accounting, Financial Markets, Financial Analysis, Statistics, Security Analysis",
+      dates: "Graduated December 2022"
     },
     skills: {
-      technical: "Excel (VBA), Bloomberg Terminal, Capital IQ, FactSet, PowerPoint, Financial Modeling",
-      other: "Valuation Analysis, M&A, Due Diligence, Client Presentations, CFA Level 1"
+      technical: "Excel, PowerPoint, Microsoft Office Suite, Salesforce, Bloomberg Terminal, Bloomberg Query (BQL), Regression Analysis, Tableau",
+      other: "Asset Management, Risk Mitigation, Investment and Capital Markets, Financial Models, Risk Analysis, Market Analysis, FINRA: SIE, Series 66, Series 7 (IP)"
     }
   },
   "consulting": {
