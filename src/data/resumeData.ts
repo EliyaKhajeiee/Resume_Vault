@@ -195,44 +195,56 @@ export const resumeDataByField: Record<string, ResumeData> = {
     }
   },
   "consulting": {
-    name: "Emily Thompson",
-    location: "Boston, MA",
+    name: "Candidate Name",
+    location: "Chicago, IL",
     phone: "(555) 654-3210",
-    email: "emily.thompson@email.com",
-    linkedin: "linkedin.com/in/emilythompson",
-    summary: "Management Consultant with 4+ years solving complex business problems for Fortune 500 clients. Experience across strategy, operations, and digital transformation at top-tier firms. Track record of delivering measurable impact and building lasting client relationships.",
+    email: "candidate@email.com",
+    linkedin: "linkedin.com/in/candidate",
+    summary: "Finance graduate with consulting experience across strategy, operations, and tax advisory. Experience working with Fortune 500 clients in BFSI, Construction, Pharmaceuticals, and Renewable Energy sectors. Strong analytical skills with expertise in financial modeling, process optimization, and cross-functional collaboration.",
     experience: [
       {
-        title: "Consultant",
-        company: "McKinsey & Company",
-        dates: "2021 - Present",
+        title: "Senior Consultant - Strategy (Business Consulting)",
+        company: "KPMG Assurance and Consulting Services LLP",
+        dates: "March 2021 - June 2023",
         bullets: [
-          "Led operational efficiency project for $2B retailer, identifying $50M in cost savings",
-          "Developed growth strategy for tech client that resulted in 25% market share increase",
-          "Managed team of 4 analysts on digital transformation engagement for healthcare client",
-          "Presented strategic recommendations to C-suite across 10+ client engagements"
+          "Developed financial models for capital projects ($100M+), supporting strategic decision-making",
+          "Implemented cost optimization strategies, resulting in 5-7% cost reductions across large capital projects",
+          "Delivered comprehensive feasibility & sensitivity analysis and Quality of Earnings reports",
+          "Orchestrated PMO support for global projects in India, Brazil, and Croatia",
+          "Cross-functional collaboration to implement projects aligned with client requirements"
         ]
       },
       {
-        title: "Business Analyst",
-        company: "Bain & Company",
-        dates: "2020 - 2021",
+        title: "Senior Consultant - Indirect Tax and Regulatory Services",
+        company: "Ernst & Young LLP",
+        dates: "October 2016 - February 2021",
         bullets: [
-          "Conducted market analysis for PE client evaluating $300M acquisition target",
-          "Built financial model forecasting 5-year revenue impact of new product launch",
-          "Performed competitor benchmarking across 20+ companies in CPG industry"
+          "Performed impact analysis and process mapping to ensure compliance with VAT/GST",
+          "Executed Tax Due Diligence for M&A in BFSI Sector, evaluating tax positions and risk exposure",
+          "Authored two industry representations to Ministry of Finance advocating for tax reforms",
+          "Led tax transformation projects leveraging technology solutions for compliance"
+        ]
+      },
+      {
+        title: "Graduate Consultant - Business Practicum",
+        company: "Ravinia Capital LLC (via University of Illinois)",
+        dates: "August 2024 - December 2024",
+        bullets: [
+          "Led stakeholder interviews with industry professionals and city officials",
+          "Conducted financial and economic analysis for comprehensive development strategy",
+          "Performed market research and feasibility studies analyzing ROI potential"
         ]
       }
     ],
     education: {
-      degree: "Bachelor of Arts in Economics",
-      school: "Harvard University",
-      details: "GPA: 3.8/4.0 • Magna Cum Laude • Economics Society President",
-      dates: "2016 - 2020"
+      degree: "Master of Science in Finance (STEM)",
+      school: "University of Illinois at Urbana Champaign - Gies College of Business",
+      details: "CGPA: 3.8/4.0 • Corporate Finance Specialization • CPA Eligible",
+      dates: "2023 - 2024"
     },
     skills: {
-      technical: "Excel, PowerPoint, Alteryx, Tableau, SQL, Python, R",
-      other: "Strategic Analysis, Problem Solving, Stakeholder Management, Case Interviews"
+      technical: "MS Office (Excel, PowerPoint), Financial Modeling, Bloomberg, CapitalIQ, SAP, Financial Reporting, US GAAP",
+      other: "Project Management, Financial Due Diligence, Internal Audit, Tax Technology, Risk Advisory, Leadership"
     }
   },
   "private-equity": {
