@@ -16,6 +16,8 @@ const Header = () => {
 
   const navigation = [
     { name: "Browse Resumes", href: "/resumes" },
+    { name: "Interview Prep", href: "/interview-questions" },
+    { name: "Job Boards", href: "/job-boards" },
     { name: "Pricing", href: "/pricing" },
     { name: "Blog", href: "/blog" },
   ];

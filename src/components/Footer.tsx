@@ -24,8 +24,9 @@ const Footer = () => {
       title: "Resources",
       links: [
         { name: "Guides", href: "/guides" },
+        { name: "Interview Prep", href: "/interview-questions" },
+        { name: "Job Boards", href: "/job-boards" },
         { name: "Templates", href: "/templates" },
-        { name: "Community", href: "/about" },
         { name: "Support", href: "/contact" },
       ],
     },
@@ -52,7 +53,7 @@ const Footer = () => {
             </p>
             {/* Contact info instead of social media */}
             <div className="text-gray-400 text-sm">
-              <p>📧 support@resumeproof.com</p>
+              <p>📧 reports@resumeproof.com</p>
             </div>
           </div>
 
