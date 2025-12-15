@@ -36,13 +36,11 @@ const Privacy = () => {
 
             <h3 className="text-xl font-semibold text-black mb-3">Usage Information</h3>
             <p className="text-gray-600 mb-4">
-              We automatically collect certain information about your device and usage of our services:
+              We collect minimal usage information to improve our services:
             </p>
             <ul className="list-disc pl-6 text-gray-600 mb-4">
-              <li>IP address and location data</li>
-              <li>Browser type and version</li>
-              <li>Pages visited and time spent on our site</li>
-              <li>Referring website addresses</li>
+              <li>Pages visited and features used</li>
+              <li>Resume access history (for your account only)</li>
             </ul>
           </section>
 
@@ -97,6 +95,16 @@ const Privacy = () => {
           </section>
 
           <section className="mb-8">
+            <h2 className="text-2xl font-bold text-black mb-4">Subscription Management and Cancellation</h2>
+            <p className="text-gray-600 mb-4">
+              You can manage your subscription and cancel anytime directly from your account settings. If you experience any issues with canceling your subscription or need assistance with your account, please don't hesitate to contact us at reports@resumeproof.com. We're here to help and will respond promptly to ensure your cancellation is processed correctly.
+            </p>
+            <p className="text-gray-600 mb-4">
+              Upon cancellation, your subscription will remain active until the end of your current billing period, after which no further charges will occur. If you have any questions about billing, refunds, or account deletion, please reach out to our support team.
+            </p>
+          </section>
+
+          <section className="mb-8">
             <h2 className="text-2xl font-bold text-black mb-4">Cookies</h2>
             <p className="text-gray-600 mb-4">
               We use cookies and similar tracking technologies to enhance your experience on our website. You can control cookie settings through your browser preferences.
@@ -109,7 +117,7 @@ const Privacy = () => {
               If you have any questions about this Privacy Policy, please contact us at:
             </p>
             <p className="text-gray-600">
-              Email: support@resumeproof.com
+              Email: reports@resumeproof.com
             </p>
           </section>
         </div>

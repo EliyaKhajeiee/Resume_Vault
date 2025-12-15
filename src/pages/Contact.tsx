@@ -76,7 +76,7 @@ const Contact = () => {
     {
       icon: <Mail className="w-6 h-6 text-blue-600" />,
       title: "Email Support",
-      content: "support@resumeproof.com",
+      content: "reports@resumeproof.com",
       description: "Send us an email anytime for all inquiries!"
     },
     {
@@ -233,7 +233,7 @@ const Contact = () => {
                 </div>
                 <div className="border-b border-gray-200 pb-4">
                   <h4 className="font-semibold text-gray-900 mb-2">What types of inquiries do you handle?</h4>
-                  <p className="text-gray-600 text-sm">We handle all types of inquiries including technical support, billing questions, feature requests, and general feedback through support@resumeproof.com.</p>
+                  <p className="text-gray-600 text-sm">We handle all types of inquiries including technical support, billing questions, feature requests, and general feedback through reports@resumeproof.com.</p>
                 </div>
                 <div className="border-b border-gray-200 pb-4">
                   <h4 className="font-semibold text-gray-900 mb-2">Can I schedule a demo?</h4>

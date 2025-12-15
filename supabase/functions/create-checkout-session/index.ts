@@ -71,6 +71,7 @@ serve(async (req) => {
     // Add metadata based on mode
     if (mode === 'subscription') {
       sessionConfig.subscription_data = {
+        trial_period_days: 7, // 7-day free trial before first charge
         metadata: {
           userId: userId,
           planId: planId || 'pro-monthly',

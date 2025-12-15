@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
 import { useNavigate } from "react-router-dom";
 import { ResumeService } from "@/services/resumeService";
 import type { Resume } from "@/lib/supabase";
@@ -65,14 +66,21 @@ const getFieldCompanies = (fieldId: string): string[] => {
 const FieldLandingPage = ({ config }: FieldLandingPageProps) => {
   const [isUnlocked, setIsUnlocked] = useState(false);
   const { user, isAuthenticated } = useAuth();
+  const { hasActiveSubscription, hasActivePurchase, loading: subscriptionLoading } = useSubscription();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isAuthenticated && !isUnlocked) {
+    // Only unlock if user has an active subscription or purchase
+    const hasAccess = hasActiveSubscription || hasActivePurchase;
+
+    if (isAuthenticated && hasAccess && !isUnlocked) {
       setIsUnlocked(true);
       toast.success("Resume unlocked! Welcome to Resume Proof! 🎉");
+    } else if (isAuthenticated && !hasAccess && !subscriptionLoading) {
+      // User is signed in but doesn't have access - redirect to pricing
+      toast.info("Subscribe to unlock premium resumes!");
     }
-  }, [isAuthenticated, isUnlocked]);
+  }, [isAuthenticated, hasActiveSubscription, hasActivePurchase, subscriptionLoading, isUnlocked]);
 
   return (
     <div className="min-h-screen bg-white relative overflow-hidden">

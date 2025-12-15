@@ -50,7 +50,7 @@ export interface UserSubscription {
   stripe_customer_id: string
   stripe_subscription_id: string
   plan_id: string
-  status: 'active' | 'canceled' | 'past_due' | 'incomplete'
+  status: 'active' | 'canceled' | 'past_due' | 'incomplete' | 'trialing'
   current_period_start: string
   current_period_end: string
   created_at: string
@@ -102,16 +102,24 @@ export class StripeService {
       const plan = SUBSCRIPTION_PLANS.find(p => p.stripePriceId === priceId)
       const isOneTime = plan?.interval === 'one-time'
 
-      const { data, error } = await supabase.functions.invoke('create-checkout-session', {
-        body: {
+      // Use Netlify function instead of Supabase function for better reliability
+      const response = await fetch('/.netlify/functions/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           priceId,
           userId,
           planId,
           mode: isOneTime ? 'payment' : 'subscription',
           successUrl: `${window.location.origin}/${isOneTime ? 'purchase' : 'subscription'}/success?session_id={CHECKOUT_SESSION_ID}`,
           cancelUrl: `${window.location.origin}/pricing`
-        }
+        })
       })
+
+      const data = await response.json()
+      const error = !response.ok ? data : null
 
       if (error) {
         console.error('Error creating checkout session:', error)
@@ -203,7 +211,13 @@ export class StripeService {
 
       if (!response.ok) {
         console.error('🔗 Cancellation error:', data)
-        return { error: data.error || 'Failed to cancel subscription' }
+        console.error('🔗 Error details:', data.details)
+        console.error('🔗 Error message:', data.message)
+        console.error('🔗 Full response:', JSON.stringify(data, null, 2))
+        return {
+          error: data.message || data.error || 'Failed to cancel subscription',
+          details: data.details
+        }
       }
 
       // Clear cache after successful cancellation to force fresh data
@@ -284,12 +298,18 @@ export class StripeService {
   }
 
   /**
-   * Check if user has active subscription (including cancelled but still in paid period)
+   * Check if user has active subscription (including trialing, cancelled but still in paid period)
    */
   static async hasActiveSubscription(userId: string): Promise<boolean> {
     const { data } = await this.getUserSubscription(userId, true) // Force fresh data
+    console.log('🔍 hasActiveSubscription check:', {
+      hasData: !!data,
+      status: data?.status,
+      periodEnd: data?.current_period_end,
+      isAfterNow: data ? new Date(data.current_period_end) > new Date() : false
+    });
     return !!data &&
-      (data.status === 'active' || data.status === 'canceled') &&
+      (data.status === 'active' || data.status === 'canceled' || data.status === 'trialing') &&
       new Date(data.current_period_end) > new Date()
   }
 
@@ -459,27 +479,13 @@ export class StripeService {
         return { canAccess: true }
       }
 
-      // For free users, check total access count (strict: 1 resume max, ever)
-      let accessCount = 0;
-      try {
-        accessCount = await this.getUserResumeAccessCount(userId)
-        console.log('📊 Current free access count:', accessCount)
-      } catch (accessError) {
-        console.log('⚠️ Could not check access count, allowing first access:', accessError)
-        accessCount = 0;
-      }
-
-      if (accessCount >= 1) {
-        console.log('❌ Free access limit reached - user has already accessed 1 resume')
-        return { canAccess: false, reason: 'limit_reached' }
-      }
-
-      console.log('✅ Free access granted - first resume access')
-      return { canAccess: true }
+      // Free users no longer get any free resume access
+      console.log('❌ No active subscription or purchase - access denied for free user')
+      return { canAccess: false, reason: 'subscription_required' }
     } catch (error) {
       console.error('❌ Error checking resume access:', error)
-      console.log('🔓 Allowing access due to error (treating as new user)')
-      return { canAccess: true }
+      console.log('❌ Denying access due to error')
+      return { canAccess: false, reason: 'subscription_required' }
     }
   }
 

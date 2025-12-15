@@ -93,10 +93,10 @@ exports.handler = async (event, context) => {
       console.log('Generated subscription ID detected, finding real Stripe subscription...');
 
       try {
-        // Get customer's subscriptions from Stripe
+        // Get customer's subscriptions from Stripe (including trialing subscriptions)
         const subscriptions = await stripe.subscriptions.list({
           customer: userSubscription.stripe_customer_id,
-          status: 'active',
+          status: 'all', // Include all statuses: active, trialing, past_due, etc.
           limit: 10
         });
 
@@ -136,10 +136,27 @@ exports.handler = async (event, context) => {
     }
 
     // Try to cancel the real subscription in Stripe
+    // IMPORTANT: Use cancel_at_period_end to prevent future charges while keeping access until period end
     if (realSubscriptionId !== subscriptionId || !stripeError) {
       try {
-        cancelledSubscription = await stripe.subscriptions.cancel(realSubscriptionId);
-        console.log('✅ Stripe cancellation successful for:', realSubscriptionId);
+        cancelledSubscription = await stripe.subscriptions.update(realSubscriptionId, {
+          cancel_at_period_end: true
+        });
+        console.log('✅ Stripe cancellation scheduled (cancel_at_period_end) for:', realSubscriptionId);
+
+        // Log the correct end date based on subscription status
+        const endDate = cancelledSubscription.status === 'trialing' && cancelledSubscription.trial_end
+          ? new Date(cancelledSubscription.trial_end * 1000)
+          : cancelledSubscription.current_period_end
+            ? new Date(cancelledSubscription.current_period_end * 1000)
+            : null;
+
+        if (endDate) {
+          console.log('✅ Subscription will remain active until:', endDate.toISOString());
+        } else {
+          console.log('⚠️ Could not determine subscription end date');
+        }
+
         stripeError = null; // Clear any previous errors
       } catch (error) {
         console.error('❌ Stripe cancellation failed:', error.message);
@@ -153,19 +170,46 @@ exports.handler = async (event, context) => {
       console.log('❌ Could not find real subscription ID, will only update database');
     }
 
-    // Update database status
-    const { error: updateError } = await supabase
-      .from('user_subscriptions')
-      .update({
-        status: 'canceled',
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', userSubscription.id);
+    // CRITICAL FIX: Only update database to 'canceled' if Stripe cancellation succeeded OR subscription not found
+    // This prevents showing "canceled" in the app when Stripe is still active
+    let shouldUpdateDatabase = false;
+    let databaseStatus = userSubscription.status; // Keep current status by default
+
+    if (!stripeError) {
+      // Stripe cancellation succeeded
+      shouldUpdateDatabase = true;
+      databaseStatus = 'canceled';
+      console.log('✅ Stripe cancellation successful - updating database to canceled');
+    } else if (stripeError.includes('resource_missing') || stripeError.includes('No matching active subscription')) {
+      // Subscription doesn't exist in Stripe - safe to mark as canceled
+      shouldUpdateDatabase = true;
+      databaseStatus = 'canceled';
+      console.log('⚠️ Subscription not found in Stripe - marking database as canceled');
+    } else {
+      // Stripe cancellation failed for other reasons - do NOT update database
+      console.error('❌ CRITICAL: Stripe cancellation failed, NOT updating database to prevent false cancellation');
+      console.error('❌ Error was:', stripeError);
+    }
+
+    // Update database status only if safe to do so
+    let updateError = null;
+    if (shouldUpdateDatabase) {
+      const { error: dbError } = await supabase
+        .from('user_subscriptions')
+        .update({
+          status: databaseStatus,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', userSubscription.id);
+      updateError = dbError;
+    } else {
+      console.log('⚠️ Skipping database update due to Stripe cancellation failure');
+    }
 
     if (updateError) {
       console.error('Database update error:', updateError);
       // Continue anyway since Stripe cancellation succeeded
-    } else {
+    } else if (shouldUpdateDatabase) {
       console.log('Database update successful');
     }
 
@@ -190,21 +234,36 @@ exports.handler = async (event, context) => {
     }
 
     // Determine success status
-    const isFullSuccess = !updateError && !stripeError;
-    const isPartialSuccess = !updateError; // Database update succeeded
+    // CRITICAL: Only report success if Stripe cancellation succeeded
+    const isFullSuccess = !updateError && !stripeError && shouldUpdateDatabase;
+    const isStripeCancellationSuccess = !stripeError;
+
+    // If Stripe cancellation failed for reasons other than "not found", return error
+    if (!isStripeCancellationSuccess && !stripeError.includes('resource_missing') && !stripeError.includes('No matching active subscription')) {
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({
+          success: false,
+          error: 'Failed to cancel subscription in Stripe',
+          message: `Stripe cancellation failed: ${stripeError}. Your subscription is still active. Please contact support or try again.`,
+          details: stripeError
+        }),
+      };
+    }
 
     return {
-      statusCode: isPartialSuccess ? 200 : 500,
+      statusCode: isFullSuccess ? 200 : 500,
       headers,
       body: JSON.stringify({
-        success: isPartialSuccess,
+        success: isFullSuccess,
         message: isFullSuccess
           ? 'Subscription cancelled successfully in both Stripe and database'
-          : isPartialSuccess
-            ? `Subscription cancelled in database. ${stripeError ? `Stripe: ${stripeError}` : ''}`
+          : stripeError && (stripeError.includes('resource_missing') || stripeError.includes('No matching active subscription'))
+            ? 'Subscription not found in Stripe but marked as canceled in database'
             : 'Failed to cancel subscription',
         subscription: cancelledSubscription,
-        warnings: stripeError ? [stripeError] : undefined,
+        warnings: stripeError && (stripeError.includes('resource_missing') || stripeError.includes('No matching active subscription')) ? [stripeError] : undefined,
         realSubscriptionId: realSubscriptionId !== subscriptionId ? realSubscriptionId : undefined
       }),
     };

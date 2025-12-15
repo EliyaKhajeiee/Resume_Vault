@@ -9,6 +9,7 @@ export interface InterviewQuestion {
   answer?: string
   tips?: string[]
   difficulty: 'easy' | 'medium' | 'hard'
+  priority: 'very_high' | 'high' | 'medium' | 'low'
   tags: string[]
   is_featured: boolean
   view_count: number
@@ -33,6 +34,7 @@ export interface AddInterviewQuestionData {
   answer?: string
   tips?: string[]
   difficulty: 'easy' | 'medium' | 'hard'
+  priority: 'very_high' | 'high' | 'medium' | 'low'
   tags: string[]
   is_featured: boolean
 }

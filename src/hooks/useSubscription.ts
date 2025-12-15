@@ -123,7 +123,7 @@ export const useSubscription = () => {
   }
 
   const hasActiveSubscription = subscription &&
-    (subscription.status === 'active' || subscription.status === 'canceled') &&
+    (subscription.status === 'active' || subscription.status === 'canceled' || subscription.status === 'trialing') &&
     new Date(subscription.current_period_end) > new Date()
 
   const hasActivePurchase = purchase &&

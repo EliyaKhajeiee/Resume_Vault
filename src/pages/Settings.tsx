@@ -212,14 +212,23 @@ const Settings = () => {
                   <div className="mt-2">
                     <Badge variant={
                       hasActiveSubscription
-                        ? "default"
+                        ? subscription?.status === 'trialing'
+                          ? "default"
+                          : "default"
                         : hasActivePurchase
                         ? "outline"
                         : "secondary"
-                    }>
+                    } className={subscription?.status === 'trialing' ? 'bg-green-600' : ''}>
                       {hasActiveSubscription
-                        ? subscription?.status === 'canceled'
-                          ? "Pro Member (Cancels at period end)"
+                        ? subscription?.status === 'trialing'
+                          ? "Pro Member (Free Trial)"
+                          : subscription?.status === 'canceled'
+                          ? (
+                              // Check if canceled subscription is still in trial period (created within 14 days)
+                              subscription?.created_at && new Date(subscription.created_at) > new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
+                                ? "Pro Member (Free Trial - Cancels at period end)"
+                                : "Pro Member (Cancels at period end)"
+                            )
                           : "Pro Member"
                         : hasActivePurchase
                         ? `Resume Pack (${purchase?.resumes_remaining} left)`
@@ -250,19 +259,46 @@ const Settings = () => {
                     <div>
                       <Label>Current Plan</Label>
                       <div className="mt-1">
-                        <Badge className="bg-blue-600">
-                          {subscription.plan_id === 'pro-monthly' ? 'Pro - $29.99/month' : subscription.plan_id}
+                        <Badge className={subscription.status === 'trialing' ? 'bg-green-600' : 'bg-blue-600'}>
+                          {subscription.status === 'trialing'
+                            ? 'Pro - 7-day Free Trial'
+                            : subscription.plan_id === 'pro-monthly'
+                            ? 'Pro - $29.99/month'
+                            : subscription.plan_id}
                         </Badge>
                       </div>
                     </div>
                     <div>
                       <Label>Status</Label>
                       <div className="mt-1">
-                        <Badge variant={hasActiveSubscription ? 'default' : 'destructive'}>
-                          {subscription.status === 'active'
+                        <Badge variant={
+                          subscription.status === 'trialing'
+                            ? 'default'
+                            : subscription.status === 'active'
+                            ? 'default'
+                            : subscription.status === 'canceled' && hasActiveSubscription
+                            ? 'default'
+                            : 'destructive'
+                        } className={subscription.status === 'trialing' ? 'bg-green-600' : ''}>
+                          {subscription.status === 'trialing'
+                            ? 'Free Trial'
+                            : subscription.status === 'active'
                             ? 'Active'
                             : subscription.status === 'canceled' && hasActiveSubscription
-                              ? 'Active (Cancels at period end)'
+                              ? (
+                                  // Check if canceled subscription is still in trial period
+                                  // Calculate trial duration dynamically
+                                  (() => {
+                                    const start = new Date(subscription.current_period_start);
+                                    const end = new Date(subscription.current_period_end);
+                                    const created = new Date(subscription.created_at);
+                                    const trialDurationMs = end.getTime() - start.getTime();
+                                    const wasCreatedDuringTrial = new Date().getTime() - created.getTime() <= trialDurationMs;
+                                    return new Date(subscription.current_period_end) > new Date() && wasCreatedDuringTrial
+                                      ? 'Free Trial (Cancels at period end)'
+                                      : 'Active (Cancels at period end)';
+                                  })()
+                                )
                               : subscription.status}
                         </Badge>
                       </div>
@@ -270,13 +306,55 @@ const Settings = () => {
                     <div>
                       <Label>Current Period</Label>
                       <p className="text-sm text-gray-600 mt-1">
-                        {formatDate(subscription.current_period_start)} - {formatDate(subscription.current_period_end)}
+                        {subscription.status === 'trialing' ? (() => {
+                          // For trials, always calculate as start + 7 days
+                          const start = new Date(subscription.current_period_start);
+                          const end = new Date(start);
+                          end.setDate(end.getDate() + 7);
+                          return `${formatDate(subscription.current_period_start)} - ${formatDate(end.toISOString())}`;
+                        })() : `${formatDate(subscription.current_period_start)} - ${formatDate(subscription.current_period_end)}`}
                       </p>
                     </div>
                     <div>
-                      <Label>Next Billing Date</Label>
+                      <Label>
+                        {subscription.status === 'trialing'
+                          ? 'Trial Ends / First Charge'
+                          : subscription.status === 'canceled'
+                            ? (() => {
+                                // Calculate if this was a trial cancellation
+                                const start = new Date(subscription.current_period_start);
+                                const end = new Date(subscription.current_period_end);
+                                const created = new Date(subscription.created_at);
+                                const trialDurationMs = end.getTime() - start.getTime();
+                                const wasCreatedDuringTrial = new Date().getTime() - created.getTime() <= trialDurationMs;
+                                return subscription.created_at && wasCreatedDuringTrial ? 'Trial Ends' : 'Access Until';
+                              })()
+                            : 'Next Billing Date'}
+                      </Label>
                       <p className="text-sm text-gray-600 mt-1">
-                        {formatDate(subscription.current_period_end)}
+                        {subscription.status === 'trialing' ? (() => {
+                          // For trials, always calculate as start + 7 days
+                          const start = new Date(subscription.current_period_start);
+                          const end = new Date(start);
+                          end.setDate(end.getDate() + 7);
+                          return formatDate(end.toISOString());
+                        })() : formatDate(subscription.current_period_end)}
+                        {subscription.status === 'trialing' && (
+                          <span className="text-green-600 font-semibold ml-2">(No charge until then)</span>
+                        )}
+                        {subscription.status === 'canceled' && hasActiveSubscription && (
+                          (() => {
+                            // Calculate if this was a trial cancellation
+                            const start = new Date(subscription.current_period_start);
+                            const end = new Date(subscription.current_period_end);
+                            const created = new Date(subscription.created_at);
+                            const trialDurationMs = end.getTime() - start.getTime();
+                            const wasCreatedDuringTrial = new Date().getTime() - created.getTime() <= trialDurationMs;
+                            return subscription.created_at && wasCreatedDuringTrial
+                              ? <span className="text-green-600 font-semibold ml-2">(No charge - trial canceled)</span>
+                              : <span className="text-gray-600 font-semibold ml-2">(No further charges)</span>;
+                          })()
+                        )}
                       </p>
                     </div>
                   </div>
@@ -290,13 +368,13 @@ const Settings = () => {
                       >
                         {isManagingSubscription ? "Opening..." : "Manage Billing"}
                       </Button>
-                      {subscription.status === 'active' && (
+                      {(subscription.status === 'active' || subscription.status === 'trialing') && (
                         <Button
                           variant="destructive"
                           onClick={() => setShowCancellationDialog(true)}
                           className="flex-1 sm:flex-initial"
                         >
-                          Cancel Subscription
+                          Cancel {subscription.status === 'trialing' ? 'Trial' : 'Subscription'}
                         </Button>
                       )}
                     </div>
@@ -629,8 +707,8 @@ const Settings = () => {
                     <Label>Email Support</Label>
                     <div className="flex items-center gap-2">
                       <Mail className="w-4 h-4 text-gray-500" />
-                      <a href="mailto:support@resumeproof.com" className="text-blue-600 hover:underline">
-                        support@resumeproof.com
+                      <a href="mailto:reports@resumeproof.com" className="text-blue-600 hover:underline">
+                        reports@resumeproof.com
                       </a>
                     </div>
                     <p className="text-xs text-gray-500">

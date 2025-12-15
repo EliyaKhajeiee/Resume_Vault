@@ -113,9 +113,13 @@ serve(async (req) => {
 
     console.log('Found subscription, cancelling in Stripe...')
 
-    // Cancel the subscription in Stripe
-    const cancelledSubscription = await stripe.subscriptions.cancel(subscriptionId)
-    console.log('Stripe cancellation successful')
+    // Cancel the subscription in Stripe at period end to prevent future charges
+    // This allows users to keep access until the end of their paid period
+    const cancelledSubscription = await stripe.subscriptions.update(subscriptionId, {
+      cancel_at_period_end: true
+    })
+    console.log('Stripe cancellation scheduled (cancel_at_period_end)')
+    console.log('Subscription will remain active until:', new Date(cancelledSubscription.current_period_end * 1000).toISOString())
 
     // Update the subscription in our database
     console.log('Updating database status...')

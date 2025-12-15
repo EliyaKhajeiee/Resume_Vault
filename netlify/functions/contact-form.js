@@ -32,7 +32,7 @@ exports.handler = async (event, context) => {
     // Email to support team
     const supportEmailOptions = {
       from: process.env.GMAIL_USER,
-      to: 'support@resumeproof.com',
+      to: 'reports@resumeproof.com',
       subject: `Contact Form: ${subject}`,
       html: `
         <h3>New Contact Form Submission</h3>

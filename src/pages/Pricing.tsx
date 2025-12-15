@@ -89,8 +89,9 @@ const Pricing = () => {
         "Resume review checklist",
         "Industry-specific templates"
       ],
-      cta: "Subscribe now",
-      popular: false
+      cta: "Start free trial",
+      popular: false,
+      trial: true
     },
     {
       name: "Enterprise",
@@ -146,14 +147,14 @@ const Pricing = () => {
             Choose your <span className="text-blue-600">career path</span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-            Start free with 1 resume view, get 5 resumes for $9.99, or unlimited access for $29.99/month.
+            Start with a <span className="font-bold text-blue-600">7-day FREE trial</span> for Pro, get 5 resumes for $9.99, or browse free with 1 resume.
           </p>
           <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
             <span>✅ No hidden fees</span>
             <span>•</span>
-            <span>✅ Cancel anytime</span>
+            <span>✅ Cancel anytime during trial</span>
             <span>•</span>
-            <span>✅ 7-day money back guarantee</span>
+            <span>✅ No charges for 7 days</span>
           </div>
         </div>
       </section>
@@ -177,11 +178,27 @@ const Pricing = () => {
                 <CardHeader className="text-center pb-8">
                   <CardTitle className="text-2xl font-bold">{plan.name}</CardTitle>
                   <div className="mt-4">
-                    <span className={`text-4xl font-bold ${plan.popular ? 'text-blue-600' : ''}`}>
-                      {plan.price}
-                    </span>
-                    {plan.period !== "contact us" && (
-                      <span className="text-gray-500">/{plan.period}</span>
+                    {plan.trial ? (
+                      <div className="space-y-2">
+                        <div className="text-5xl font-bold text-blue-600">
+                          FREE
+                        </div>
+                        <div className="text-lg text-gray-600">
+                          for 7 days
+                        </div>
+                        <div className="text-sm text-gray-400">
+                          then <span className="text-gray-500">{plan.price}/{plan.period}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <span className={`text-4xl font-bold ${plan.popular ? 'text-blue-600' : ''}`}>
+                          {plan.price}
+                        </span>
+                        {plan.period !== "contact us" && (
+                          <span className="text-gray-500">/{plan.period}</span>
+                        )}
+                      </>
                     )}
                   </div>
                   <CardDescription className="mt-4 text-base">{plan.description}</CardDescription>

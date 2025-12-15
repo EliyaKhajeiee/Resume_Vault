@@ -62,7 +62,12 @@
       "Bash(npm run db:query:*)",
       "Bash(npm run:*)",
       "WebFetch(domain:www.productalliance.com)",
-      "WebFetch(domain:gemini.google.com)"
+      "WebFetch(domain:gemini.google.com)",
+      "Bash(if [ -f \"deploy_functions.bat\" ])",
+      "Bash(then cat deploy_functions.bat)",
+      "Bash(./deploy_checkout_function.bat)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)"
     ],
     "deny": []
   }
