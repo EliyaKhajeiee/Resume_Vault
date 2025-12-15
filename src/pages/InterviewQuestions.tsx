@@ -153,12 +153,12 @@ const InterviewQuestions = () => {
                   <Building2 className="h-4 w-4" />
                   Company
                 </label>
-                <Select value={filters.company || ""} onValueChange={(value) => handleFiltersChange({ company: value || undefined })}>
+                <Select value={filters.company || "all"} onValueChange={(value) => handleFiltersChange({ company: value === "all" ? undefined : value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="All Companies" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Companies</SelectItem>
+                    <SelectItem value="all">All Companies</SelectItem>
                     {filterOptions.companies.map((company) => (
                       <SelectItem key={company} value={company}>{company}</SelectItem>
                     ))}
@@ -172,12 +172,12 @@ const InterviewQuestions = () => {
                   <Briefcase className="h-4 w-4" />
                   Role
                 </label>
-                <Select value={filters.role || ""} onValueChange={(value) => handleFiltersChange({ role: value || undefined })}>
+                <Select value={filters.role || "all"} onValueChange={(value) => handleFiltersChange({ role: value === "all" ? undefined : value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="All Roles" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Roles</SelectItem>
+                    <SelectItem value="all">All Roles</SelectItem>
                     {filterOptions.roles.map((role) => (
                       <SelectItem key={role} value={role}>{role}</SelectItem>
                     ))}
@@ -191,12 +191,12 @@ const InterviewQuestions = () => {
                   <MessageSquare className="h-4 w-4" />
                   Type
                 </label>
-                <Select value={filters.type || ""} onValueChange={(value) => handleFiltersChange({ type: value || undefined })}>
+                <Select value={filters.type || "all"} onValueChange={(value) => handleFiltersChange({ type: value === "all" ? undefined : value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="All Types" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Types</SelectItem>
+                    <SelectItem value="all">All Types</SelectItem>
                     {filterOptions.types.map((type) => (
                       <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
                     ))}
@@ -210,12 +210,12 @@ const InterviewQuestions = () => {
                   <Star className="h-4 w-4" />
                   Difficulty
                 </label>
-                <Select value={filters.difficulty || ""} onValueChange={(value) => handleFiltersChange({ difficulty: value || undefined })}>
+                <Select value={filters.difficulty || "all"} onValueChange={(value) => handleFiltersChange({ difficulty: value === "all" ? undefined : value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="All Levels" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Levels</SelectItem>
+                    <SelectItem value="all">All Levels</SelectItem>
                     {filterOptions.difficulties.map((diff) => (
                       <SelectItem key={diff.value} value={diff.value}>{diff.label}</SelectItem>
                     ))}
