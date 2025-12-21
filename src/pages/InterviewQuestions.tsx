@@ -23,7 +23,6 @@ const InterviewQuestions = () => {
   const [selectedQuestion, setSelectedQuestion] = useState<InterviewQuestion | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const [roleAccessCounts, setRoleAccessCounts] = useState<Record<string, number>>({});
 
   const { user, isAuthenticated } = useAuth();
   const { hasActiveSubscription } = useSubscription();
@@ -49,19 +48,6 @@ const InterviewQuestions = () => {
           return 0;
         });
         setQuestions(sortedData);
-
-        // Load access counts for each role if user is authenticated and not subscribed
-        if (user && !hasActiveSubscription) {
-          const uniqueRoles = [...new Set(sortedData.map(q => q.role))];
-          const counts: Record<string, number> = {};
-
-          for (const role of uniqueRoles) {
-            const count = await StripeService.getUserInterviewAccessCountByRole(user.id, role);
-            counts[role] = count;
-          }
-
-          setRoleAccessCounts(counts);
-        }
       } else {
         toast.error(result.error || "Failed to load interview questions");
       }
@@ -74,7 +60,40 @@ const InterviewQuestions = () => {
   };
 
   const handleViewQuestion = async (question: InterviewQuestion) => {
-    // Show auth dialog if not authenticated
+    // Calculate if this question is locked based on position
+    const rolePositions: Record<string, number> = {};
+    let questionPosition = 0;
+
+    for (const q of questions) {
+      if (!rolePositions[q.role]) {
+        rolePositions[q.role] = 0;
+      }
+      rolePositions[q.role]++;
+
+      if (q.id === question.id) {
+        questionPosition = rolePositions[q.role];
+        break;
+      }
+    }
+
+    const isLocked = !hasActiveSubscription && questionPosition > FREE_QUESTIONS_PER_ROLE;
+
+    // If locked, redirect to pricing (or show auth dialog if not authenticated)
+    if (isLocked) {
+      if (!isAuthenticated) {
+        setShowAuthDialog(true);
+        return;
+      }
+
+      toast.error(
+        `This question is locked. Upgrade to Pro for unlimited access to all ${question.role} questions!`,
+        { duration: 5000 }
+      );
+      navigate("/pricing");
+      return;
+    }
+
+    // Show auth dialog if not authenticated (for unlocked questions)
     if (!isAuthenticated) {
       setShowAuthDialog(true);
       return;
@@ -88,41 +107,18 @@ const InterviewQuestions = () => {
       return;
     }
 
-    // Check role-based access for free users
+    // Free users can access unlocked questions (first 5 per role)
     try {
-      const accessCheck = await StripeService.canAccessInterviewQuestion(
-        user!.id,
-        question.id,
-        question.role
-      );
-
-      if (!accessCheck.canAccess) {
-        const roleCount = roleAccessCounts[question.role] || 0;
-        toast.error(
-          `You've used all ${FREE_QUESTIONS_PER_ROLE} free questions for ${question.role}. Upgrade to Pro for unlimited access!`,
-          { duration: 5000 }
-        );
-        navigate("/pricing");
-        return;
-      }
-
-      // Record access for free users (if this is a new question for this role)
+      // Record access for tracking purposes
       await StripeService.processInterviewAccess(user!.id, question.id, question.role);
-
-      // Update local role access count
-      const currentCount = roleAccessCounts[question.role] || 0;
-      setRoleAccessCounts(prev => ({
-        ...prev,
-        [question.role]: currentCount + 1
-      }));
 
       // Show the question
       setSelectedQuestion(question);
       setIsViewDialogOpen(true);
       InterviewService.incrementViewCount(question.id);
     } catch (error) {
-      console.error("Error checking access:", error);
-      toast.error("Failed to check access. Please try again.");
+      console.error("Error recording access:", error);
+      toast.error("Failed to access question. Please try again.");
     }
   };
 
@@ -274,11 +270,31 @@ const InterviewQuestions = () => {
               <div className="mb-6 flex items-center justify-between">
                 <p className="text-gray-600">
                   Showing <strong>{questions.length}</strong> question{questions.length !== 1 ? 's' : ''}
-                  {!hasActiveSubscription && user && (
-                    <span className="ml-2 text-sm">
-                      (5 free per role <Lock className="inline h-3 w-3" />)
-                    </span>
-                  )}
+                  {!hasActiveSubscription && (() => {
+                    // Count free vs locked questions
+                    const rolePositions: Record<string, number> = {};
+                    let freeCount = 0;
+                    let lockedCount = 0;
+
+                    questions.forEach(q => {
+                      if (!rolePositions[q.role]) {
+                        rolePositions[q.role] = 0;
+                      }
+                      rolePositions[q.role]++;
+
+                      if (rolePositions[q.role] <= FREE_QUESTIONS_PER_ROLE) {
+                        freeCount++;
+                      } else {
+                        lockedCount++;
+                      }
+                    });
+
+                    return (
+                      <span className="ml-2 text-sm">
+                        ({freeCount} free, {lockedCount} locked <Lock className="inline h-3 w-3" />)
+                      </span>
+                    );
+                  })()}
                 </p>
                 {!hasActiveSubscription && (
                   <Button
@@ -313,54 +329,64 @@ const InterviewQuestions = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                      {questions.map((question) => {
-                        // Check if this role is at the limit for free users
-                        const roleCount = roleAccessCounts[question.role] || 0;
-                        const isRoleLimitReached = !hasActiveSubscription && roleCount >= FREE_QUESTIONS_PER_ROLE;
-                        const showLockIcon = isRoleLimitReached && !isAuthenticated;
+                      {(() => {
+                        // Track the position of each question within its role
+                        const rolePositions: Record<string, number> = {};
 
-                        return (
-                          <tr
-                            key={question.id}
-                            onClick={() => handleViewQuestion(question)}
-                            className="cursor-pointer hover:bg-blue-50 transition-colors"
-                          >
-                            <td className="px-6 py-4">
-                              <div className="flex items-center gap-3">
-                                {showLockIcon && (
-                                  <Lock className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                                )}
-                                <span className="text-sm text-gray-900 font-medium">
-                                  {question.question}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 text-sm text-gray-700">
-                              {question.company}
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="flex flex-col gap-1">
-                                <Badge variant="outline" className="text-xs">
-                                  {getTypeLabel(question.type)}
-                                </Badge>
-                                {!hasActiveSubscription && user && (
-                                  <span className="text-xs text-gray-500">
-                                    {roleCount}/{FREE_QUESTIONS_PER_ROLE} used
+                        return questions.map((question) => {
+                          // Increment position counter for this role
+                          if (!rolePositions[question.role]) {
+                            rolePositions[question.role] = 0;
+                          }
+                          rolePositions[question.role]++;
+
+                          const positionInRole = rolePositions[question.role];
+
+                          // Determine if this question is locked (beyond 5th position for this role)
+                          const isLocked = !hasActiveSubscription && positionInRole > FREE_QUESTIONS_PER_ROLE;
+
+                          return (
+                            <tr
+                              key={question.id}
+                              onClick={() => handleViewQuestion(question)}
+                              className={`${
+                                isLocked
+                                  ? 'cursor-pointer opacity-60 bg-gray-50 hover:bg-gray-100'
+                                  : 'cursor-pointer hover:bg-blue-50'
+                              } transition-colors`}
+                            >
+                              <td className="px-6 py-4">
+                                <div className="flex items-center gap-3">
+                                  {isLocked && (
+                                    <Lock className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                  )}
+                                  <span className={`text-sm ${isLocked ? 'text-gray-500' : 'text-gray-900 font-medium'}`}>
+                                    {question.question}
                                   </span>
-                                )}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <Badge
-                                className={`text-xs border ${getPriorityColor(question.priority)}`}
-                                variant="outline"
-                              >
-                                {getPriorityLabel(question.priority)}
-                              </Badge>
-                            </td>
-                          </tr>
-                        );
-                      })}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-700">
+                                {question.company}
+                              </td>
+                              <td className="px-6 py-4">
+                                <div className="flex flex-col gap-1">
+                                  <Badge variant="outline" className="text-xs">
+                                    {getTypeLabel(question.type)}
+                                  </Badge>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4">
+                                <Badge
+                                  className={`text-xs border ${getPriorityColor(question.priority)}`}
+                                  variant="outline"
+                                >
+                                  {getPriorityLabel(question.priority)}
+                                </Badge>
+                              </td>
+                            </tr>
+                          );
+                        });
+                      })()}
                     </tbody>
                   </table>
                 </div>
