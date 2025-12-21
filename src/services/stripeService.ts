@@ -516,4 +516,147 @@ export class StripeService {
       return { error: 'An unexpected error occurred' }
     }
   }
+
+  // ==================== INTERVIEW QUESTIONS ACCESS CONTROL ====================
+
+  /**
+   * Get user's interview question access count for a specific role
+   */
+  static async getUserInterviewAccessCountByRole(userId: string, role: string): Promise<number> {
+    try {
+      console.log('📊 Fetching interview access count for user:', userId, 'role:', role)
+
+      const { data, error } = await supabase
+        .from('user_interview_access')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('role', role)
+
+      if (error) {
+        console.error('❌ Database error fetching interview access count:', error)
+        return 0
+      }
+
+      const count = data?.length || 0
+      console.log('✅ Interview access count retrieved:', count, 'for role:', role)
+      return count
+    } catch (error) {
+      console.error('❌ Unexpected error fetching interview access count:', error)
+      return 0
+    }
+  }
+
+  /**
+   * Record interview question access for free users
+   */
+  static async recordInterviewAccess(userId: string, questionId: string, role: string): Promise<void> {
+    try {
+      console.log('📝 Recording interview access for user:', userId, 'question:', questionId, 'role:', role)
+
+      await supabase
+        .from('user_interview_access')
+        .upsert({
+          user_id: userId,
+          question_id: questionId,
+          role: role,
+          accessed_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,question_id'
+        })
+      console.log('✅ Interview access recorded successfully')
+    } catch (error) {
+      console.error('❌ Error recording interview access:', error)
+    }
+  }
+
+  /**
+   * Check if user can access interview question (industry-based paywall)
+   * Free users get 5 questions per role/industry
+   * Pro users get unlimited access
+   */
+  static async canAccessInterviewQuestion(
+    userId: string,
+    questionId: string,
+    role: string
+  ): Promise<{
+    canAccess: boolean
+    reason?: 'subscription_required' | 'role_limit_reached'
+    questionsUsed?: number
+    questionsLimit?: number
+  }> {
+    try {
+      console.log('🔍 Checking interview question access for user:', userId, 'question:', questionId, 'role:', role)
+
+      // Check if user has active subscription (unlimited access)
+      const hasSubscription = await this.hasActiveSubscription(userId)
+      console.log('📋 Has active subscription:', hasSubscription)
+
+      if (hasSubscription) {
+        console.log('✅ User has unlimited subscription - access granted')
+        return { canAccess: true }
+      }
+
+      // Free users get 5 questions per role
+      const FREE_QUESTIONS_PER_ROLE = 5
+
+      // Check how many questions from this role the user has already accessed
+      const accessCount = await this.getUserInterviewAccessCountByRole(userId, role)
+      console.log('📊 User has accessed', accessCount, 'questions for role:', role)
+
+      // Check if this specific question was already accessed
+      const { data: existingAccess } = await supabase
+        .from('user_interview_access')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('question_id', questionId)
+        .single()
+
+      if (existingAccess) {
+        console.log('✅ User already accessed this question - access granted')
+        return { canAccess: true }
+      }
+
+      // Check if user has reached the limit for this role
+      if (accessCount >= FREE_QUESTIONS_PER_ROLE) {
+        console.log('❌ User has reached limit for role:', role)
+        return {
+          canAccess: false,
+          reason: 'role_limit_reached',
+          questionsUsed: accessCount,
+          questionsLimit: FREE_QUESTIONS_PER_ROLE
+        }
+      }
+
+      // User can access this question (hasn't reached limit)
+      console.log('✅ User can access question - within free limit')
+      return {
+        canAccess: true,
+        questionsUsed: accessCount,
+        questionsLimit: FREE_QUESTIONS_PER_ROLE
+      }
+    } catch (error) {
+      console.error('❌ Error checking interview question access:', error)
+      return { canAccess: false, reason: 'subscription_required' }
+    }
+  }
+
+  /**
+   * Process interview question access - records access for free users
+   */
+  static async processInterviewAccess(userId: string, questionId: string, role: string): Promise<void> {
+    try {
+      // Check if user has active subscription
+      const hasSubscription = await this.hasActiveSubscription(userId)
+      if (hasSubscription) {
+        console.log('✅ User has subscription - no tracking needed')
+        return
+      }
+
+      // Free user - record access for limit tracking
+      console.log('🆓 Free user - recording interview access')
+      await this.recordInterviewAccess(userId, questionId, role)
+    } catch (error) {
+      console.error('Error processing interview access:', error)
+    }
+  }
 }

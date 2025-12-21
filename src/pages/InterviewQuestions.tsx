@@ -7,13 +7,14 @@ import { Lock, Lightbulb, Building2, Briefcase, Crown } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { InterviewService, type InterviewFilters, type InterviewQuestion } from "@/services/interviewService";
+import { StripeService } from "@/services/stripeService";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useNavigate } from "react-router-dom";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 
-const FREE_QUESTIONS_LIMIT = 5;
+const FREE_QUESTIONS_PER_ROLE = 5;
 
 const InterviewQuestions = () => {
   const [questions, setQuestions] = useState<InterviewQuestion[]>([]);
@@ -22,6 +23,7 @@ const InterviewQuestions = () => {
   const [selectedQuestion, setSelectedQuestion] = useState<InterviewQuestion | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [roleAccessCounts, setRoleAccessCounts] = useState<Record<string, number>>({});
 
   const { user, isAuthenticated } = useAuth();
   const { hasActiveSubscription } = useSubscription();
@@ -47,6 +49,19 @@ const InterviewQuestions = () => {
           return 0;
         });
         setQuestions(sortedData);
+
+        // Load access counts for each role if user is authenticated and not subscribed
+        if (user && !hasActiveSubscription) {
+          const uniqueRoles = [...new Set(sortedData.map(q => q.role))];
+          const counts: Record<string, number> = {};
+
+          for (const role of uniqueRoles) {
+            const count = await StripeService.getUserInterviewAccessCountByRole(user.id, role);
+            counts[role] = count;
+          }
+
+          setRoleAccessCounts(counts);
+        }
       } else {
         toast.error(result.error || "Failed to load interview questions");
       }
@@ -58,22 +73,57 @@ const InterviewQuestions = () => {
     }
   };
 
-  const handleViewQuestion = (question: InterviewQuestion, index: number) => {
-    const isLocked = index >= FREE_QUESTIONS_LIMIT && !hasActiveSubscription;
-
-    if (isLocked) {
-      if (!isAuthenticated) {
-        setShowAuthDialog(true);
-        return;
-      }
-      toast.error("Upgrade to Pro to access all interview questions!");
-      navigate("/pricing");
+  const handleViewQuestion = async (question: InterviewQuestion) => {
+    // Show auth dialog if not authenticated
+    if (!isAuthenticated) {
+      setShowAuthDialog(true);
       return;
     }
 
-    setSelectedQuestion(question);
-    setIsViewDialogOpen(true);
-    InterviewService.incrementViewCount(question.id);
+    // Pro users get unlimited access
+    if (hasActiveSubscription) {
+      setSelectedQuestion(question);
+      setIsViewDialogOpen(true);
+      InterviewService.incrementViewCount(question.id);
+      return;
+    }
+
+    // Check role-based access for free users
+    try {
+      const accessCheck = await StripeService.canAccessInterviewQuestion(
+        user!.id,
+        question.id,
+        question.role
+      );
+
+      if (!accessCheck.canAccess) {
+        const roleCount = roleAccessCounts[question.role] || 0;
+        toast.error(
+          `You've used all ${FREE_QUESTIONS_PER_ROLE} free questions for ${question.role}. Upgrade to Pro for unlimited access!`,
+          { duration: 5000 }
+        );
+        navigate("/pricing");
+        return;
+      }
+
+      // Record access for free users (if this is a new question for this role)
+      await StripeService.processInterviewAccess(user!.id, question.id, question.role);
+
+      // Update local role access count
+      const currentCount = roleAccessCounts[question.role] || 0;
+      setRoleAccessCounts(prev => ({
+        ...prev,
+        [question.role]: currentCount + 1
+      }));
+
+      // Show the question
+      setSelectedQuestion(question);
+      setIsViewDialogOpen(true);
+      InterviewService.incrementViewCount(question.id);
+    } catch (error) {
+      console.error("Error checking access:", error);
+      toast.error("Failed to check access. Please try again.");
+    }
   };
 
   const handleFiltersChange = (newFilters: Partial<InterviewFilters>) => {
@@ -224,13 +274,13 @@ const InterviewQuestions = () => {
               <div className="mb-6 flex items-center justify-between">
                 <p className="text-gray-600">
                   Showing <strong>{questions.length}</strong> question{questions.length !== 1 ? 's' : ''}
-                  {!hasActiveSubscription && questions.length > FREE_QUESTIONS_LIMIT && (
+                  {!hasActiveSubscription && user && (
                     <span className="ml-2 text-sm">
-                      ({FREE_QUESTIONS_LIMIT} free, {questions.length - FREE_QUESTIONS_LIMIT} locked <Lock className="inline h-3 w-3" />)
+                      (5 free per role <Lock className="inline h-3 w-3" />)
                     </span>
                   )}
                 </p>
-                {!hasActiveSubscription && questions.length > FREE_QUESTIONS_LIMIT && (
+                {!hasActiveSubscription && (
                   <Button
                     onClick={() => navigate("/pricing")}
                     size="sm"
@@ -263,25 +313,24 @@ const InterviewQuestions = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                      {questions.map((question, index) => {
-                        const isLocked = index >= FREE_QUESTIONS_LIMIT && !hasActiveSubscription;
+                      {questions.map((question) => {
+                        // Check if this role is at the limit for free users
+                        const roleCount = roleAccessCounts[question.role] || 0;
+                        const isRoleLimitReached = !hasActiveSubscription && roleCount >= FREE_QUESTIONS_PER_ROLE;
+                        const showLockIcon = isRoleLimitReached && !isAuthenticated;
 
                         return (
                           <tr
                             key={question.id}
-                            onClick={() => handleViewQuestion(question, index)}
-                            className={`${
-                              isLocked
-                                ? 'cursor-not-allowed opacity-60 bg-gray-50'
-                                : 'cursor-pointer hover:bg-blue-50 transition-colors'
-                            }`}
+                            onClick={() => handleViewQuestion(question)}
+                            className="cursor-pointer hover:bg-blue-50 transition-colors"
                           >
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-3">
-                                {isLocked && (
+                                {showLockIcon && (
                                   <Lock className="h-4 w-4 text-gray-400 flex-shrink-0" />
                                 )}
-                                <span className={`text-sm ${isLocked ? 'text-gray-500' : 'text-gray-900 font-medium'}`}>
+                                <span className="text-sm text-gray-900 font-medium">
                                   {question.question}
                                 </span>
                               </div>
@@ -290,9 +339,16 @@ const InterviewQuestions = () => {
                               {question.company}
                             </td>
                             <td className="px-6 py-4">
-                              <Badge variant="outline" className="text-xs">
-                                {getTypeLabel(question.type)}
-                              </Badge>
+                              <div className="flex flex-col gap-1">
+                                <Badge variant="outline" className="text-xs">
+                                  {getTypeLabel(question.type)}
+                                </Badge>
+                                {!hasActiveSubscription && user && (
+                                  <span className="text-xs text-gray-500">
+                                    {roleCount}/{FREE_QUESTIONS_PER_ROLE} used
+                                  </span>
+                                )}
+                              </div>
                             </td>
                             <td className="px-6 py-4">
                               <Badge
@@ -311,12 +367,12 @@ const InterviewQuestions = () => {
               </div>
 
               {/* Upgrade CTA */}
-              {!hasActiveSubscription && questions.length > FREE_QUESTIONS_LIMIT && (
+              {!hasActiveSubscription && (
                 <div className="mt-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl p-8 text-center">
                   <Crown className="h-12 w-12 mx-auto mb-4" />
                   <h3 className="text-2xl font-bold mb-2">Unlock All Interview Questions</h3>
                   <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
-                    Get unlimited access to {questions.length}+ company-specific interview questions, complete answers, and pro tips from real candidates who got the offer.
+                    Free users get 5 questions per role. Upgrade to Pro for unlimited access to {questions.length}+ company-specific interview questions across all roles, complete answers, and pro tips from real candidates who got offers.
                   </p>
                   <Button
                     onClick={() => navigate("/pricing")}
