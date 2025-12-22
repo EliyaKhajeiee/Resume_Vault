@@ -126,34 +126,35 @@ export class InterviewService {
     types: Array<{ value: string; label: string }>
     difficulties: Array<{ value: string; label: string }>
   } {
-    // Same companies as resumes
+    // Only companies with interview questions
     const techCompanies = [
       'Google', 'Meta', 'Amazon', 'Apple', 'Microsoft', 'Netflix',
-      'Tesla', 'NVIDIA', 'OpenAI'
+      'Uber', 'Airbnb', 'Stripe', 'LinkedIn', 'Twitter', 'Spotify'
     ]
 
-    const quantCompanies = ['Citadel', 'Jane Street', 'Two Sigma']
-
     const financeCompanies = [
-      'Goldman Sachs', 'JPMorgan', 'Morgan Stanley', 'BlackRock',
-      'Evercore'
+      'Goldman Sachs', 'JPMorgan', 'Morgan Stanley', 'Bank of America',
+      'Citi', 'Deutsche Bank', 'Barclays', 'UBS', 'Credit Suisse',
+      'Jefferies', 'Lazard'
     ]
 
     const consultingCompanies = [
-      'McKinsey', 'BCG', 'Bain', 'Deloitte'
+      'McKinsey', 'BCG', 'Bain', 'Deloitte', 'Oliver Wyman',
+      'Accenture', 'PwC', 'EY', 'Kearney', 'Roland Berger'
     ]
 
     const topCompanies = [
       ...techCompanies,
-      ...quantCompanies,
       ...financeCompanies,
       ...consultingCompanies
     ].sort()
 
+    // Only roles with interview questions
     const topRoles = [
-      'Software Engineer', 'Product Manager', 'Data Scientist',
-      'Machine Learning Engineer', 'Consultant', 'Marketing',
-      'Finance', 'Investment Banking'
+      'Software Engineer',
+      'Product Manager',
+      'Consultant',
+      'Investment Banking Analyst'
     ].sort()
 
     const types = [
