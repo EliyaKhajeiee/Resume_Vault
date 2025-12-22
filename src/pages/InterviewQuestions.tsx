@@ -31,7 +31,7 @@ const InterviewQuestions = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
     searchQuestions();
-  }, [filters]);
+  }, [filters, hasActiveSubscription]);
 
   const searchQuestions = async () => {
     setLoading(true);
@@ -47,7 +47,10 @@ const InterviewQuestions = () => {
           if (!a.is_featured && b.is_featured) return 1;
           return 0;
         });
-        setQuestions(sortedData);
+
+        // Limit to 30 questions for non-Pro users
+        const limitedData = hasActiveSubscription ? sortedData : sortedData.slice(0, 30);
+        setQuestions(limitedData);
       } else {
         toast.error(result.error || "Failed to load interview questions");
       }

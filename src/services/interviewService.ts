@@ -126,27 +126,21 @@ export class InterviewService {
     types: Array<{ value: string; label: string }>
     difficulties: Array<{ value: string; label: string }>
   } {
-    // Only companies with interview questions
-    const techCompanies = [
-      'Google', 'Meta', 'Amazon', 'Apple', 'Microsoft', 'Netflix',
-      'Uber', 'Airbnb', 'Stripe', 'LinkedIn', 'Twitter', 'Spotify'
-    ]
-
-    const financeCompanies = [
-      'Goldman Sachs', 'JPMorgan', 'Morgan Stanley', 'Bank of America',
-      'Citi', 'Deutsche Bank', 'Barclays', 'UBS', 'Credit Suisse',
-      'Jefferies', 'Lazard'
-    ]
-
-    const consultingCompanies = [
-      'McKinsey', 'BCG', 'Bain', 'Deloitte', 'Oliver Wyman',
-      'Accenture', 'PwC', 'EY', 'Kearney', 'Roland Berger'
-    ]
-
+    // Top 10 companies only (2-3 per role)
     const topCompanies = [
-      ...techCompanies,
-      ...financeCompanies,
-      ...consultingCompanies
+      // Tech (SWE & PM)
+      'Google',
+      'Meta',
+      'Amazon',
+      'Apple',
+      // Consulting
+      'McKinsey',
+      'BCG',
+      'Bain',
+      // Investment Banking
+      'Goldman Sachs',
+      'JPMorgan',
+      'Morgan Stanley'
     ].sort()
 
     // Only roles with interview questions
