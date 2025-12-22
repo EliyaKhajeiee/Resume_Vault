@@ -330,38 +330,55 @@ const InterviewQuestions = () => {
                     </thead>
                     <tbody className="divide-y divide-gray-200">
                       {(() => {
-                        // Track the position of each question within its role
+                        // First pass: mark each question as free or locked based on role position
                         const rolePositions: Record<string, number> = {};
-
-                        return questions.map((question) => {
-                          // Increment position counter for this role
+                        const questionsWithLockStatus = questions.map((question) => {
                           if (!rolePositions[question.role]) {
                             rolePositions[question.role] = 0;
                           }
                           rolePositions[question.role]++;
 
                           const positionInRole = rolePositions[question.role];
-
-                          // Determine if this question is locked (beyond 5th position for this role)
                           const isLocked = !hasActiveSubscription && positionInRole > FREE_QUESTIONS_PER_ROLE;
+
+                          return { ...question, isLocked, positionInRole };
+                        });
+
+                        // Sort: free questions first, then locked questions
+                        const sortedQuestions = [...questionsWithLockStatus].sort((a, b) => {
+                          if (a.isLocked === b.isLocked) return 0;
+                          return a.isLocked ? 1 : -1; // Free (false) comes before locked (true)
+                        });
+
+                        // Helper function to truncate locked question text
+                        const getTruncatedQuestion = (text: string) => {
+                          const words = text.split(' ');
+                          if (words.length <= 3) return text + '...';
+                          return words.slice(0, 3).join(' ') + '...';
+                        };
+
+                        return sortedQuestions.map((question) => {
+                          const displayQuestion = question.isLocked
+                            ? getTruncatedQuestion(question.question)
+                            : question.question;
 
                           return (
                             <tr
                               key={question.id}
                               onClick={() => handleViewQuestion(question)}
                               className={`${
-                                isLocked
+                                question.isLocked
                                   ? 'cursor-pointer opacity-60 bg-gray-50 hover:bg-gray-100'
                                   : 'cursor-pointer hover:bg-blue-50'
                               } transition-colors`}
                             >
                               <td className="px-6 py-4">
                                 <div className="flex items-center gap-3">
-                                  {isLocked && (
+                                  {question.isLocked && (
                                     <Lock className="h-4 w-4 text-gray-400 flex-shrink-0" />
                                   )}
-                                  <span className={`text-sm ${isLocked ? 'text-gray-500' : 'text-gray-900 font-medium'}`}>
-                                    {question.question}
+                                  <span className={`text-sm ${question.isLocked ? 'text-gray-500' : 'text-gray-900 font-medium'}`}>
+                                    {displayQuestion}
                                   </span>
                                 </div>
                               </td>
